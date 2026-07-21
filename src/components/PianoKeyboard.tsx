@@ -37,30 +37,36 @@ export function PianoKeyboard({ chordSymbol, voicing }: Props) {
 
   return (
     <section className="piano-keyboard" aria-label="Piano keyboard">
-      <div className="piano-shell">
-        <div className="white-key-row">
-          {whiteKeys.map((key) => {
-            const active = hasExactVoicing ? activeMidi.has(key.midi) : chordNotes.has(key.note);
-            return (
-              <div className={`piano-key white-key ${active ? "active" : ""}`} key={key.midi}>
-                {active && <span>{key.note}</span>}
-              </div>
-            );
-          })}
-        </div>
-        <div className="black-key-row">
-          {blackKeys.map((key) => {
-            const active = hasExactVoicing ? activeMidi.has(key.midi) : chordNotes.has(key.note);
-            return (
-              <div
-                className={`piano-key black-key ${active ? "active" : ""}`}
-                key={key.midi}
-                style={{ left: `${blackKeyLeft(key.midi)}%` }}
-              >
-                {active && <span>{key.note}</span>}
-              </div>
-            );
-          })}
+      <div className="instrument-heading">
+        <span>Piano</span>
+        <small>Voicing range</small>
+      </div>
+      <div className="piano-scroll" tabIndex={0} aria-label="Scrollable piano keyboard">
+        <div className="piano-shell">
+          <div className="white-key-row">
+            {whiteKeys.map((key) => {
+              const active = hasExactVoicing ? activeMidi.has(key.midi) : chordNotes.has(key.note);
+              return (
+                <div className={`piano-key white-key ${active ? "active" : ""} ${active && key.note === chord.root ? "root-key" : ""}`} key={key.midi}>
+                  {active && <span>{key.note}</span>}
+                </div>
+              );
+            })}
+          </div>
+          <div className="black-key-row">
+            {blackKeys.map((key) => {
+              const active = hasExactVoicing ? activeMidi.has(key.midi) : chordNotes.has(key.note);
+              return (
+                <div
+                  className={`piano-key black-key ${active ? "active" : ""} ${active && key.note === chord.root ? "root-key" : ""}`}
+                  key={key.midi}
+                  style={{ left: `${blackKeyLeft(key.midi)}%` }}
+                >
+                  {active && <span>{key.note}</span>}
+                </div>
+              );
+            })}
+          </div>
         </div>
       </div>
     </section>
