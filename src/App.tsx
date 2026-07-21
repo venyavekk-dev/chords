@@ -1,7 +1,7 @@
-import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PianoKeyboard } from "./components/PianoKeyboard";
+import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord } from "./lib/musicTheory";
@@ -29,9 +29,6 @@ export default function App() {
   const visibleChord = previewChord ?? activeChord;
   const visibleVoicings = useMemo(() => generateVoicings(visibleChord.symbol), [visibleChord.symbol]);
   const visibleVoicing = previewVoicing ?? (previewChord ? visibleVoicings[0] : selectedVoicing);
-  const relationText = previewChord
-    ? transitionExplanation(activeChord, previewChord, scaleMode)
-    : defaultTransitionAdvice(activeChord);
 
   useEffect(() => {
     setActiveChord(chords[0]);
@@ -143,7 +140,7 @@ export default function App() {
             </button>
           ))}
         </section>
-        <div className="relationship-hint">{relationText}</div>
+        <RelationshipHint />
       </main>
     </div>
   );
@@ -204,52 +201,4 @@ function transitionRelation(from: DegreeChord, to: DegreeChord, mode: ScaleMode)
   if (from.functionName === "subdominant" && to.functionName === "dominant") return "good";
   if (from.functionName === to.functionName) return "weak";
   return "ok";
-}
-
-function defaultTransitionAdvice(from: DegreeChord) {
-  if (from.functionName === "tonic") {
-    return <span>Сейчас ты в <mark className="home-word">доме</mark>: лучше вести в прогулку или сразу создать <mark className="tension-word">напряжение</mark>.</span>;
-  }
-  if (from.functionName === "subdominant") {
-    return <span>Сейчас ты вышел гулять: хорошо вести дальше в <mark className="tension-word">напряжение</mark>, потом домой.</span>;
-  }
-  if (from.functionName === "dominant") {
-    return <span>Сейчас есть <mark className="tension-word">напряжение</mark>: сильнее всего звучит возврат в <mark className="home-word">дом</mark>.</span>;
-  }
-  return <span>Это цветовой аккорд: ищи рядом <mark className="home-word">дом</mark> или мягкое развитие.</span>;
-}
-
-function transitionExplanation(from: DegreeChord, to: DegreeChord, mode: ScaleMode): ReactNode {
-  const relation = transitionRelation(from, to, mode);
-  const fromFunction = functionLabel(from.functionName);
-  const toFunction = functionLabel(to.functionName);
-  if (from.degree === to.degree) return <span>Стоишь на месте: удерживаешь текущее настроение без движения.</span>;
-  if (from.functionName === "dominant" && to.functionName === "tonic") {
-    return <span>Возвращение в <mark className="home-word">дом</mark>: <mark className="tension-word">напряжение</mark> красиво разрешается.</span>;
-  }
-  if (from.functionName === "subdominant" && to.functionName === "dominant") {
-    return <span>Пошёл гулять и создал <mark className="tension-word">напряжение</mark>: хороший шаг перед возвращением домой.</span>;
-  }
-  if (from.functionName === "tonic" && to.functionName === "subdominant") {
-    return <span>Выход из <mark className="home-word">дома</mark>: мягкое развитие без резкого <mark className="tension-word">напряжения</mark>.</span>;
-  }
-  if (from.functionName === "tonic" && to.functionName === "dominant") {
-    return <span>Сразу создаёшь <mark className="tension-word">напряжение</mark>: появляется вопрос, который просится обратно в <mark className="home-word">дом</mark>.</span>;
-  }
-  if (from.functionName === "dominant" && to.functionName !== "tonic") {
-    return <span><mark className="tension-word">Напряжение</mark> не вернулось в <mark className="home-word">дом</mark>: переход более острый и менее устойчивый.</span>;
-  }
-  if (from.functionName === to.functionName) {
-    return <span>Оба аккорда из одной зоны ({fromFunction}): цвет меняется, но движение слабее.</span>;
-  }
-  if (relation === "good") return <span>Естественное движение: {fromFunction} ведёт в {toFunction}.</span>;
-  if (relation === "weak") return <span>Слабая смена функции: может звучать статично или спорно.</span>;
-  return <span>Рабочая связка: {fromFunction} переходит в {toFunction} без сильного конфликта.</span>;
-}
-
-function functionLabel(functionName: DegreeChord["functionName"]) {
-  if (functionName === "tonic") return "дом/тоника";
-  if (functionName === "subdominant") return "прогулка/подготовка";
-  if (functionName === "dominant") return "напряжение";
-  return "цвет";
 }
