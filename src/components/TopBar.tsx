@@ -25,7 +25,7 @@ export function TopBar(props: Props) {
       <div className="brand">
         <img src="/logo.svg" alt="" width="56" height="34" />
         <div className="brand-title-row">
-          <h1><span>Chord Tulza</span> <i>by Venya Vekk</i></h1>
+          <h1><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
           <button
             type="button"
             className={`onboarding-toggle ${props.onboardingOpen ? "active" : ""}`}
@@ -65,7 +65,7 @@ export function TopBar(props: Props) {
           </div>
         </fieldset>
         <fieldset className="control-group sound-control">
-          <legend>Sound <span>tap to preview</span></legend>
+          <legend>Sound</legend>
           <div className="segmented-control sound-toggle">
             {sounds.map((sound) => (
               <button type="button" aria-pressed={props.sound === sound} className={props.sound === sound ? "active" : ""} key={sound} onClick={() => props.onSound(sound)}>

@@ -22,7 +22,8 @@ describe("TopBar onboarding", () => {
     );
 
     expect(html).toContain("Chord Tulza");
-    expect(html).toContain("<i>by Venya Vekk</i>");
+    expect(html).toContain('href="https://venyavekk.com/music"');
+    expect(html).not.toContain("tap to preview");
     expect(html).toContain('aria-pressed="false"');
     expect(html).not.toContain("harmony map");
   });

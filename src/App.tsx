@@ -1,3 +1,4 @@
+import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PianoKeyboard } from "./components/PianoKeyboard";
@@ -19,6 +20,7 @@ export default function App() {
   const [volume, setVolume] = useState(initial.volume ?? 0.72);
   const [sound, setSound] = useState<SoundPreset>(initial.sound ?? "Velvet");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
+  const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -30,6 +32,9 @@ export default function App() {
   const visibleChord = previewChord ?? activeChord;
   const visibleVoicings = useMemo(() => generateVoicings(visibleChord.symbol), [visibleChord.symbol]);
   const visibleVoicing = previewVoicing ?? (previewChord ? visibleVoicings[0] : selectedVoicing);
+  const relationText = previewChord
+    ? transitionExplanation(activeChord, previewChord, scaleMode)
+    : defaultTransitionAdvice(activeChord);
 
   useEffect(() => {
     setActiveChord(chords[0]);
@@ -143,7 +148,11 @@ export default function App() {
             </button>
           ))}
         </section>
-        {onboardingOpen && <RelationshipHint />}
+        {onboardingOpen && (
+          <RelationshipHint acknowledged={onboardingAcknowledged} onAcknowledge={() => setOnboardingAcknowledged(true)}>
+            {relationText}
+          </RelationshipHint>
+        )}
       </main>
     </div>
   );
@@ -204,4 +213,52 @@ function transitionRelation(from: DegreeChord, to: DegreeChord, mode: ScaleMode)
   if (from.functionName === "subdominant" && to.functionName === "dominant") return "good";
   if (from.functionName === to.functionName) return "weak";
   return "ok";
+}
+
+function defaultTransitionAdvice(from: DegreeChord) {
+  if (from.functionName === "tonic") {
+    return <span>Сейчас ты в{"\u00A0"}<mark className="home-word">доме</mark>: лучше вести в{"\u00A0"}прогулку или сразу создать <mark className="tension-word">напряжение</mark>.</span>;
+  }
+  if (from.functionName === "subdominant") {
+    return <span>Сейчас ты вышел гулять: хорошо вести дальше в{"\u00A0"}<mark className="tension-word">напряжение</mark>, потом домой.</span>;
+  }
+  if (from.functionName === "dominant") {
+    return <span>Сейчас есть <mark className="tension-word">напряжение</mark>: сильнее всего звучит возврат в{"\u00A0"}<mark className="home-word">дом</mark>.</span>;
+  }
+  return <span>Это цветовой аккорд: ищи рядом <mark className="home-word">дом</mark> или мягкое развитие.</span>;
+}
+
+function transitionExplanation(from: DegreeChord, to: DegreeChord, mode: ScaleMode): ReactNode {
+  const relation = transitionRelation(from, to, mode);
+  const fromFunction = functionLabel(from.functionName);
+  const toFunction = functionLabel(to.functionName);
+  if (from.degree === to.degree) return <span>Стоишь на{"\u00A0"}месте: удерживаешь текущее настроение без{"\u00A0"}движения.</span>;
+  if (from.functionName === "dominant" && to.functionName === "tonic") {
+    return <span>Возвращение в{"\u00A0"}<mark className="home-word">дом</mark>: <mark className="tension-word">напряжение</mark> красиво разрешается.</span>;
+  }
+  if (from.functionName === "subdominant" && to.functionName === "dominant") {
+    return <span>Пошёл гулять и{"\u00A0"}создал <mark className="tension-word">напряжение</mark>: хороший шаг перед возвращением домой.</span>;
+  }
+  if (from.functionName === "tonic" && to.functionName === "subdominant") {
+    return <span>Выход из{"\u00A0"}<mark className="home-word">дома</mark>: мягкое развитие без{"\u00A0"}резкого <mark className="tension-word">напряжения</mark>.</span>;
+  }
+  if (from.functionName === "tonic" && to.functionName === "dominant") {
+    return <span>Сразу создаёшь <mark className="tension-word">напряжение</mark>: появляется вопрос, который просится обратно в{"\u00A0"}<mark className="home-word">дом</mark>.</span>;
+  }
+  if (from.functionName === "dominant" && to.functionName !== "tonic") {
+    return <span><mark className="tension-word">Напряжение</mark> не{"\u00A0"}вернулось в{"\u00A0"}<mark className="home-word">дом</mark>: переход более острый и{"\u00A0"}менее устойчивый.</span>;
+  }
+  if (from.functionName === to.functionName) {
+    return <span>Оба аккорда из{"\u00A0"}одной зоны ({fromFunction}): цвет меняется, но{"\u00A0"}движение слабее.</span>;
+  }
+  if (relation === "good") return <span>Естественное движение: {fromFunction} ведёт в{"\u00A0"}{toFunction}.</span>;
+  if (relation === "weak") return <span>Слабая смена функции: может звучать статично или спорно.</span>;
+  return <span>Рабочая связка: {fromFunction} переходит в{"\u00A0"}{toFunction} без{"\u00A0"}сильного конфликта.</span>;
+}
+
+function functionLabel(functionName: DegreeChord["functionName"]) {
+  if (functionName === "tonic") return "дом/тоника";
+  if (functionName === "subdominant") return "прогулка/подготовка";
+  if (functionName === "dominant") return "напряжение";
+  return "цвет";
 }

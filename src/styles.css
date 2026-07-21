@@ -206,6 +206,13 @@ select {
   white-space: nowrap;
 }
 
+.brand h1 a {
+  color: inherit;
+  text-decoration-color: var(--border-strong);
+  text-decoration-thickness: 1px;
+  text-underline-offset: 3px;
+}
+
 .onboarding-toggle {
   display: inline-flex;
   align-items: center;
@@ -776,6 +783,10 @@ select {
   animation: hint-reveal var(--transition-fast) var(--ease-default);
 }
 
+.onboarding-copy {
+  pointer-events: auto;
+}
+
 .relationship-hint p {
   margin: 0;
 }
@@ -787,6 +798,42 @@ select {
 .relationship-reminder {
   color: var(--text-strong);
   font-style: italic;
+}
+
+.onboarding-acknowledge {
+  min-height: 34px;
+  margin-top: 10px;
+  padding: 7px 14px;
+  border: 1px solid var(--border-strong);
+  border-radius: var(--radius-pill);
+  background: var(--surface-hover);
+  color: var(--text-strong);
+  font-size: 0.8125rem;
+  line-height: 1;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.relationship-advice {
+  display: flex;
+  align-items: center;
+}
+
+.relationship-hint mark {
+  padding: 0 3px;
+  border-radius: 4px;
+  color: inherit;
+}
+
+.home-word {
+  border: 1px solid var(--home-border);
+  background: var(--home-bg);
+  color: var(--home-text) !important;
+}
+
+.tension-word {
+  border: 1px solid var(--tension-border);
+  background: var(--tension-bg);
+  color: var(--tension-text) !important;
 }
 
 .indicator-word {
@@ -868,6 +915,11 @@ select {
 @media (hover: hover) {
   .onboarding-toggle:hover {
     color: var(--text-strong);
+  }
+
+  .onboarding-acknowledge:hover {
+    background: var(--surface-active);
+    color: var(--page-bg);
   }
 
   .segmented-control button:not(.active):hover {
