@@ -18,6 +18,7 @@ export default function App() {
   const [instrument, setInstrument] = useState<Instrument>(initial.instrument ?? "Guitar");
   const [volume, setVolume] = useState(initial.volume ?? 0.72);
   const [sound, setSound] = useState<SoundPreset>(initial.sound ?? "Velvet");
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -72,11 +73,13 @@ export default function App() {
         scaleMode={scaleMode}
         instrument={instrument}
         sound={sound}
+        onboardingOpen={onboardingOpen}
         volume={volume}
         onKeyRoot={setKeyRoot}
         onScaleMode={setScaleMode}
         onInstrument={setInstrument}
         onSound={selectSound}
+        onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
         onVolume={setVolume}
       />
       <main className="minimal-workspace">
@@ -140,7 +143,7 @@ export default function App() {
             </button>
           ))}
         </section>
-        <RelationshipHint />
+        {onboardingOpen && <RelationshipHint />}
       </main>
     </div>
   );

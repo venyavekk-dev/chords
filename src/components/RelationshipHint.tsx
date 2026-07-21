@@ -1,12 +1,11 @@
 export function RelationshipHint() {
   return (
-    <div className="relationship-hint" role="note">
-      <p className="relationship-hint-full">
-        Индикаторы показывают, как каждый аккорд связан с текущим. <span className="indicator-word good">Зелёный</span> — переход обычно звучит естественно, <span className="indicator-word ok">жёлтый</span> — зависит от контекста, <span className="indicator-word weak">красный</span> — будет более резким и непредсказуемым.
+    <div className="relationship-hint" id="relationship-hint" role="note">
+      <p>Chord Tulza — тулза для музыкантов. Она помогает генерировать аккорды в правильной тональности с вариациями для гитары и клавиш.</p>
+      <p>
+        У каждого аккорда ты увидишь цветной индикатор. Он показывает отношение текущего аккорда к следующему. <span className="indicator-word good">Зелёный</span> — всё круто звучит. <span className="indicator-word ok">Жёлтый</span> — зависит от контекста. <span className="indicator-word weak">Красный</span> — так себе.
       </p>
-      <p className="relationship-hint-short">
-        <span className="indicator-word good">Зелёный</span> — естественный переход, <span className="indicator-word ok">жёлтый</span> — зависит от контекста, <span className="indicator-word weak">красный</span> — более резкий и непредсказуемый.
-      </p>
+      <p className="relationship-reminder">Но помни: это лишь подсказки, ориентируйся на звук!</p>
     </div>
   );
 }

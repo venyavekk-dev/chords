@@ -1,23 +1,22 @@
-import { useState } from "react";
 import type { Instrument, ScaleMode, SoundPreset } from "../types/music";
 import { NOTES } from "../lib/musicTheory";
-import { OnboardingGuide } from "./OnboardingGuide";
 
 type Props = {
   keyRoot: string;
   scaleMode: ScaleMode;
   instrument: Instrument;
   sound: SoundPreset;
+  onboardingOpen: boolean;
   volume: number;
   onKeyRoot: (value: string) => void;
   onScaleMode: (value: ScaleMode) => void;
   onInstrument: (value: Instrument) => void;
   onSound: (value: SoundPreset) => void;
+  onToggleOnboarding: () => void;
   onVolume: (value: number) => void;
 };
 
 export function TopBar(props: Props) {
-  const [onboardingOpen, setOnboardingOpen] = useState(false);
   const instruments: Instrument[] = ["Guitar", "Piano", "Both"];
   const sounds: SoundPreset[] = ["Velvet", "Clean", "Glass", "Nylon", "Air"];
 
@@ -29,11 +28,11 @@ export function TopBar(props: Props) {
           <h1><span>Chord Tulza</span> <i>by Venya Vekk</i></h1>
           <button
             type="button"
-            className={`onboarding-toggle ${onboardingOpen ? "active" : ""}`}
-            aria-pressed={onboardingOpen}
-            aria-expanded={onboardingOpen}
-            aria-controls="onboarding-guide"
-            onClick={() => setOnboardingOpen((open) => !open)}
+            className={`onboarding-toggle ${props.onboardingOpen ? "active" : ""}`}
+            aria-pressed={props.onboardingOpen}
+            aria-expanded={props.onboardingOpen}
+            aria-controls="relationship-hint"
+            onClick={props.onToggleOnboarding}
           >
             <span className="onboarding-switch" aria-hidden="true"><i /></span>
             Онбординг
@@ -80,7 +79,6 @@ export function TopBar(props: Props) {
           <input aria-label="Volume" className="volume-slider" type="range" min="0" max="1" step="0.01" value={props.volume} onChange={(event) => props.onVolume(Number(event.target.value))} />
         </label>
       </div>
-      {onboardingOpen && <OnboardingGuide />}
     </header>
   );
 }

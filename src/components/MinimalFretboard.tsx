@@ -17,10 +17,6 @@ export function MinimalFretboard({ chordSymbol, voicing }: Props) {
 
   return (
     <section className="minimal-fretboard" aria-label="Guitar fretboard">
-      <div className="instrument-heading">
-        <span>Guitar</span>
-        <small>Swipe the fretboard horizontally</small>
-      </div>
       <div className="fretboard-scroll" tabIndex={0} aria-label="Scrollable guitar fretboard">
         <div className="fretboard-canvas">
           <div className="fret-marker-row" style={{ gridTemplateColumns: `48px repeat(${DISPLAY_FRETS.length}, 1fr)` }}>

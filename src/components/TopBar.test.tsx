@@ -10,11 +10,13 @@ describe("TopBar onboarding", () => {
         scaleMode="Major"
         instrument="Guitar"
         sound="Velvet"
+        onboardingOpen={false}
         volume={0.72}
         onKeyRoot={() => undefined}
         onScaleMode={() => undefined}
         onInstrument={() => undefined}
         onSound={() => undefined}
+        onToggleOnboarding={() => undefined}
         onVolume={() => undefined}
       />,
     );
@@ -22,7 +24,6 @@ describe("TopBar onboarding", () => {
     expect(html).toContain("Chord Tulza");
     expect(html).toContain("<i>by Venya Vekk</i>");
     expect(html).toContain('aria-pressed="false"');
-    expect(html).not.toContain("onboarding-panel");
     expect(html).not.toContain("harmony map");
   });
 });
