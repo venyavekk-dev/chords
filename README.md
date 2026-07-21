@@ -5,7 +5,7 @@
 
 Проект доступен на GitHub Pages:
 
-[https://venyavekk-dev.github.io/chords/](https://venyavekk-dev.github.io/chords/)
+[[https://venyavekk-dev.github.io/chords/](https://venyavekk-dev.github.io/chords/)](https://www.venyavekk.com/chords)
 
 Сделал Веня Векк.
 
