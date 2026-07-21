@@ -23,7 +23,7 @@
 }
 
 :root {
-  color-scheme: dark;
+  color-scheme: light dark;
   font-family: "Ibarra Real Nova", Georgia, "Times New Roman", serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -39,9 +39,17 @@
   --border-strong: rgba(168, 168, 168, 0.44);
   --note-fill: #d8d5ce;
   --note-ink: #1c1c1c;
-  --function-good: #98a886;
-  --function-ok: #b8a078;
-  --function-weak: #aa807b;
+  --function-good: #73e2a7;
+  --function-ok: #ffd166;
+  --function-weak: #ff7b7b;
+  --home-bg: rgba(115, 226, 167, 0.27);
+  --home-text: #d9ffea;
+  --home-border: rgba(115, 226, 167, 0.58);
+  --tension-bg: rgba(255, 123, 123, 0.29);
+  --tension-text: #ffe0e0;
+  --tension-border: rgba(255, 123, 123, 0.62);
+  --header-bg: rgba(28, 28, 28, 0.9);
+  --hint-bg: rgba(37, 37, 37, 0.94);
 
   --font-body: clamp(0.875rem, 1.25vw, 1.125rem);
   --font-bio: clamp(1.125rem, 1.55vw, 1.4375rem);
@@ -63,6 +71,33 @@
 
   background: var(--page-bg);
   color: var(--text-primary);
+}
+
+@media (prefers-color-scheme: light) {
+  :root {
+    --page-bg: #ffffff;
+    --text-primary: #333333;
+    --text-secondary: #666666;
+    --text-strong: #000000;
+    --surface-primary: #f2f2f2;
+    --surface-hover: #e6e6e6;
+    --surface-active: #333333;
+    --border-default: rgba(51, 51, 51, 0.18);
+    --border-strong: rgba(51, 51, 51, 0.42);
+    --note-fill: #333333;
+    --note-ink: #ffffff;
+    --function-good: #168a50;
+    --function-ok: #b97800;
+    --function-weak: #d93636;
+    --home-bg: #d8f5e5;
+    --home-text: #075c32;
+    --home-border: #58ad7c;
+    --tension-bg: #ffe0e0;
+    --tension-text: #8f1f1f;
+    --tension-border: #df7777;
+    --header-bg: rgba(255, 255, 255, 0.92);
+    --hint-bg: rgba(242, 242, 242, 0.96);
+  }
 }
 
 * {
@@ -124,7 +159,7 @@ select {
   max-width: var(--content-max);
   margin: 0 auto;
   padding: var(--space-5) var(--page-padding);
-  background: rgba(28, 28, 28, 0.9);
+  background: var(--header-bg);
   backdrop-filter: blur(18px);
 }
 
@@ -132,25 +167,21 @@ select {
   min-width: 0;
 }
 
-.brand-kicker,
-.brand strong,
+.brand h1,
 .brand small {
   display: block;
   margin: 0;
 }
 
-.brand-kicker {
-  margin-bottom: 2px;
-  color: var(--text-secondary);
-  font-style: italic;
-  font-size: 0.875rem;
-}
-
-.brand strong {
+.brand h1 {
   color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.5;
+}
+
+.brand h1 i {
+  font-weight: 400;
 }
 
 .brand small {
@@ -467,16 +498,21 @@ select:hover {
   position: absolute;
   top: 12px;
   right: 12px;
-  width: 8px;
-  height: 8px;
+  width: 10px;
+  height: 10px;
   border-radius: var(--radius-pill);
   background: var(--text-secondary);
+  box-shadow: 0 0 0 2px var(--surface-primary);
 }
 
 .relation-dot.good { background: var(--function-good); }
 .relation-dot.ok { background: var(--function-ok); }
 .relation-dot.weak { background: var(--function-weak); }
 .relation-dot.neutral { opacity: 0.45; }
+
+.strip-chord.active .relation-dot {
+  box-shadow: 0 0 0 2px var(--page-bg);
+}
 
 .strip-main {
   display: grid;
@@ -596,7 +632,7 @@ select:hover {
   padding: 11px 14px;
   border: 1px solid var(--border-default);
   border-radius: var(--radius-card);
-  background: rgba(37, 37, 37, 0.92);
+  background: var(--hint-bg);
   color: var(--text-primary);
   font-size: 0.875rem;
   line-height: 1.4;
@@ -610,8 +646,17 @@ select:hover {
   color: inherit;
 }
 
-.home-word { background: rgba(152, 168, 134, 0.2); }
-.tension-word { background: rgba(170, 128, 123, 0.22); }
+.home-word {
+  border: 1px solid var(--home-border);
+  background: var(--home-bg);
+  color: var(--home-text) !important;
+}
+
+.tension-word {
+  border: 1px solid var(--tension-border);
+  background: var(--tension-bg);
+  color: var(--tension-text) !important;
+}
 
 .voicing-mini {
   display: grid;
@@ -690,7 +735,7 @@ select:hover {
 
   .minimal-fretboard:hover,
   .piano-keyboard:hover {
-    background: #282828;
+    background: var(--surface-hover);
   }
 }
 
@@ -728,7 +773,6 @@ select:hover {
     backdrop-filter: none;
   }
 
-  .brand-kicker,
   .brand small {
     font-size: 0.8125rem;
   }

@@ -17,8 +17,7 @@ export function TopBar(props: Props) {
     <header className="topbar">
       <div className="brand">
         <div>
-          <p className="brand-kicker">Venya Vekk · music tools</p>
-          <strong>Chord Workspace</strong>
+          <h1>Chord Tulza <i>by Venya Vekk</i></h1>
           <small>{props.keyRoot} {props.scaleMode} · harmony map</small>
         </div>
       </div>
