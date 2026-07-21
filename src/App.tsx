@@ -8,7 +8,7 @@ import { buildDiatonicChords, buildScale, parseChord } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { playChord } from "./lib/audio";
-import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode } from "./types/music";
+import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
 
 const initial = loadState();
 
@@ -17,6 +17,7 @@ export default function App() {
   const [scaleMode, setScaleMode] = useState<ScaleMode>(initial.scaleMode ?? "Major");
   const [instrument, setInstrument] = useState<Instrument>(initial.instrument ?? "Guitar");
   const [volume, setVolume] = useState(initial.volume ?? 0.72);
+  const [sound, setSound] = useState<SoundPreset>(initial.sound ?? "Velvet");
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -42,8 +43,8 @@ export default function App() {
   }, [activeChord.symbol, voicings, voicingMemory]);
 
   useEffect(() => {
-    saveState({ keyRoot, scaleMode, instrument, progression: [], volume, voicingMemory });
-  }, [keyRoot, scaleMode, instrument, volume, voicingMemory]);
+    saveState({ keyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
+  }, [keyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
 
   const selectChord = (chord: DegreeChord) => {
     setPreviewChord(undefined);
@@ -52,14 +53,19 @@ export default function App() {
     const nextVoicings = generateVoicings(chord.symbol);
     const memorized = voicingMemory[chord.symbol];
     const nextVoicing = nextVoicings.find((voicing) => voicing.frets.join("") === memorized) ?? nextVoicings[0];
-    playChord(chord.symbol, volume, nextVoicing);
+    playChord(chord.symbol, volume, nextVoicing, sound);
   };
 
   const selectVoicing = (voicing: GuitarVoicing) => {
     setPreviewVoicing(undefined);
     setSelectedVoicing(voicing);
     setVoicingMemory((memory) => ({ ...memory, [activeChord.symbol]: voicing.frets.join("") }));
-    playChord(activeChord.symbol, volume, voicing);
+    playChord(activeChord.symbol, volume, voicing, sound);
+  };
+
+  const selectSound = (nextSound: SoundPreset) => {
+    setSound(nextSound);
+    playChord(activeChord.symbol, volume, selectedVoicing, nextSound);
   };
 
   return (
@@ -68,10 +74,12 @@ export default function App() {
         keyRoot={keyRoot}
         scaleMode={scaleMode}
         instrument={instrument}
+        sound={sound}
         volume={volume}
         onKeyRoot={setKeyRoot}
         onScaleMode={setScaleMode}
         onInstrument={setInstrument}
+        onSound={selectSound}
         onVolume={setVolume}
       />
       <main className="minimal-workspace">

@@ -1,5 +1,6 @@
 export type ScaleMode = "Major" | "Minor";
 export type Instrument = "Guitar" | "Piano" | "Both";
+export type SoundPreset = "Velvet" | "Clean" | "Glass" | "Nylon" | "Air";
 export type ViewMode = "Chords" | "Guitar" | "Piano" | "Progression" | "Explore";
 export type ChordFilter = "Triads" | "Sus" | "Sevenths" | "All";
 export type FretRange = "0-5" | "5-9" | "9-12" | "All";

@@ -1,4 +1,4 @@
-import type { Instrument, ProgressionItem, ScaleMode } from "../types/music";
+import type { Instrument, ProgressionItem, ScaleMode, SoundPreset } from "../types/music";
 
 const KEY = "chord-workspace-state-v1";
 
@@ -8,6 +8,7 @@ export type StoredState = {
   instrument?: Instrument;
   progression: ProgressionItem[];
   volume?: number;
+  sound?: SoundPreset;
   voicingMemory?: Record<string, string>;
 };
 

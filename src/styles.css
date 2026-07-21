@@ -152,9 +152,9 @@ select {
   top: 0;
   z-index: 30;
   display: grid;
-  grid-template-columns: minmax(13rem, 0.5fr) minmax(0, 1.5fr);
-  align-items: end;
-  gap: var(--space-12);
+  grid-template-columns: minmax(14rem, 0.42fr) minmax(0, 1.58fr);
+  align-items: center;
+  gap: var(--space-8);
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
@@ -164,7 +164,16 @@ select {
 }
 
 .brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
   min-width: 0;
+}
+
+.brand img {
+  flex: 0 0 auto;
+  width: 56px;
+  height: 34px;
 }
 
 .brand h1,
@@ -192,24 +201,46 @@ select {
 
 .control-grid {
   display: grid;
-  grid-template-columns: repeat(4, minmax(0, 1fr));
+  grid-template-columns: minmax(24rem, 2.1fr) minmax(9rem, 0.72fr) minmax(13rem, 1fr);
   gap: var(--space-2);
   min-width: 0;
 }
 
-.control-grid label {
-  display: grid;
-  gap: 5px;
+.control-group {
   min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.control-group legend,
+.volume-control > span {
+  display: flex;
+  justify-content: space-between;
+  width: 100%;
+  margin: 0 0 5px;
+  padding: 0;
   color: var(--text-secondary);
-  font-size: 0.8125rem;
+  font-size: 0.75rem;
   line-height: 1.25;
 }
 
-.control-grid label > span {
-  display: flex;
-  justify-content: space-between;
+.control-group legend span {
+  font-style: italic;
+}
+
+.sound-control {
+  grid-column: 1 / 3;
+}
+
+.volume-control {
+  display: grid;
+  gap: 5px;
+  grid-column: 3;
+  align-content: end;
   min-width: 0;
+  color: var(--text-secondary);
+  line-height: 1.25;
 }
 
 .control-grid output {
@@ -217,30 +248,79 @@ select {
   font-variant-numeric: tabular-nums;
 }
 
-select {
-  width: 100%;
-  min-height: 44px;
-  margin: 0;
-  padding: 9px 34px 9px 12px;
-  border: 1px solid transparent;
+.segmented-control {
+  display: flex;
+  gap: 2px;
+  min-width: 0;
+  min-height: 40px;
+  padding: 3px;
   border-radius: var(--radius-card);
   background: var(--surface-primary);
+}
+
+.segmented-control button {
+  flex: 1 1 0;
+  min-width: 0;
+  min-height: 34px;
+  padding: 6px 9px;
+  border: 0;
+  border-radius: 5px;
+  overflow: hidden;
+  background: transparent;
   color: var(--text-primary);
-  transition: background var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast);
+  font-size: 0.8125rem;
+  line-height: 1;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast), transform var(--transition-fast);
 }
 
-select:hover {
-  background: var(--surface-hover);
-  color: var(--text-strong);
+.segmented-control button.active {
+  background: var(--surface-active);
+  color: var(--page-bg);
+  box-shadow: 0 1px 5px rgba(0, 0, 0, 0.16);
 }
 
-.volume-control {
-  align-content: end;
+.note-toggle {
+  display: grid;
+  grid-template-columns: repeat(12, minmax(0, 1fr));
+}
+
+.note-toggle button {
+  padding-inline: 2px;
+  font-variant-numeric: tabular-nums;
+}
+
+.sound-toggle button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.sound-toggle i {
+  flex: 0 0 auto;
+  width: 7px;
+  height: 7px;
+  border-radius: var(--radius-pill);
+  background: currentColor;
+  opacity: 0.55;
+}
+
+.sound-toggle button:nth-child(1) i { background: #a58aac; }
+.sound-toggle button:nth-child(2) i { background: #78ad8c; }
+.sound-toggle button:nth-child(3) i { background: #78a9c5; }
+.sound-toggle button:nth-child(4) i { background: #c49b69; }
+.sound-toggle button:nth-child(5) i { background: #aaa; }
+
+.sound-toggle button.active i {
+  background: var(--page-bg);
+  opacity: 0.8;
 }
 
 .volume-slider {
   width: 100%;
-  min-height: 44px;
+  min-height: 40px;
   margin: 0;
   accent-color: var(--text-primary);
 }
@@ -722,6 +802,11 @@ select:hover {
 }
 
 @media (hover: hover) {
+  .segmented-control button:not(.active):hover {
+    background: var(--surface-hover);
+    color: var(--text-strong);
+  }
+
   .strip-chord:not(.active):hover,
   .position-button:not(.active):hover {
     background: var(--surface-hover);
@@ -743,11 +828,29 @@ select:hover {
   :root { --page-padding: 2rem; }
 
   .topbar {
+    grid-template-columns: 1fr;
+    align-items: start;
     gap: var(--space-8);
   }
+}
 
+@media (max-width: 51.999rem) {
   .control-grid {
     grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .key-control,
+  .sound-control,
+  .volume-control {
+    grid-column: 1 / -1;
+  }
+
+  .scale-control {
+    grid-column: 1;
+  }
+
+  .instrument-control {
+    grid-column: 2;
   }
 
   .chord-strip {
@@ -781,11 +884,16 @@ select:hover {
     gap: var(--space-2);
   }
 
-  .control-grid label {
-    font-size: 0.75rem;
+  .note-toggle {
+    display: grid;
+    grid-template-columns: repeat(6, minmax(0, 1fr));
   }
 
-  select,
+  .sound-toggle {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
   .volume-slider {
     min-height: 44px;
   }
@@ -881,6 +989,19 @@ select:hover {
 
   .control-grid {
     grid-template-columns: 1fr;
+  }
+
+  .key-control,
+  .scale-control,
+  .instrument-control,
+  .sound-control,
+  .volume-control {
+    grid-column: 1;
+  }
+
+  .sound-toggle {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
   }
 
   .chord-strip,
