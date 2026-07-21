@@ -1,5 +1,7 @@
+import { useState } from "react";
 import type { Instrument, ScaleMode, SoundPreset } from "../types/music";
 import { NOTES } from "../lib/musicTheory";
+import { OnboardingGuide } from "./OnboardingGuide";
 
 type Props = {
   keyRoot: string;
@@ -15,6 +17,7 @@ type Props = {
 };
 
 export function TopBar(props: Props) {
+  const [onboardingOpen, setOnboardingOpen] = useState(false);
   const instruments: Instrument[] = ["Guitar", "Piano", "Both"];
   const sounds: SoundPreset[] = ["Velvet", "Clean", "Glass", "Nylon", "Air"];
 
@@ -22,9 +25,19 @@ export function TopBar(props: Props) {
     <header className="topbar">
       <div className="brand">
         <img src="/logo.svg" alt="" width="56" height="34" />
-        <div>
-          <h1>Chord Tulza <i>by Venya Vekk</i></h1>
-          <small>{props.keyRoot} {props.scaleMode} · harmony map</small>
+        <div className="brand-title-row">
+          <h1><span>Chord Tulza</span> <i>by Venya Vekk</i></h1>
+          <button
+            type="button"
+            className={`onboarding-toggle ${onboardingOpen ? "active" : ""}`}
+            aria-pressed={onboardingOpen}
+            aria-expanded={onboardingOpen}
+            aria-controls="onboarding-guide"
+            onClick={() => setOnboardingOpen((open) => !open)}
+          >
+            <span className="onboarding-switch" aria-hidden="true"><i /></span>
+            Онбординг
+          </button>
         </div>
       </div>
       <div className="control-grid" aria-label="Workspace settings">
@@ -67,6 +80,7 @@ export function TopBar(props: Props) {
           <input aria-label="Volume" className="volume-slider" type="range" min="0" max="1" step="0.01" value={props.volume} onChange={(event) => props.onVolume(Number(event.target.value))} />
         </label>
       </div>
+      {onboardingOpen && <OnboardingGuide />}
     </header>
   );
 }
