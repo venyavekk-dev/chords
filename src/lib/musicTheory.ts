@@ -82,6 +82,12 @@ export function buildDiatonicChords(root: string, mode: ScaleMode): DegreeChord[
   });
 }
 
+export function transposeChordSymbol(symbol: string, semitones: number): string {
+  if (!semitones) return symbol;
+  const { root, suffix } = parseChord(symbol);
+  return `${transpose(root, semitones)}${suffix}`;
+}
+
 export function parseChord(symbol: string): ChordDefinition {
   const match = symbol.match(/^([A-G](?:#|b)?)(.*)$/);
   if (!match) throw new Error(`Cannot parse chord: ${symbol}`);

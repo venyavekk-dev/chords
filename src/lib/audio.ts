@@ -56,7 +56,7 @@ const SOUND_PROFILES: Record<SoundPreset, SoundProfile> = {
   Air: { oscillator: "sine", body: "sine", attack: 0.045, duration: 1.55, level: 0.38, detune: 5, lowpassStart: 5200, lowpassEnd: 2100, ampFrequency: 1100, ampGain: 2.2, cabinet: 5100, drive: 0.03, shimmer: 0.085, pick: 0.012, pickFrequency: 3300, delay: 0.17, reverb: 0.34, stagger: 0.04 },
 };
 
-export function playChord(symbol: string, volume = 0.72, voicing?: GuitarVoicing, sound: SoundPreset = "Velvet") {
+export function playChord(symbol: string, volume = 0.72, voicing?: GuitarVoicing, sound: SoundPreset = "Velvet", capoFret = 0) {
   const context = getAudioContext();
   if (!context) return;
   if (context.state === "suspended") void context.resume();
@@ -109,7 +109,7 @@ export function playChord(symbol: string, volume = 0.72, voicing?: GuitarVoicing
   cabinet.connect(delay).connect(delayGain).connect(compressor);
   cabinet.connect(reverb).connect(reverbGain).connect(compressor);
 
-  const midiNotes = voicing
+  const midiNotes = (voicing
     ? voicing.frets
       .map((fret, stringIndex) => (fret === "x" ? undefined : OPEN_STRING_MIDI[stringIndex] + fret))
       .filter((midi): midi is number => typeof midi === "number")
@@ -117,7 +117,8 @@ export function playChord(symbol: string, volume = 0.72, voicing?: GuitarVoicing
       const noteIndex = NOTES.indexOf(note as (typeof NOTES)[number]);
       const octaveShift = noteIndex < rootIndex ? 1 : 0;
       return 52 + rootIndex + (noteIndex - rootIndex + octaveShift * 12);
-    });
+    })
+  ).map((midi) => midi + capoFret);
 
   midiNotes.forEach((midi, index) => {
     const frequency = 440 * 2 ** ((midi - 69) / 12);

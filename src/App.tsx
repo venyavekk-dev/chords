@@ -5,7 +5,7 @@ import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
-import { buildDiatonicChords, buildScale, parseChord } from "./lib/musicTheory";
+import { buildDiatonicChords, buildScale, parseChord, transposeChordSymbol } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { playChord } from "./lib/audio";
@@ -21,6 +21,7 @@ export default function App() {
   const [sound, setSound] = useState<SoundPreset>(initial.sound ?? "Velvet");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
+  const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -56,20 +57,27 @@ export default function App() {
     const nextVoicings = generateVoicings(chord.symbol);
     const memorized = voicingMemory[chord.symbol];
     const nextVoicing = nextVoicings.find((voicing) => voicing.frets.join("") === memorized) ?? nextVoicings[0];
-    playChord(chord.symbol, volume, nextVoicing, sound);
+    playChord(chord.symbol, volume, nextVoicing, sound, capoFret);
   };
 
   const selectVoicing = (voicing: GuitarVoicing) => {
     setPreviewVoicing(undefined);
     setSelectedVoicing(voicing);
     setVoicingMemory((memory) => ({ ...memory, [activeChord.symbol]: voicing.frets.join("") }));
-    playChord(activeChord.symbol, volume, voicing, sound);
+    playChord(activeChord.symbol, volume, voicing, sound, capoFret);
   };
 
   const selectSound = (nextSound: SoundPreset) => {
     setSound(nextSound);
-    playChord(activeChord.symbol, volume, selectedVoicing, nextSound);
+    playChord(activeChord.symbol, volume, selectedVoicing, nextSound, capoFret);
   };
+
+  const toggleCapo = (fret: number) => {
+    setCapoFret(fret);
+    playChord(activeChord.symbol, volume, selectedVoicing, sound, fret);
+  };
+
+  const soundingSymbol = (symbol: string) => transposeChordSymbol(symbol, capoFret);
 
   return (
     <div className="app">
@@ -83,17 +91,22 @@ export default function App() {
         onKeyRoot={setKeyRoot}
         onScaleMode={setScaleMode}
         onInstrument={setInstrument}
-        onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound)}
+        onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound, capoFret)}
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
         onVolume={setVolume}
       />
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
-          <MinimalFretboard chordSymbol={visibleChord.symbol} voicing={visibleVoicing} />
+          <MinimalFretboard
+            chordSymbol={soundingSymbol(visibleChord.symbol)}
+            voicing={visibleVoicing}
+            capoFret={capoFret}
+            onCapoChange={toggleCapo}
+          />
         )}
         {(instrument === "Piano" || instrument === "Both") && (
-          <PianoKeyboard chordSymbol={visibleChord.symbol} voicing={visibleVoicing} />
+          <PianoKeyboard chordSymbol={soundingSymbol(visibleChord.symbol)} voicing={visibleVoicing} capoFret={capoFret} />
         )}
         <section
           className="chord-strip"
@@ -114,7 +127,7 @@ export default function App() {
               <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
               <button className="strip-main" onClick={() => selectChord(chord)}>
                 <span>{chord.degree}</span>
-                <strong>{chord.symbol}</strong>
+                <strong>{soundingSymbol(chord.symbol)}</strong>
               </button>
               <div className="variant-row">
                 {chordVariants[index].map((variant) => (
@@ -127,7 +140,7 @@ export default function App() {
                       setPreviewChord(variant);
                     }}
                   >
-                    {variantLabel(variant)}
+                    {soundingSymbol(variantLabel(variant))}
                   </button>
                 ))}
               </div>
