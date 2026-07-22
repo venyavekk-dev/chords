@@ -60,17 +60,30 @@ export function TopBar(props: Props) {
           <h1 ref={nameRef}><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
         </div>
         <div className="brand-toggle-stack">
-          <button
-            type="button"
-            className={`onboarding-toggle ${props.onboardingOpen ? "active" : ""}`}
-            aria-pressed={props.onboardingOpen}
-            aria-expanded={props.onboardingOpen}
-            aria-controls="relationship-hint"
-            onClick={props.onToggleOnboarding}
-          >
-            <span className="onboarding-switch" aria-hidden="true"><i /></span>
-            Онбординг
-          </button>
+          <div className="toggle-row">
+            <button
+              type="button"
+              className={`onboarding-toggle ${props.onboardingOpen ? "active" : ""}`}
+              aria-pressed={props.onboardingOpen}
+              aria-expanded={props.onboardingOpen}
+              aria-controls="relationship-hint"
+              onClick={props.onToggleOnboarding}
+            >
+              <span className="onboarding-switch" aria-hidden="true"><i /></span>
+              Онбординг
+            </button>
+            <button
+              type="button"
+              className={`onboarding-toggle settings-toggle ${settingsOpen ? "active" : ""}`}
+              aria-pressed={settingsOpen}
+              aria-expanded={settingsOpen}
+              aria-controls="workspace-settings"
+              onClick={() => setSettingsOpen((open) => !open)}
+            >
+              <span className="onboarding-switch" aria-hidden="true"><i /></span>
+              Настройки
+            </button>
+          </div>
           <button
             type="button"
             className={`onboarding-toggle theme-toggle ${theme === "light" ? "active" : ""}`}
@@ -83,17 +96,6 @@ export function TopBar(props: Props) {
               <i />
             </span>
             Тема
-          </button>
-          <button
-            type="button"
-            className={`onboarding-toggle settings-toggle ${settingsOpen ? "active" : ""}`}
-            aria-pressed={settingsOpen}
-            aria-expanded={settingsOpen}
-            aria-controls="workspace-settings"
-            onClick={() => setSettingsOpen((open) => !open)}
-          >
-            <span className="onboarding-switch" aria-hidden="true"><i /></span>
-            Настройки
           </button>
         </div>
       </div>
@@ -134,7 +136,8 @@ export function TopBar(props: Props) {
         </fieldset>
         <fieldset className="control-group volume-control">
           <legend>Volume</legend>
-          <div className="volume-slider-track" style={{ "--volume-fill": `${Math.round(props.volume * 100)}%` } as React.CSSProperties}>
+          <div className="volume-slider-track">
+            <div className="volume-slider-fill" style={{ width: `${Math.round(props.volume * 100)}%` }} />
             <input
               aria-label="Volume"
               className="volume-slider"

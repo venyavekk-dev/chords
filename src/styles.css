@@ -226,6 +226,14 @@ select {
   gap: 1px;
 }
 
+.toggle-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  gap: var(--space-4);
+}
+
 .brand h1 {
   color: var(--text-primary);
   font-size: 1rem;
@@ -352,7 +360,7 @@ select {
   display: grid;
   gap: 5px;
   grid-column: 3;
-  align-content: end;
+  align-content: start;
   min-width: 0;
   color: var(--text-secondary);
   line-height: 1.25;
@@ -370,11 +378,12 @@ select {
   background: var(--surface-primary);
 }
 
-.volume-slider-track::before {
-  content: "";
+.volume-slider-fill {
   position: absolute;
-  inset: 3px;
-  width: calc(var(--volume-fill, 20%) - 6px);
+  top: 3px;
+  bottom: 3px;
+  left: 3px;
+  z-index: 0;
   border-radius: 5px;
   background: var(--surface-active);
   transition: width var(--transition-fast);
@@ -383,7 +392,7 @@ select {
 
 .volume-slider-value {
   position: relative;
-  z-index: 1;
+  z-index: 2;
   color: #fff;
   font-size: 0.8125rem;
   font-variant-numeric: tabular-nums;
@@ -469,7 +478,7 @@ select {
 .volume-slider {
   position: absolute;
   inset: 0;
-  z-index: 2;
+  z-index: 1;
   width: 100%;
   height: 100%;
   margin: 0;
@@ -479,15 +488,24 @@ select {
   -webkit-appearance: none;
 }
 
-.volume-slider::-webkit-slider-thumb {
-  -webkit-appearance: none;
+.volume-slider::-webkit-slider-runnable-track {
   width: 100%;
   height: 100%;
+  background: transparent;
+}
+
+.volume-slider::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 4px;
+  height: 100%;
+  background: transparent;
+  border: 0;
 }
 
 .volume-slider::-moz-range-thumb {
-  width: 100%;
+  width: 4px;
   height: 100%;
+  background: transparent;
   border: 0;
 }
 
