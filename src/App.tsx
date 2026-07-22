@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChordSequencer } from "./components/ChordSequencer";
 import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
@@ -9,7 +10,7 @@ import { buildDiatonicChords, buildScale, parseChord } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { playChord } from "./lib/audio";
-import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
+import type { DegreeChord, GuitarVoicing, Instrument, ProgressionItem, ScaleMode, SoundPreset } from "./types/music";
 
 const initial = loadState();
 
@@ -22,6 +23,11 @@ export default function App() {
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
+  const [sequence, setSequence] = useState<ProgressionItem[]>([]);
+  const [bpm, setBpm] = useState(96);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [playingIndex, setPlayingIndex] = useState(-1);
+  const playbackTimer = useRef<number | undefined>(undefined);
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
   const [activeChord, setActiveChord] = useState<DegreeChord>(chords[0]);
@@ -57,7 +63,53 @@ export default function App() {
     const memorized = voicingMemory[chord.symbol];
     const nextVoicing = nextVoicings.find((voicing) => voicing.frets.join("") === memorized) ?? nextVoicings[0];
     playChord(chord.symbol, volume, nextVoicing, sound);
+    setSequence((current) => [...current, { id: crypto.randomUUID(), degree: chord.degree, symbol: chord.symbol }]);
   };
+
+  const removeFromSequence = (id: string) => {
+    if (isPlaying) stopSequence();
+    setSequence((current) => current.filter((item) => item.id !== id));
+  };
+
+  const clearSequence = () => {
+    if (isPlaying) stopSequence();
+    setSequence([]);
+  };
+
+  const stopSequence = () => {
+    if (playbackTimer.current) window.clearTimeout(playbackTimer.current);
+    playbackTimer.current = undefined;
+    setIsPlaying(false);
+    setPlayingIndex(-1);
+  };
+
+  const playSequence = () => {
+    if (sequence.length === 0) return;
+    setIsPlaying(true);
+    const stepMs = (60 / bpm) * 1000 * 4;
+    const playStep = (index: number) => {
+      const item = sequence[index];
+      setPlayingIndex(index);
+      const stepVoicings = generateVoicings(item.symbol);
+      const memorized = voicingMemory[item.symbol];
+      const stepVoicing = stepVoicings.find((voicing) => voicing.frets.join("") === memorized) ?? stepVoicings[0];
+      playChord(item.symbol, volume, stepVoicing, sound);
+      playbackTimer.current = window.setTimeout(() => {
+        if (index + 1 < sequence.length) playStep(index + 1);
+        else stopSequence();
+      }, stepMs);
+    };
+    playStep(0);
+  };
+
+  const toggleSequencePlayback = () => {
+    if (isPlaying) stopSequence();
+    else playSequence();
+  };
+
+  useEffect(() => () => {
+    if (playbackTimer.current) window.clearTimeout(playbackTimer.current);
+  }, []);
 
   const selectVoicing = (voicing: GuitarVoicing) => {
     setPreviewVoicing(undefined);
@@ -149,6 +201,16 @@ export default function App() {
             </button>
           ))}
         </section>
+        <ChordSequencer
+          items={sequence}
+          bpm={bpm}
+          isPlaying={isPlaying}
+          playingIndex={playingIndex}
+          onBpm={setBpm}
+          onRemove={removeFromSequence}
+          onClear={clearSequence}
+          onPlayToggle={toggleSequencePlayback}
+        />
         {onboardingOpen && (
           <RelationshipHint acknowledged={onboardingAcknowledged} onAcknowledge={() => setOnboardingAcknowledged(true)}>
             {relationText}

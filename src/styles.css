@@ -841,6 +841,127 @@ select {
   color: var(--card-active-text);
 }
 
+.sequencer-bar {
+  display: grid;
+  gap: var(--space-3);
+  margin-top: var(--space-5);
+  padding: var(--space-4);
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+}
+
+.sequencer-header {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-3);
+}
+
+.sequencer-header strong {
+  color: var(--text-strong);
+  font-size: 0.875rem;
+  font-weight: 600;
+}
+
+.sequencer-bpm {
+  display: grid;
+  gap: 4px;
+  min-width: 9rem;
+  margin-left: auto;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.sequencer-bpm span {
+  display: flex;
+  justify-content: space-between;
+}
+
+.sequencer-bpm output {
+  color: var(--text-primary);
+}
+
+.sequencer-play,
+.sequencer-clear {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  padding: 7px 12px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: var(--surface-hover);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  transition: opacity var(--transition-fast);
+}
+
+.sequencer-play:disabled,
+.sequencer-clear:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.sequencer-play:not(:disabled):hover,
+.sequencer-clear:not(:disabled):hover {
+  opacity: 0.8;
+}
+
+.sequencer-track {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-2);
+  min-height: 44px;
+}
+
+.sequencer-empty {
+  align-self: center;
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+}
+
+.sequencer-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 7px 8px 7px 12px;
+  border-radius: var(--radius-pill);
+  background: var(--card-chip-bg);
+  color: var(--card-chip-text);
+  font-size: 0.8125rem;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sequencer-item span {
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+}
+
+.sequencer-item.playing {
+  background: var(--card-active-bg);
+  color: var(--card-active-text);
+}
+
+.sequencer-item.playing span {
+  color: var(--card-active-muted);
+}
+
+.sequencer-item button {
+  display: grid;
+  place-items: center;
+  width: 18px;
+  height: 18px;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: inherit;
+  opacity: 0.7;
+}
+
+.sequencer-item button:hover {
+  opacity: 1;
+}
+
 .relationship-hint {
   position: sticky;
   bottom: 12px;
