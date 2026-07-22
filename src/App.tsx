@@ -90,19 +90,13 @@ export default function App() {
       const symbolVoicings = generateVoicings(symbol);
       const memorized = voicingMemory[symbol];
       const preferred = symbolVoicings.find((v) => v.frets.join("") === memorized) ?? symbolVoicings[0];
-      const pressed = preferred?.frets.filter((fret): fret is number => typeof fret === "number") ?? [];
-      if (pressed.length > 0 && Math.max(...pressed) < capoFret) blocked.add(symbol);
+      if (preferred && isVoicingBlockedByCapo(preferred, capoFret)) blocked.add(symbol);
     });
     return blocked;
   }, [chords, chordVariants, voicingMemory, capoFret]);
 
   const visiblePositionVoicings = useMemo(
-    () =>
-      voicings.filter((voicing) => {
-        if (capoFret <= 0) return true;
-        const pressed = voicing.frets.filter((fret): fret is number => typeof fret === "number");
-        return pressed.length === 0 || Math.max(...pressed) >= capoFret;
-      }),
+    () => voicings.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret)),
     [voicings, capoFret],
   );
 
@@ -201,6 +195,11 @@ export default function App() {
       </main>
     </div>
   );
+}
+
+function isVoicingBlockedByCapo(voicing: GuitarVoicing, capoFret: number): boolean {
+  if (capoFret <= 0) return false;
+  return voicing.frets.some((fret) => typeof fret === "number" && fret > 0 && fret < capoFret);
 }
 
 function variantsForChord(chord: DegreeChord, keyRoot: string, mode: ScaleMode): DegreeChord[] {
