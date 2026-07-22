@@ -32,37 +32,37 @@ export function TopBar(props: Props) {
   return (
     <header className="topbar">
       <div className="brand">
-        <button type="button" className="brand-logo" aria-label="Проиграть текущий аккорд" onClick={props.onPlayChord}>
-          <img src="/logo.svg" alt="" width="56" height="34" />
-        </button>
-        <div className="brand-title-row">
+        <div className="brand-heading">
+          <button type="button" className="brand-logo" aria-label="Проиграть текущий аккорд" onClick={props.onPlayChord}>
+            <img src="/logo.svg" alt="" width="56" height="34" />
+          </button>
           <h1><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
-          <div className="brand-toggle-stack">
-            <button
-              type="button"
-              className={`onboarding-toggle ${props.onboardingOpen ? "active" : ""}`}
-              aria-pressed={props.onboardingOpen}
-              aria-expanded={props.onboardingOpen}
-              aria-controls="relationship-hint"
-              onClick={props.onToggleOnboarding}
-            >
-              <span className="onboarding-switch" aria-hidden="true"><i /></span>
-              Онбординг
-            </button>
-            <button
-              type="button"
-              className={`onboarding-toggle theme-toggle ${theme === "light" ? "active" : ""}`}
-              aria-pressed={theme === "light"}
-              onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
-            >
-              <span className="onboarding-switch" aria-hidden="true"><i /></span>
-              Светлая тема
-            </button>
-          </div>
+          <button type="button" className="settings-toggle" aria-expanded={settingsOpen} aria-controls="workspace-settings" onClick={() => setSettingsOpen((open) => !open)}>
+            Настройки <i aria-hidden="true" />
+          </button>
         </div>
-        <button type="button" className="settings-toggle" aria-expanded={settingsOpen} aria-controls="workspace-settings" onClick={() => setSettingsOpen((open) => !open)}>
-          Настройки <i aria-hidden="true" />
-        </button>
+        <div className="brand-toggle-stack">
+          <button
+            type="button"
+            className={`onboarding-toggle ${props.onboardingOpen ? "active" : ""}`}
+            aria-pressed={props.onboardingOpen}
+            aria-expanded={props.onboardingOpen}
+            aria-controls="relationship-hint"
+            onClick={props.onToggleOnboarding}
+          >
+            <span className="onboarding-switch" aria-hidden="true"><i /></span>
+            Онбординг
+          </button>
+          <button
+            type="button"
+            className={`onboarding-toggle theme-toggle ${theme === "light" ? "active" : ""}`}
+            aria-pressed={theme === "light"}
+            onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+          >
+            <span className="onboarding-switch" aria-hidden="true"><i /></span>
+            Светлая тема
+          </button>
+        </div>
       </div>
       {settingsOpen && <div className="control-grid" id="workspace-settings" aria-label="Workspace settings">
         <fieldset className="control-group key-control">
