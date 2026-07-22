@@ -15,6 +15,7 @@ describe("TopBar onboarding", () => {
         onKeyRoot={() => undefined}
         onScaleMode={() => undefined}
         onInstrument={() => undefined}
+        onPlayChord={() => undefined}
         onSound={() => undefined}
         onToggleOnboarding={() => undefined}
         onVolume={() => undefined}
@@ -24,6 +25,8 @@ describe("TopBar onboarding", () => {
     expect(html).toContain("Chord Tulza");
     expect(html).toContain('href="https://venyavekk.com/music"');
     expect(html).not.toContain("tap to preview");
+    expect(html).toContain("Светлая тема");
+    expect(html).toContain('aria-controls="workspace-settings"');
     expect(html).toContain('aria-pressed="false"');
     expect(html).not.toContain("harmony map");
   });
