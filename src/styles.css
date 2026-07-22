@@ -23,7 +23,7 @@
 }
 
 :root {
-  color-scheme: light dark;
+  color-scheme: dark;
   font-family: "Ibarra Real Nova", Georgia, "Times New Roman", serif;
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -71,33 +71,6 @@
 
   background: var(--page-bg);
   color: var(--text-primary);
-}
-
-@media (prefers-color-scheme: light) {
-  :root {
-    --page-bg: #ffffff;
-    --text-primary: #333333;
-    --text-secondary: #666666;
-    --text-strong: #000000;
-    --surface-primary: #f2f2f2;
-    --surface-hover: #e6e6e6;
-    --surface-active: #333333;
-    --border-default: rgba(51, 51, 51, 0.18);
-    --border-strong: rgba(51, 51, 51, 0.42);
-    --note-fill: #333333;
-    --note-ink: #ffffff;
-    --function-good: #168a50;
-    --function-ok: #b97800;
-    --function-weak: #d93636;
-    --home-bg: #d8f5e5;
-    --home-text: #075c32;
-    --home-border: #58ad7c;
-    --tension-bg: #ffe0e0;
-    --tension-text: #8f1f1f;
-    --tension-border: #df7777;
-    --header-bg: rgba(255, 255, 255, 0.92);
-    --hint-bg: rgba(242, 242, 242, 0.96);
-  }
 }
 
 * {
