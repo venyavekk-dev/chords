@@ -798,6 +798,11 @@ select {
   color: var(--card-active-muted);
 }
 
+.strip-main.capo-unavailable,
+.variant-chip.capo-unavailable {
+  opacity: 0.6;
+}
+
 .variant-row {
   position: relative;
   z-index: 2;

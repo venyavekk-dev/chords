@@ -81,6 +81,23 @@ export default function App() {
   const effectiveCapoFret = previewCapoFret ?? capoFret;
   const soundingSymbol = (symbol: string) => transposeChordSymbol(symbol, effectiveCapoFret);
 
+  const capoBlockedSymbols = useMemo(() => {
+    const blocked = new Set<string>();
+    if (effectiveCapoFret <= 0) return blocked;
+    const symbols = new Set<string>([
+      ...chords.map((chord) => chord.symbol),
+      ...chordVariants.flat().map((variant) => variant.symbol),
+    ]);
+    symbols.forEach((symbol) => {
+      const symbolVoicings = generateVoicings(symbol);
+      const memorized = voicingMemory[symbol];
+      const preferred = symbolVoicings.find((v) => v.frets.join("") === memorized) ?? symbolVoicings[0];
+      const pressed = preferred?.frets.filter((fret): fret is number => typeof fret === "number") ?? [];
+      if (pressed.length > 0 && Math.max(...pressed) < effectiveCapoFret) blocked.add(symbol);
+    });
+    return blocked;
+  }, [chords, chordVariants, voicingMemory, effectiveCapoFret]);
+
   return (
     <div className="app">
       <TopBar
@@ -130,14 +147,17 @@ export default function App() {
               }}
             >
               <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
-              <button className="strip-main" onClick={() => selectChord(chord)}>
+              <button
+                className={`strip-main ${capoBlockedSymbols.has(chord.symbol) ? "capo-unavailable" : ""}`}
+                onClick={() => selectChord(chord)}
+              >
                 <span>{chord.degree}</span>
                 <strong>{soundingSymbol(chord.symbol)}</strong>
               </button>
               <div className="variant-row">
                 {chordVariants[index].map((variant) => (
                   <button
-                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""}`}
+                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""} ${capoBlockedSymbols.has(variant.symbol) ? "capo-unavailable" : ""}`}
                     key={variant.symbol}
                     onClick={() => selectChord(variant)}
                     onMouseEnter={() => {
