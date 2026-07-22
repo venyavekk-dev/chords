@@ -1,4 +1,5 @@
-import { useEffect, useState } from "react";
+import { Moon, Sun } from "lucide-react";
+import { useEffect, useRef, useState } from "react";
 import type { Instrument, ScaleMode, SoundPreset } from "../types/music";
 import { NOTES } from "../lib/musicTheory";
 
@@ -18,9 +19,13 @@ type Props = {
   onVolume: (value: number) => void;
 };
 
+const DEFAULT_LOGO_SIZE = 34;
+
 export function TopBar(props: Props) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
   const [settingsOpen, setSettingsOpen] = useState(true);
+  const [logoSize, setLogoSize] = useState(DEFAULT_LOGO_SIZE);
+  const nameRef = useRef<HTMLHeadingElement>(null);
   const instruments: Instrument[] = ["Guitar", "Piano", "Both"];
   const sounds: SoundPreset[] = ["Velvet", "Clean", "Glass", "Nylon", "Air"];
 
@@ -29,14 +34,30 @@ export function TopBar(props: Props) {
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f7f5f0" : "#1c1c1c");
   }, [theme]);
 
+  useEffect(() => {
+    const el = nameRef.current;
+    if (!el) return;
+    const update = () => setLogoSize(Math.max(DEFAULT_LOGO_SIZE, el.offsetHeight));
+    update();
+    const observer = new ResizeObserver(update);
+    observer.observe(el);
+    return () => observer.disconnect();
+  }, []);
+
   return (
     <header className="topbar">
       <div className="brand">
         <div className="brand-heading">
-          <button type="button" className="brand-logo" aria-label="Проиграть текущий аккорд" onClick={props.onPlayChord}>
-            <img src="/logo.svg" alt="" width="56" height="34" />
+          <button
+            type="button"
+            className="brand-logo"
+            style={{ height: logoSize }}
+            aria-label="Проиграть текущий аккорд"
+            onClick={props.onPlayChord}
+          >
+            <img src="/logo.svg" alt="" style={{ height: logoSize, width: "auto" }} />
           </button>
-          <h1><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
+          <h1 ref={nameRef}><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
         </div>
         <div className="brand-toggle-stack">
           <button
@@ -56,8 +77,12 @@ export function TopBar(props: Props) {
             aria-pressed={theme === "light"}
             onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
           >
-            <span className="onboarding-switch" aria-hidden="true"><i /></span>
-            Светлая тема
+            <span className="onboarding-switch theme-switch" aria-hidden="true">
+              <Sun size={8} className="theme-icon theme-icon-sun" />
+              <Moon size={8} className="theme-icon theme-icon-moon" />
+              <i />
+            </span>
+            Тема
           </button>
           <button
             type="button"
@@ -107,10 +132,22 @@ export function TopBar(props: Props) {
             ))}
           </div>
         </fieldset>
-        <label className="volume-control control-group">
-          <span>Volume <output>{Math.round(props.volume * 100)}</output></span>
-          <input aria-label="Volume" className="volume-slider" type="range" min="0" max="1" step="0.01" value={props.volume} onChange={(event) => props.onVolume(Number(event.target.value))} />
-        </label>
+        <fieldset className="control-group volume-control">
+          <legend>Volume</legend>
+          <div className="volume-slider-track" style={{ "--volume-fill": `${Math.round(props.volume * 100)}%` } as React.CSSProperties}>
+            <input
+              aria-label="Volume"
+              className="volume-slider"
+              type="range"
+              min="0"
+              max="1"
+              step="0.01"
+              value={props.volume}
+              onChange={(event) => props.onVolume(Number(event.target.value))}
+            />
+            <span className="volume-slider-value">{Math.round(props.volume * 100)}%</span>
+          </div>
+        </fieldset>
       </div>}
     </header>
   );
