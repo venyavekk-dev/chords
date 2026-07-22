@@ -299,7 +299,7 @@ select {
 }
 
 .settings-toggle {
-  display: none;
+  display: inline-flex;
   align-items: center;
   gap: 7px;
   min-height: 34px;
@@ -1080,10 +1080,6 @@ select {
   .brand-heading {
     width: 100%;
     align-items: flex-start;
-  }
-
-  .settings-toggle {
-    display: inline-flex;
   }
 
   .control-grid {
