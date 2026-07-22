@@ -555,8 +555,20 @@ select {
   font-weight: 600;
 }
 
+.fret-number.capo-blocked {
+  opacity: 0.32;
+}
+
+.fret-marker.capo-blocked {
+  opacity: 0.32;
+}
+
 .string-cell.capo-column {
   box-shadow: inset 0 0 0 9999px rgba(168, 168, 168, 0.16);
+}
+
+.string-cell.capo-blocked {
+  opacity: 0.22;
 }
 
 .string-name {

@@ -36,7 +36,7 @@ export function MinimalFretboard({
           <div className="fret-marker-row" style={{ gridTemplateColumns: `48px repeat(${DISPLAY_FRETS.length}, 1fr)` }}>
             <div />
             {DISPLAY_FRETS.map((fret) => (
-              <div className="fret-marker" key={fret}>{MARKERS.has(fret) && <span />}</div>
+              <div className={`fret-marker ${fret < shownCapo ? "capo-blocked" : ""}`} key={fret}>{MARKERS.has(fret) && <span />}</div>
             ))}
           </div>
           <div className="fretboard-grid" style={{ gridTemplateColumns: `48px repeat(${DISPLAY_FRETS.length}, 1fr)` }}>
@@ -44,7 +44,7 @@ export function MinimalFretboard({
             {DISPLAY_FRETS.map((fret) => (
               <button
                 type="button"
-                className={`fret-number ${fret === shownCapo ? "capo-active" : ""}`}
+                className={`fret-number ${fret === shownCapo ? "capo-active" : ""} ${fret < shownCapo ? "capo-blocked" : ""}`}
                 key={fret}
                 aria-pressed={fret === capoFret}
                 aria-label={fret === capoFret ? `Снять капо с лада ${fret}` : `Поставить капо на лад ${fret}`}
@@ -58,11 +58,15 @@ export function MinimalFretboard({
               <Fragment key={string.stringIndex}>
                 <div className="string-name">{string.openNote}</div>
                 {DISPLAY_FRETS.map((fret) => {
-                  const isVoicing = voicing?.frets[string.stringIndex] === fret;
+                  const isBlocked = fret < shownCapo;
+                  const isVoicing = !isBlocked && voicing?.frets[string.stringIndex] === fret;
                   const note = isVoicing ? transpose(STANDARD_TUNING[string.stringIndex], fret + shownCapo) : string.frets[fret].note;
                   const isRoot = note === root;
                   return (
-                    <div className={`string-cell ${fret === shownCapo ? "capo-column" : ""}`} key={`${string.stringIndex}-${fret}`}>
+                    <div
+                      className={`string-cell ${fret === shownCapo ? "capo-column" : ""} ${isBlocked ? "capo-blocked" : ""}`}
+                      key={`${string.stringIndex}-${fret}`}
+                    >
                       {isVoicing && <span className={`note-dot ${isRoot ? "root-note" : ""}`} aria-label={`${note}${isRoot ? ", root" : ""}`}>{note}</span>}
                     </div>
                   );
