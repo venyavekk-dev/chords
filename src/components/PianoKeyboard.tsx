@@ -37,10 +37,6 @@ export function PianoKeyboard({ chordSymbol, voicing }: Props) {
 
   return (
     <section className="piano-keyboard" aria-label="Piano keyboard">
-      <div className="instrument-heading">
-        <span>Piano</span>
-        <small>Voicing range</small>
-      </div>
       <div className="piano-scroll" tabIndex={0} aria-label="Scrollable piano keyboard">
         <div className="piano-shell">
           <div className="white-key-row">

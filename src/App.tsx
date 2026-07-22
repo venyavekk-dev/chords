@@ -83,6 +83,7 @@ export default function App() {
         onKeyRoot={setKeyRoot}
         onScaleMode={setScaleMode}
         onInstrument={setInstrument}
+        onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound)}
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
         onVolume={setVolume}

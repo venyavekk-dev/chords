@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import type { Instrument, ScaleMode, SoundPreset } from "../types/music";
 import { NOTES } from "../lib/musicTheory";
 
@@ -12,34 +13,58 @@ type Props = {
   onScaleMode: (value: ScaleMode) => void;
   onInstrument: (value: Instrument) => void;
   onSound: (value: SoundPreset) => void;
+  onPlayChord: () => void;
   onToggleOnboarding: () => void;
   onVolume: (value: number) => void;
 };
 
 export function TopBar(props: Props) {
+  const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [settingsOpen, setSettingsOpen] = useState(true);
   const instruments: Instrument[] = ["Guitar", "Piano", "Both"];
   const sounds: SoundPreset[] = ["Velvet", "Clean", "Glass", "Nylon", "Air"];
+
+  useEffect(() => {
+    document.documentElement.dataset.theme = theme;
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f7f5f0" : "#1c1c1c");
+  }, [theme]);
 
   return (
     <header className="topbar">
       <div className="brand">
-        <img src="/logo.svg" alt="" width="56" height="34" />
+        <button type="button" className="brand-logo" aria-label="Проиграть текущий аккорд" onClick={props.onPlayChord}>
+          <img src="/logo.svg" alt="" width="56" height="34" />
+        </button>
         <div className="brand-title-row">
           <h1><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
-          <button
-            type="button"
-            className={`onboarding-toggle ${props.onboardingOpen ? "active" : ""}`}
-            aria-pressed={props.onboardingOpen}
-            aria-expanded={props.onboardingOpen}
-            aria-controls="relationship-hint"
-            onClick={props.onToggleOnboarding}
-          >
-            <span className="onboarding-switch" aria-hidden="true"><i /></span>
-            Онбординг
-          </button>
+          <div className="brand-toggle-stack">
+            <button
+              type="button"
+              className={`onboarding-toggle ${props.onboardingOpen ? "active" : ""}`}
+              aria-pressed={props.onboardingOpen}
+              aria-expanded={props.onboardingOpen}
+              aria-controls="relationship-hint"
+              onClick={props.onToggleOnboarding}
+            >
+              <span className="onboarding-switch" aria-hidden="true"><i /></span>
+              Онбординг
+            </button>
+            <button
+              type="button"
+              className={`onboarding-toggle theme-toggle ${theme === "light" ? "active" : ""}`}
+              aria-pressed={theme === "light"}
+              onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+            >
+              <span className="onboarding-switch" aria-hidden="true"><i /></span>
+              Светлая тема
+            </button>
+          </div>
         </div>
+        <button type="button" className="settings-toggle" aria-expanded={settingsOpen} aria-controls="workspace-settings" onClick={() => setSettingsOpen((open) => !open)}>
+          Настройки <i aria-hidden="true" />
+        </button>
       </div>
-      <div className="control-grid" aria-label="Workspace settings">
+      {settingsOpen && <div className="control-grid" id="workspace-settings" aria-label="Workspace settings">
         <fieldset className="control-group key-control">
           <legend>Key</legend>
           <div className="segmented-control note-toggle">
@@ -78,7 +103,7 @@ export function TopBar(props: Props) {
           <span>Volume <output>{Math.round(props.volume * 100)}</output></span>
           <input aria-label="Volume" className="volume-slider" type="range" min="0" max="1" step="0.01" value={props.volume} onChange={(event) => props.onVolume(Number(event.target.value))} />
         </label>
-      </div>
+      </div>}
     </header>
   );
 }
