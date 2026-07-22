@@ -22,6 +22,7 @@ export default function App() {
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [capoFret, setCapoFret] = useState(0);
+  const [previewCapoFret, setPreviewCapoFret] = useState<number | undefined>(undefined);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -77,7 +78,8 @@ export default function App() {
     playChord(activeChord.symbol, volume, selectedVoicing, sound, fret);
   };
 
-  const soundingSymbol = (symbol: string) => transposeChordSymbol(symbol, capoFret);
+  const effectiveCapoFret = previewCapoFret ?? capoFret;
+  const soundingSymbol = (symbol: string) => transposeChordSymbol(symbol, effectiveCapoFret);
 
   return (
     <div className="app">
@@ -102,11 +104,14 @@ export default function App() {
             chordSymbol={soundingSymbol(visibleChord.symbol)}
             voicing={visibleVoicing}
             capoFret={capoFret}
+            displayCapoFret={effectiveCapoFret}
             onCapoChange={toggleCapo}
+            onCapoPreview={setPreviewCapoFret}
+            onCapoPreviewEnd={() => setPreviewCapoFret(undefined)}
           />
         )}
         {(instrument === "Piano" || instrument === "Both") && (
-          <PianoKeyboard chordSymbol={soundingSymbol(visibleChord.symbol)} voicing={visibleVoicing} capoFret={capoFret} />
+          <PianoKeyboard chordSymbol={soundingSymbol(visibleChord.symbol)} voicing={visibleVoicing} capoFret={effectiveCapoFret} />
         )}
         <section
           className="chord-strip"
