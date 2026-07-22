@@ -37,9 +37,6 @@ export function TopBar(props: Props) {
             <img src="/logo.svg" alt="" width="56" height="34" />
           </button>
           <h1><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
-          <button type="button" className="settings-toggle" aria-expanded={settingsOpen} aria-controls="workspace-settings" onClick={() => setSettingsOpen((open) => !open)}>
-            Настройки <i aria-hidden="true" />
-          </button>
         </div>
         <div className="brand-toggle-stack">
           <button
@@ -61,6 +58,17 @@ export function TopBar(props: Props) {
           >
             <span className="onboarding-switch" aria-hidden="true"><i /></span>
             Светлая тема
+          </button>
+          <button
+            type="button"
+            className={`onboarding-toggle settings-toggle ${settingsOpen ? "active" : ""}`}
+            aria-pressed={settingsOpen}
+            aria-expanded={settingsOpen}
+            aria-controls="workspace-settings"
+            onClick={() => setSettingsOpen((open) => !open)}
+          >
+            <span className="onboarding-switch" aria-hidden="true"><i /></span>
+            Настройки
           </button>
         </div>
       </div>
