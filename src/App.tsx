@@ -22,7 +22,6 @@ export default function App() {
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [capoFret, setCapoFret] = useState(0);
-  const [previewCapoFret, setPreviewCapoFret] = useState<number | undefined>(undefined);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -78,12 +77,11 @@ export default function App() {
     playChord(activeChord.symbol, volume, selectedVoicing, sound, fret);
   };
 
-  const effectiveCapoFret = previewCapoFret ?? capoFret;
-  const soundingSymbol = (symbol: string) => transposeChordSymbol(symbol, effectiveCapoFret);
+  const soundingSymbol = (symbol: string) => transposeChordSymbol(symbol, capoFret);
 
   const capoBlockedSymbols = useMemo(() => {
     const blocked = new Set<string>();
-    if (effectiveCapoFret <= 0) return blocked;
+    if (capoFret <= 0) return blocked;
     const symbols = new Set<string>([
       ...chords.map((chord) => chord.symbol),
       ...chordVariants.flat().map((variant) => variant.symbol),
@@ -93,10 +91,20 @@ export default function App() {
       const memorized = voicingMemory[symbol];
       const preferred = symbolVoicings.find((v) => v.frets.join("") === memorized) ?? symbolVoicings[0];
       const pressed = preferred?.frets.filter((fret): fret is number => typeof fret === "number") ?? [];
-      if (pressed.length > 0 && Math.max(...pressed) < effectiveCapoFret) blocked.add(symbol);
+      if (pressed.length > 0 && Math.max(...pressed) < capoFret) blocked.add(symbol);
     });
     return blocked;
-  }, [chords, chordVariants, voicingMemory, effectiveCapoFret]);
+  }, [chords, chordVariants, voicingMemory, capoFret]);
+
+  const visiblePositionVoicings = useMemo(
+    () =>
+      voicings.filter((voicing) => {
+        if (capoFret <= 0) return true;
+        const pressed = voicing.frets.filter((fret): fret is number => typeof fret === "number");
+        return pressed.length === 0 || Math.max(...pressed) >= capoFret;
+      }),
+    [voicings, capoFret],
+  );
 
   return (
     <div className="app">
@@ -121,14 +129,11 @@ export default function App() {
             chordSymbol={soundingSymbol(visibleChord.symbol)}
             voicing={visibleVoicing}
             capoFret={capoFret}
-            displayCapoFret={effectiveCapoFret}
             onCapoChange={toggleCapo}
-            onCapoPreview={setPreviewCapoFret}
-            onCapoPreviewEnd={() => setPreviewCapoFret(undefined)}
           />
         )}
         {(instrument === "Piano" || instrument === "Both") && (
-          <PianoKeyboard chordSymbol={soundingSymbol(visibleChord.symbol)} voicing={visibleVoicing} capoFret={effectiveCapoFret} />
+          <PianoKeyboard chordSymbol={soundingSymbol(visibleChord.symbol)} voicing={visibleVoicing} capoFret={capoFret} />
         )}
         <section
           className="chord-strip"
@@ -151,6 +156,7 @@ export default function App() {
                 className={`strip-main ${capoBlockedSymbols.has(chord.symbol) ? "capo-unavailable" : ""}`}
                 onClick={() => selectChord(chord)}
               >
+                {capoFret > 0 && <small className="capo-shape-label">форма {chord.symbol}</small>}
                 <span>{chord.degree}</span>
                 <strong>{soundingSymbol(chord.symbol)}</strong>
               </button>
@@ -173,7 +179,7 @@ export default function App() {
           ))}
         </section>
         <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
-          {voicings.map((voicing) => (
+          {visiblePositionVoicings.map((voicing) => (
             <button
               className={`position-button ${selectedVoicing?.frets.join("") === voicing.frets.join("") ? "active" : ""}`}
               key={voicing.frets.join("-")}
