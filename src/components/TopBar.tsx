@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import type { Instrument, ScaleMode, SoundPreset } from "../types/music";
-import { NOTES } from "../lib/musicTheory";
+import { NOTES, transpose } from "../lib/musicTheory";
 
 type Props = {
   keyRoot: string;
@@ -9,6 +9,7 @@ type Props = {
   sound: SoundPreset;
   onboardingOpen: boolean;
   volume: number;
+  capoFret: number;
   onKeyRoot: (value: string) => void;
   onScaleMode: (value: ScaleMode) => void;
   onInstrument: (value: Instrument) => void;
@@ -66,7 +67,10 @@ export function TopBar(props: Props) {
       </div>
       {settingsOpen && <div className="control-grid" id="workspace-settings" aria-label="Workspace settings">
         <fieldset className="control-group key-control">
-          <legend>Key</legend>
+          <legend>
+            Key
+            {props.capoFret > 0 && <small className="capo-key-hint">звучит как {transpose(props.keyRoot, props.capoFret)}</small>}
+          </legend>
           <div className="segmented-control note-toggle">
             {NOTES.map((note) => (
               <button type="button" aria-pressed={props.keyRoot === note} className={props.keyRoot === note ? "active" : ""} key={note} onClick={() => props.onKeyRoot(note)}>{note}</button>

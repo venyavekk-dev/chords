@@ -116,6 +116,7 @@ export default function App() {
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
         onVolume={setVolume}
+        capoFret={capoFret}
       />
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
