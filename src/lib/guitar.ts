@@ -22,7 +22,12 @@ export function getFretWindow(range: FretRange): [number, number] {
   return [1, 20];
 }
 
-export function generateVoicings(symbol: string, tuning = STANDARD_TUNING): GuitarVoicing[] {
+export function isVoicingBlockedByCapo(voicing: GuitarVoicing, capoFret: number): boolean {
+  if (capoFret <= 0) return false;
+  return voicing.frets.some((fret) => typeof fret === "number" && fret > 0 && fret < capoFret);
+}
+
+export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD_TUNING): GuitarVoicing[] {
   const chord = parseChord(symbol);
   const preferred = buildPreferredVoicings(symbol, tuning);
   const options = tuning.map((openNote) => {
@@ -59,14 +64,16 @@ export function generateVoicings(symbol: string, tuning = STANDARD_TUNING): Guit
 
   const seen = new Set<string>();
   const orderedCandidates = candidates.sort((a, b) => scoreVoicing(a, chord.root, tuning) - scoreVoicing(b, chord.root, tuning));
-  return [...preferred, ...orderedCandidates]
-    .filter((voicing) => {
-      const key = voicing.frets.join("-");
-      if (seen.has(key)) return false;
-      seen.add(key);
-      return true;
-    })
-    .slice(0, 10);
+  const deduped = [...preferred, ...orderedCandidates].filter((voicing) => {
+    const key = voicing.frets.join("-");
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  const usable = capoFret > 0 ? deduped.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret)) : deduped;
+  const pool = usable.length > 0 ? usable : deduped;
+  return pool.slice(0, 10);
 }
 
 function scoreVoicing(voicing: GuitarVoicing, root: string, tuning: string[]): number {
