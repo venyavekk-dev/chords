@@ -137,6 +137,10 @@ body {
   line-height: 1.5;
 }
 
+body.paywall-locked {
+  overflow: hidden;
+}
+
 button,
 select,
 input {
@@ -1030,8 +1034,8 @@ select {
   display: grid;
   place-items: center;
   padding: var(--space-6);
-  background: rgba(0, 0, 0, 0.7);
-  backdrop-filter: blur(10px);
+  background: rgba(0, 0, 0, 0.32);
+  backdrop-filter: blur(3px);
   animation: hint-reveal 240ms var(--ease-default);
 }
 

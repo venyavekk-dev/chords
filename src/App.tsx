@@ -64,6 +64,10 @@ export default function App() {
     return () => clearInterval(interval);
   }, [trialExpired]);
 
+  useEffect(() => {
+    document.body.classList.toggle("paywall-locked", trialExpired);
+  }, [trialExpired]);
+
   const openPaywall = () => {
     const next = { ...trial, locked: true };
     setTrial(next);
