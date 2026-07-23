@@ -74,6 +74,12 @@ export default function App() {
     saveTrial(next);
   };
 
+  const dismissPaywall = () => {
+    const next = { startedAt: Date.now(), locked: false };
+    setTrial(next);
+    saveTrial(next);
+  };
+
   const selectChord = (chord: DegreeChord) => {
     setPreviewChord(undefined);
     setPreviewVoicing(undefined);
@@ -124,7 +130,7 @@ export default function App() {
         onTrialLinkClick={openPaywall}
         onVolume={setVolume}
       />
-      {trialExpired && <PaywallOverlay />}
+      {trialExpired && <PaywallOverlay onDismiss={dismissPaywall} />}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
           <MinimalFretboard

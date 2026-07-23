@@ -1,4 +1,8 @@
-export function PaywallOverlay() {
+type Props = {
+  onDismiss: () => void;
+};
+
+export function PaywallOverlay({ onDismiss }: Props) {
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
       <div className="paywall-hero">
@@ -7,7 +11,7 @@ export function PaywallOverlay() {
         <p className="paywall-subtitle">Разовый платёж — 20€. Просто и навсегда.</p>
         <div className="paywall-actions">
           <button type="button" className="paywall-cta paywall-cta-primary">Купить за 20€</button>
-          <button type="button" className="paywall-cta paywall-cta-secondary">Подробнее</button>
+          <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onDismiss}>Подробнее</button>
         </div>
       </div>
     </div>
