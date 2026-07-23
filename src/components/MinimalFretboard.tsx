@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import type { GuitarVoicing } from "../types/music";
 import { buildFretboard, STANDARD_TUNING } from "../lib/guitar";
-import { parseChord, transpose } from "../lib/musicTheory";
+import { parseChord } from "../lib/musicTheory";
 
 type Props = {
   chordSymbol: string;
@@ -24,7 +24,7 @@ export function MinimalFretboard({ chordSymbol, voicing, capoFret = 0, onCapoCha
           <div className="fret-marker-row" style={{ gridTemplateColumns: `48px repeat(${DISPLAY_FRETS.length}, 1fr)` }}>
             <div />
             {DISPLAY_FRETS.map((fret) => (
-              <div className={`fret-marker ${fret < capoFret ? "capo-blocked" : ""}`} key={fret}>{MARKERS.has(fret) && <span />}</div>
+              <div className="fret-marker" key={fret}>{MARKERS.has(fret) && <span />}</div>
             ))}
           </div>
           <div className="fretboard-grid" style={{ gridTemplateColumns: `48px repeat(${DISPLAY_FRETS.length}, 1fr)` }}>
@@ -32,11 +32,11 @@ export function MinimalFretboard({ chordSymbol, voicing, capoFret = 0, onCapoCha
             {DISPLAY_FRETS.map((fret) => (
               <button
                 type="button"
-                className={`fret-number ${fret === capoFret ? "capo-active" : ""} ${fret < capoFret ? "capo-blocked" : ""}`}
+                className={`fret-number ${fret === capoFret ? "capo-active" : ""}`}
                 key={fret}
                 aria-pressed={fret === capoFret}
                 aria-label={fret === capoFret ? `Снять капо с лада ${fret}` : `Поставить капо на лад ${fret}`}
-                onClick={() => onCapoChange?.(fret === capoFret ? 0 : fret)}
+                onClick={() => onCapoChange?.(fret)}
               >
                 {fret}
               </button>
@@ -45,15 +45,11 @@ export function MinimalFretboard({ chordSymbol, voicing, capoFret = 0, onCapoCha
               <Fragment key={string.stringIndex}>
                 <div className="string-name">{string.openNote}</div>
                 {DISPLAY_FRETS.map((fret) => {
-                  const rawFret = voicing?.frets[string.stringIndex];
-                  const isVoicing = typeof rawFret === "number" && rawFret + capoFret === fret;
-                  const note = isVoicing ? transpose(STANDARD_TUNING[string.stringIndex], fret) : string.frets[fret].note;
+                  const isVoicing = voicing?.frets[string.stringIndex] === fret;
+                  const note = string.frets[fret].note;
                   const isRoot = note === root;
                   return (
-                    <div
-                      className={`string-cell ${fret === capoFret ? "capo-column" : ""} ${fret < capoFret ? "capo-blocked" : ""}`}
-                      key={`${string.stringIndex}-${fret}`}
-                    >
+                    <div className="string-cell" key={`${string.stringIndex}-${fret}`}>
                       {isVoicing && <span className={`note-dot ${isRoot ? "root-note" : ""}`} aria-label={`${note}${isRoot ? ", root" : ""}`}>{note}</span>}
                     </div>
                   );

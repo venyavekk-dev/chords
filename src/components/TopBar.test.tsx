@@ -12,7 +12,6 @@ describe("TopBar onboarding", () => {
         sound="Velvet"
         onboardingOpen={false}
         volume={0.72}
-        capoFret={0}
         onKeyRoot={() => undefined}
         onScaleMode={() => undefined}
         onInstrument={() => undefined}

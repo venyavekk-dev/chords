@@ -5,7 +5,7 @@ import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
-import { buildDiatonicChords, buildScale, parseChord, transposeChordSymbol } from "./lib/musicTheory";
+import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { playChord } from "./lib/audio";
@@ -14,7 +14,7 @@ import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } f
 const initial = loadState();
 
 export default function App() {
-  const [keyRoot, setKeyRoot] = useState(initial.keyRoot ?? "E");
+  const [baseKeyRoot, setBaseKeyRoot] = useState(initial.keyRoot ?? "E");
   const [scaleMode, setScaleMode] = useState<ScaleMode>(initial.scaleMode ?? "Major");
   const [instrument, setInstrument] = useState<Instrument>(initial.instrument ?? "Guitar");
   const [volume, setVolume] = useState(initial.volume ?? 0.72);
@@ -23,6 +23,7 @@ export default function App() {
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
+  const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
   const [activeChord, setActiveChord] = useState<DegreeChord>(chords[0]);
@@ -47,8 +48,8 @@ export default function App() {
   }, [activeChord.symbol, voicings, voicingMemory]);
 
   useEffect(() => {
-    saveState({ keyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
-  }, [keyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
+    saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
+  }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
 
   const selectChord = (chord: DegreeChord) => {
     setPreviewChord(undefined);
@@ -57,27 +58,29 @@ export default function App() {
     const nextVoicings = generateVoicings(chord.symbol);
     const memorized = voicingMemory[chord.symbol];
     const nextVoicing = nextVoicings.find((voicing) => voicing.frets.join("") === memorized) ?? nextVoicings[0];
-    playChord(chord.symbol, volume, nextVoicing, sound, capoFret);
+    playChord(chord.symbol, volume, nextVoicing, sound);
   };
 
   const selectVoicing = (voicing: GuitarVoicing) => {
     setPreviewVoicing(undefined);
     setSelectedVoicing(voicing);
     setVoicingMemory((memory) => ({ ...memory, [activeChord.symbol]: voicing.frets.join("") }));
-    playChord(activeChord.symbol, volume, voicing, sound, capoFret);
+    playChord(activeChord.symbol, volume, voicing, sound);
   };
 
   const selectSound = (nextSound: SoundPreset) => {
     setSound(nextSound);
-    playChord(activeChord.symbol, volume, selectedVoicing, nextSound, capoFret);
+    playChord(activeChord.symbol, volume, selectedVoicing, nextSound);
+  };
+
+  const changeKeyRoot = (value: string) => {
+    setBaseKeyRoot(value);
+    setCapoFret(0);
   };
 
   const toggleCapo = (fret: number) => {
-    setCapoFret(fret);
-    playChord(activeChord.symbol, volume, selectedVoicing, sound, fret);
+    setCapoFret((current) => (current === fret ? 0 : fret));
   };
-
-  const soundingSymbol = (symbol: string) => transposeChordSymbol(symbol, capoFret);
 
   return (
     <div className="app">
@@ -88,26 +91,25 @@ export default function App() {
         sound={sound}
         onboardingOpen={onboardingOpen}
         volume={volume}
-        onKeyRoot={setKeyRoot}
+        onKeyRoot={changeKeyRoot}
         onScaleMode={setScaleMode}
         onInstrument={setInstrument}
-        onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound, capoFret)}
+        onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound)}
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
         onVolume={setVolume}
-        capoFret={capoFret}
       />
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
           <MinimalFretboard
-            chordSymbol={soundingSymbol(visibleChord.symbol)}
+            chordSymbol={visibleChord.symbol}
             voicing={visibleVoicing}
             capoFret={capoFret}
             onCapoChange={toggleCapo}
           />
         )}
         {(instrument === "Piano" || instrument === "Both") && (
-          <PianoKeyboard chordSymbol={soundingSymbol(visibleChord.symbol)} voicing={visibleVoicing} capoFret={capoFret} />
+          <PianoKeyboard chordSymbol={visibleChord.symbol} voicing={visibleVoicing} />
         )}
         <section
           className="chord-strip"
@@ -127,9 +129,8 @@ export default function App() {
             >
               <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
               <button className="strip-main" onClick={() => selectChord(chord)}>
-                {capoFret > 0 && <small className="capo-shape-label">форма {chord.symbol}</small>}
                 <span>{chord.degree}</span>
-                <strong>{soundingSymbol(chord.symbol)}</strong>
+                <strong>{chord.symbol}</strong>
               </button>
               <div className="variant-row">
                 {chordVariants[index].map((variant) => (
@@ -142,7 +143,7 @@ export default function App() {
                       setPreviewChord(variant);
                     }}
                   >
-                    {soundingSymbol(variantLabel(variant))}
+                    {variantLabel(variant)}
                   </button>
                 ))}
               </div>
@@ -160,7 +161,7 @@ export default function App() {
                 setPreviewVoicing(voicing);
               }}
             >
-              <VoicingMini voicing={voicing} capoFret={capoFret} />
+              <VoicingMini voicing={voicing} />
             </button>
           ))}
         </section>

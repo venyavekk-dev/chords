@@ -4,7 +4,6 @@ import { NOTES, parseChord } from "../lib/musicTheory";
 type Props = {
   chordSymbol: string;
   voicing?: GuitarVoicing;
-  capoFret?: number;
 };
 
 const FIRST_MIDI = 36;
@@ -25,12 +24,12 @@ const keys = Array.from({ length: LAST_MIDI - FIRST_MIDI + 1 }, (_, index) => {
 const whiteKeys = keys.filter((key) => !key.isBlack);
 const blackKeys = keys.filter((key) => key.isBlack);
 
-export function PianoKeyboard({ chordSymbol, voicing, capoFret = 0 }: Props) {
+export function PianoKeyboard({ chordSymbol, voicing }: Props) {
   const chord = parseChord(chordSymbol);
   const chordNotes = new Set(chord.tones);
   const voicingMidi = voicing
     ? voicing.frets
-      .map((fret, stringIndex) => (fret === "x" ? undefined : OPEN_STRING_MIDI[stringIndex] + fret + capoFret))
+      .map((fret, stringIndex) => (fret === "x" ? undefined : OPEN_STRING_MIDI[stringIndex] + fret))
       .filter((midi): midi is number => typeof midi === "number")
     : [];
   const activeMidi = new Set(voicingMidi);
