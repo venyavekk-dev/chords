@@ -1,16 +1,14 @@
 export function PaywallOverlay() {
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
-      <div className="paywall-card">
-        <span className="paywall-badge">Демо</span>
+      <div className="paywall-hero">
+        <span className="paywall-eyebrow">Демо-версия</span>
         <h2 id="paywall-title">Пробный период закончился</h2>
-        <p>Чтобы продолжить пользоваться Chord Tulza без ограничений, перейди на Pro.</p>
-        <ul className="paywall-perks">
-          <li>Безлимитные аккорды и прогрессии</li>
-          <li>Все звуковые пресеты</li>
-          <li>Поддержка проекта</li>
-        </ul>
-        <button type="button" className="paywall-upgrade">Обновить до Pro</button>
+        <p className="paywall-subtitle">Разовый платёж — 20€. Просто и навсегда.</p>
+        <div className="paywall-actions">
+          <button type="button" className="paywall-cta paywall-cta-primary">Купить за 20€</button>
+          <button type="button" className="paywall-cta paywall-cta-secondary">Подробнее</button>
+        </div>
       </div>
     </div>
   );
