@@ -11,6 +11,7 @@ describe("TopBar onboarding", () => {
         instrument="Guitar"
         sound="Velvet"
         onboardingOpen={false}
+        trialActive={false}
         volume={0.72}
         onKeyRoot={() => undefined}
         onScaleMode={() => undefined}
@@ -18,6 +19,7 @@ describe("TopBar onboarding", () => {
         onPlayChord={() => undefined}
         onSound={() => undefined}
         onToggleOnboarding={() => undefined}
+        onToggleTrial={() => undefined}
         onVolume={() => undefined}
       />,
     );

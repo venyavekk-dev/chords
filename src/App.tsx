@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
+import { PaywallOverlay } from "./components/PaywallOverlay";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
@@ -21,6 +22,8 @@ export default function App() {
   const [sound, setSound] = useState<SoundPreset>(initial.sound ?? "Velvet");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
+  const [trialActive, setTrialActive] = useState(false);
+  const [trialExpired, setTrialExpired] = useState(false);
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
@@ -51,6 +54,17 @@ export default function App() {
   useEffect(() => {
     saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
   }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
+
+  useEffect(() => {
+    if (!trialActive) return;
+    const timer = setTimeout(() => setTrialExpired(true), 5 * 60 * 1000);
+    return () => clearTimeout(timer);
+  }, [trialActive]);
+
+  const toggleTrial = () => {
+    setTrialActive((active) => !active);
+    setTrialExpired(false);
+  };
 
   const selectChord = (chord: DegreeChord) => {
     setPreviewChord(undefined);
@@ -91,6 +105,7 @@ export default function App() {
         instrument={instrument}
         sound={sound}
         onboardingOpen={onboardingOpen}
+        trialActive={trialActive}
         volume={volume}
         onKeyRoot={changeKeyRoot}
         onScaleMode={setScaleMode}
@@ -98,8 +113,10 @@ export default function App() {
         onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound)}
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
+        onToggleTrial={toggleTrial}
         onVolume={setVolume}
       />
+      {trialExpired && <PaywallOverlay />}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
           <MinimalFretboard

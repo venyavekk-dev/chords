@@ -9,6 +9,7 @@ type Props = {
   instrument: Instrument;
   sound: SoundPreset;
   onboardingOpen: boolean;
+  trialActive: boolean;
   volume: number;
   onKeyRoot: (value: string) => void;
   onScaleMode: (value: ScaleMode) => void;
@@ -16,6 +17,7 @@ type Props = {
   onSound: (value: SoundPreset) => void;
   onPlayChord: () => void;
   onToggleOnboarding: () => void;
+  onToggleTrial: () => void;
   onVolume: (value: number) => void;
 };
 
@@ -82,6 +84,15 @@ export function TopBar(props: Props) {
             >
               <span className="onboarding-switch" aria-hidden="true"><i /></span>
               Настройки
+            </button>
+            <button
+              type="button"
+              className={`onboarding-toggle trial-toggle ${props.trialActive ? "active" : ""}`}
+              aria-pressed={props.trialActive}
+              onClick={props.onToggleTrial}
+            >
+              <span className="onboarding-switch" aria-hidden="true"><i /></span>
+              Пробный период
             </button>
           </div>
           <button
