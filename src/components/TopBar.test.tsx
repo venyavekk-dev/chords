@@ -11,7 +11,7 @@ describe("TopBar onboarding", () => {
         instrument="Guitar"
         sound="Velvet"
         onboardingOpen={false}
-        trialActive={false}
+        trialRemainingMs={5 * 60 * 1000}
         volume={0.72}
         onKeyRoot={() => undefined}
         onScaleMode={() => undefined}
@@ -19,7 +19,7 @@ describe("TopBar onboarding", () => {
         onPlayChord={() => undefined}
         onSound={() => undefined}
         onToggleOnboarding={() => undefined}
-        onToggleTrial={() => undefined}
+        onTrialLinkClick={() => undefined}
         onVolume={() => undefined}
       />,
     );
@@ -31,5 +31,6 @@ describe("TopBar onboarding", () => {
     expect(html).toContain('aria-controls="workspace-settings"');
     expect(html).toContain('aria-pressed="false"');
     expect(html).not.toContain("harmony map");
+    expect(html).toContain("Пробный период 5:00");
   });
 });

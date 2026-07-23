@@ -9,6 +9,7 @@ import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
+import { loadTrial, saveTrial, TRIAL_MS } from "./lib/trial";
 import { playChord } from "./lib/audio";
 import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
 
@@ -22,8 +23,10 @@ export default function App() {
   const [sound, setSound] = useState<SoundPreset>(initial.sound ?? "Velvet");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
-  const [trialActive, setTrialActive] = useState(false);
-  const [trialExpired, setTrialExpired] = useState(false);
+  const [trial, setTrial] = useState(() => loadTrial());
+  const [now, setNow] = useState(() => Date.now());
+  const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
+  const trialExpired = trial.locked || trialRemainingMs <= 0;
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
@@ -56,14 +59,15 @@ export default function App() {
   }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
 
   useEffect(() => {
-    if (!trialActive) return;
-    const timer = setTimeout(() => setTrialExpired(true), 5 * 60 * 1000);
-    return () => clearTimeout(timer);
-  }, [trialActive]);
+    if (trialExpired) return;
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [trialExpired]);
 
-  const toggleTrial = () => {
-    setTrialActive((active) => !active);
-    setTrialExpired(false);
+  const openPaywall = () => {
+    const next = { ...trial, locked: true };
+    setTrial(next);
+    saveTrial(next);
   };
 
   const selectChord = (chord: DegreeChord) => {
@@ -105,7 +109,7 @@ export default function App() {
         instrument={instrument}
         sound={sound}
         onboardingOpen={onboardingOpen}
-        trialActive={trialActive}
+        trialRemainingMs={trialRemainingMs}
         volume={volume}
         onKeyRoot={changeKeyRoot}
         onScaleMode={setScaleMode}
@@ -113,7 +117,7 @@ export default function App() {
         onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound)}
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
-        onToggleTrial={toggleTrial}
+        onTrialLinkClick={openPaywall}
         onVolume={setVolume}
       />
       {trialExpired && <PaywallOverlay />}

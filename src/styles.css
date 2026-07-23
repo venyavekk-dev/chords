@@ -306,6 +306,24 @@ select {
   transform: translateX(12px);
 }
 
+.trial-timer-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 24px;
+  padding: 2px 0;
+  border: 0;
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  font-variant-numeric: tabular-nums;
+  line-height: 1;
+  transition: color var(--transition-fast);
+}
+
+.trial-timer-link:hover {
+  color: var(--text-primary);
+}
+
 .theme-switch .theme-icon {
   position: absolute;
   top: 50%;
@@ -1008,7 +1026,7 @@ select {
 .paywall-overlay {
   position: fixed;
   inset: 0;
-  z-index: 25;
+  z-index: 40;
   display: grid;
   place-items: center;
   padding: var(--space-6);
