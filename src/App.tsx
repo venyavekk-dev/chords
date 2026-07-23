@@ -30,11 +30,11 @@ export default function App() {
   const [selectedVoicing, setSelectedVoicing] = useState<GuitarVoicing | undefined>();
   const [previewChord, setPreviewChord] = useState<DegreeChord | undefined>();
   const [previewVoicing, setPreviewVoicing] = useState<GuitarVoicing | undefined>();
-  const voicings = useMemo(() => generateVoicings(activeChord.symbol), [activeChord.symbol]);
+  const voicings = useMemo(() => generateVoicings(activeChord.symbol, capoFret), [activeChord.symbol, capoFret]);
   const visibleChord = previewChord ?? activeChord;
-  const visibleVoicings = useMemo(() => generateVoicings(visibleChord.symbol), [visibleChord.symbol]);
+  const visibleVoicings = useMemo(() => generateVoicings(visibleChord.symbol, capoFret), [visibleChord.symbol, capoFret]);
   const visibleVoicing = previewVoicing
-    ?? (previewChord ? pickVoicingForCapo(visibleVoicings, capoFret, voicingMemory[visibleChord.symbol]) : selectedVoicing);
+    ?? (previewChord ? pickVoicing(visibleVoicings, voicingMemory[visibleChord.symbol]) : selectedVoicing);
   const relationText = previewChord
     ? transitionExplanation(activeChord, previewChord, scaleMode)
     : defaultTransitionAdvice(activeChord);
@@ -45,8 +45,8 @@ export default function App() {
 
   useEffect(() => {
     const memorized = voicingMemory[activeChord.symbol];
-    setSelectedVoicing(pickVoicingForCapo(voicings, capoFret, memorized));
-  }, [activeChord.symbol, voicings, voicingMemory, capoFret]);
+    setSelectedVoicing(pickVoicing(voicings, memorized));
+  }, [activeChord.symbol, voicings, voicingMemory]);
 
   useEffect(() => {
     saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
@@ -56,9 +56,9 @@ export default function App() {
     setPreviewChord(undefined);
     setPreviewVoicing(undefined);
     setActiveChord(chord);
-    const nextVoicings = generateVoicings(chord.symbol);
+    const nextVoicings = generateVoicings(chord.symbol, capoFret);
     const memorized = voicingMemory[chord.symbol];
-    const nextVoicing = pickVoicingForCapo(nextVoicings, capoFret, memorized);
+    const nextVoicing = pickVoicing(nextVoicings, memorized);
     playChord(chord.symbol, volume, nextVoicing, sound);
   };
 
@@ -82,11 +82,6 @@ export default function App() {
   const toggleCapo = (fret: number) => {
     setCapoFret((current) => (current === fret ? 0 : fret));
   };
-
-  const visiblePositionVoicings = useMemo(() => {
-    const available = voicings.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret));
-    return available.length > 0 ? available : voicings;
-  }, [voicings, capoFret]);
 
   return (
     <div className="app">
@@ -157,7 +152,7 @@ export default function App() {
           ))}
         </section>
         <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
-          {visiblePositionVoicings.map((voicing) => (
+          {voicings.map((voicing) => (
             <button
               className={`position-button ${selectedVoicing?.frets.join("") === voicing.frets.join("") ? "active" : ""}`}
               key={voicing.frets.join("-")}
@@ -181,15 +176,8 @@ export default function App() {
   );
 }
 
-function isVoicingBlockedByCapo(voicing: GuitarVoicing, capoFret: number): boolean {
-  if (capoFret <= 0) return false;
-  return voicing.frets.some((fret) => typeof fret === "number" && fret > 0 && fret < capoFret);
-}
-
-function pickVoicingForCapo(voicings: GuitarVoicing[], capoFret: number, memorizedKey?: string): GuitarVoicing | undefined {
-  const available = voicings.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret));
-  const pool = available.length > 0 ? available : voicings;
-  return pool.find((voicing) => voicing.frets.join("") === memorizedKey) ?? pool[0];
+function pickVoicing(voicings: GuitarVoicing[], memorizedKey?: string): GuitarVoicing | undefined {
+  return voicings.find((voicing) => voicing.frets.join("") === memorizedKey) ?? voicings[0];
 }
 
 function variantsForChord(chord: DegreeChord, keyRoot: string, mode: ScaleMode): DegreeChord[] {
