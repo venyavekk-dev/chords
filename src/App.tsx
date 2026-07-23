@@ -23,6 +23,7 @@ export default function App() {
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
+  const [shakingSymbol, setShakingSymbol] = useState<string | null>(null);
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
   const [activeChord, setActiveChord] = useState<DegreeChord>(chords[0]);
@@ -78,6 +79,15 @@ export default function App() {
   };
 
   const soundingSymbol = (symbol: string) => transposeChordSymbol(symbol, capoFret);
+
+  const attemptSelectChord = (chord: DegreeChord, blocked: boolean) => {
+    if (blocked) {
+      setShakingSymbol(chord.symbol);
+      window.setTimeout(() => setShakingSymbol((current) => (current === chord.symbol ? null : current)), 420);
+      return;
+    }
+    selectChord(chord);
+  };
 
   const capoBlockedSymbols = useMemo(() => {
     const blocked = new Set<string>();
@@ -148,8 +158,8 @@ export default function App() {
             >
               <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
               <button
-                className={`strip-main ${capoBlockedSymbols.has(chord.symbol) ? "capo-unavailable" : ""}`}
-                onClick={() => selectChord(chord)}
+                className={`strip-main ${capoBlockedSymbols.has(chord.symbol) ? "capo-unavailable" : ""} ${shakingSymbol === chord.symbol ? "shake" : ""}`}
+                onClick={() => attemptSelectChord(chord, capoBlockedSymbols.has(chord.symbol))}
               >
                 {capoFret > 0 && <small className="capo-shape-label">форма {chord.symbol}</small>}
                 <span>{chord.degree}</span>
@@ -158,9 +168,9 @@ export default function App() {
               <div className="variant-row">
                 {chordVariants[index].map((variant) => (
                   <button
-                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""} ${capoBlockedSymbols.has(variant.symbol) ? "capo-unavailable" : ""}`}
+                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""} ${capoBlockedSymbols.has(variant.symbol) ? "capo-unavailable" : ""} ${shakingSymbol === variant.symbol ? "shake" : ""}`}
                     key={variant.symbol}
-                    onClick={() => selectChord(variant)}
+                    onClick={() => attemptSelectChord(variant, capoBlockedSymbols.has(variant.symbol))}
                     onMouseEnter={() => {
                       setPreviewVoicing(undefined);
                       setPreviewChord(variant);
@@ -184,7 +194,7 @@ export default function App() {
                 setPreviewVoicing(voicing);
               }}
             >
-              <VoicingMini voicing={voicing} />
+              <VoicingMini voicing={voicing} capoFret={capoFret} />
             </button>
           ))}
         </section>
