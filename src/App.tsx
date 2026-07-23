@@ -17,7 +17,7 @@ export default function App() {
   const [keyRoot, setKeyRoot] = useState(initial.keyRoot ?? "E");
   const [scaleMode, setScaleMode] = useState<ScaleMode>(initial.scaleMode ?? "Major");
   const [instrument, setInstrument] = useState<Instrument>(initial.instrument ?? "Guitar");
-  const [volume, setVolume] = useState(initial.volume ?? 0.72);
+  const [volume, setVolume] = useState(initial.volume ?? 0.2);
   const [sound, setSound] = useState<SoundPreset>(initial.sound ?? "Velvet");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
