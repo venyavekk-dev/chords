@@ -33,7 +33,8 @@ export default function App() {
   const voicings = useMemo(() => generateVoicings(activeChord.symbol), [activeChord.symbol]);
   const visibleChord = previewChord ?? activeChord;
   const visibleVoicings = useMemo(() => generateVoicings(visibleChord.symbol), [visibleChord.symbol]);
-  const visibleVoicing = previewVoicing ?? (previewChord ? visibleVoicings[0] : selectedVoicing);
+  const visibleVoicing = previewVoicing
+    ?? (previewChord ? pickVoicingForCapo(visibleVoicings, capoFret, voicingMemory[visibleChord.symbol]) : selectedVoicing);
   const relationText = previewChord
     ? transitionExplanation(activeChord, previewChord, scaleMode)
     : defaultTransitionAdvice(activeChord);
