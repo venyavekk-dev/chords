@@ -170,7 +170,7 @@ select {
   z-index: 30;
   display: grid;
   grid-template-columns: minmax(14rem, 0.42fr) minmax(0, 1.58fr);
-  align-items: stretch;
+  align-items: start;
   column-gap: var(--space-8);
   row-gap: var(--space-4);
   width: 100%;
