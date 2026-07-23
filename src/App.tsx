@@ -44,8 +44,8 @@ export default function App() {
 
   useEffect(() => {
     const memorized = voicingMemory[activeChord.symbol];
-    setSelectedVoicing(voicings.find((voicing) => voicing.frets.join("") === memorized) ?? voicings[0]);
-  }, [activeChord.symbol, voicings, voicingMemory]);
+    setSelectedVoicing(pickVoicingForCapo(voicings, capoFret, memorized));
+  }, [activeChord.symbol, voicings, voicingMemory, capoFret]);
 
   useEffect(() => {
     saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
@@ -57,7 +57,7 @@ export default function App() {
     setActiveChord(chord);
     const nextVoicings = generateVoicings(chord.symbol);
     const memorized = voicingMemory[chord.symbol];
-    const nextVoicing = nextVoicings.find((voicing) => voicing.frets.join("") === memorized) ?? nextVoicings[0];
+    const nextVoicing = pickVoicingForCapo(nextVoicings, capoFret, memorized);
     playChord(chord.symbol, volume, nextVoicing, sound);
   };
 
@@ -81,6 +81,11 @@ export default function App() {
   const toggleCapo = (fret: number) => {
     setCapoFret((current) => (current === fret ? 0 : fret));
   };
+
+  const visiblePositionVoicings = useMemo(() => {
+    const available = voicings.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret));
+    return available.length > 0 ? available : voicings;
+  }, [voicings, capoFret]);
 
   return (
     <div className="app">
@@ -151,7 +156,7 @@ export default function App() {
           ))}
         </section>
         <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
-          {voicings.map((voicing) => (
+          {visiblePositionVoicings.map((voicing) => (
             <button
               className={`position-button ${selectedVoicing?.frets.join("") === voicing.frets.join("") ? "active" : ""}`}
               key={voicing.frets.join("-")}
@@ -173,6 +178,17 @@ export default function App() {
       </main>
     </div>
   );
+}
+
+function isVoicingBlockedByCapo(voicing: GuitarVoicing, capoFret: number): boolean {
+  if (capoFret <= 0) return false;
+  return voicing.frets.some((fret) => typeof fret === "number" && fret > 0 && fret < capoFret);
+}
+
+function pickVoicingForCapo(voicings: GuitarVoicing[], capoFret: number, memorizedKey?: string): GuitarVoicing | undefined {
+  const available = voicings.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret));
+  const pool = available.length > 0 ? available : voicings;
+  return pool.find((voicing) => voicing.frets.join("") === memorizedKey) ?? pool[0];
 }
 
 function variantsForChord(chord: DegreeChord, keyRoot: string, mode: ScaleMode): DegreeChord[] {
