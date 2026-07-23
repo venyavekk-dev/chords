@@ -45,13 +45,13 @@ export function MinimalFretboard({ chordSymbol, voicing, capoFret = 0, onCapoCha
               <Fragment key={string.stringIndex}>
                 <div className="string-name">{string.openNote}</div>
                 {DISPLAY_FRETS.map((fret) => {
-                  const isBlocked = fret < capoFret;
-                  const isVoicing = !isBlocked && voicing?.frets[string.stringIndex] === fret;
-                  const note = isVoicing ? transpose(STANDARD_TUNING[string.stringIndex], fret + capoFret) : string.frets[fret].note;
+                  const rawFret = voicing?.frets[string.stringIndex];
+                  const isVoicing = typeof rawFret === "number" && rawFret + capoFret === fret;
+                  const note = isVoicing ? transpose(STANDARD_TUNING[string.stringIndex], fret) : string.frets[fret].note;
                   const isRoot = note === root;
                   return (
                     <div
-                      className={`string-cell ${fret === capoFret ? "capo-column" : ""} ${isBlocked ? "capo-blocked" : ""}`}
+                      className={`string-cell ${fret === capoFret ? "capo-column" : ""} ${fret < capoFret ? "capo-blocked" : ""}`}
                       key={`${string.stringIndex}-${fret}`}
                     >
                       {isVoicing && <span className={`note-dot ${isRoot ? "root-note" : ""}`} aria-label={`${note}${isRoot ? ", root" : ""}`}>{note}</span>}

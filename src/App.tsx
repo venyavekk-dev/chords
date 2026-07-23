@@ -23,7 +23,6 @@ export default function App() {
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
-  const [shakingSymbol, setShakingSymbol] = useState<string | null>(null);
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
   const [activeChord, setActiveChord] = useState<DegreeChord>(chords[0]);
@@ -80,36 +79,6 @@ export default function App() {
 
   const soundingSymbol = (symbol: string) => transposeChordSymbol(symbol, capoFret);
 
-  const attemptSelectChord = (chord: DegreeChord, blocked: boolean) => {
-    if (blocked) {
-      setShakingSymbol(chord.symbol);
-      window.setTimeout(() => setShakingSymbol((current) => (current === chord.symbol ? null : current)), 420);
-      return;
-    }
-    selectChord(chord);
-  };
-
-  const capoBlockedSymbols = useMemo(() => {
-    const blocked = new Set<string>();
-    if (capoFret <= 0) return blocked;
-    const symbols = new Set<string>([
-      ...chords.map((chord) => chord.symbol),
-      ...chordVariants.flat().map((variant) => variant.symbol),
-    ]);
-    symbols.forEach((symbol) => {
-      const symbolVoicings = generateVoicings(symbol);
-      const memorized = voicingMemory[symbol];
-      const preferred = symbolVoicings.find((v) => v.frets.join("") === memorized) ?? symbolVoicings[0];
-      if (preferred && isVoicingBlockedByCapo(preferred, capoFret)) blocked.add(symbol);
-    });
-    return blocked;
-  }, [chords, chordVariants, voicingMemory, capoFret]);
-
-  const visiblePositionVoicings = useMemo(
-    () => voicings.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret)),
-    [voicings, capoFret],
-  );
-
   return (
     <div className="app">
       <TopBar
@@ -157,10 +126,7 @@ export default function App() {
               }}
             >
               <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
-              <button
-                className={`strip-main ${capoBlockedSymbols.has(chord.symbol) ? "capo-unavailable" : ""} ${shakingSymbol === chord.symbol ? "shake" : ""}`}
-                onClick={() => attemptSelectChord(chord, capoBlockedSymbols.has(chord.symbol))}
-              >
+              <button className="strip-main" onClick={() => selectChord(chord)}>
                 {capoFret > 0 && <small className="capo-shape-label">форма {chord.symbol}</small>}
                 <span>{chord.degree}</span>
                 <strong>{soundingSymbol(chord.symbol)}</strong>
@@ -168,9 +134,9 @@ export default function App() {
               <div className="variant-row">
                 {chordVariants[index].map((variant) => (
                   <button
-                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""} ${capoBlockedSymbols.has(variant.symbol) ? "capo-unavailable" : ""} ${shakingSymbol === variant.symbol ? "shake" : ""}`}
+                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""}`}
                     key={variant.symbol}
-                    onClick={() => attemptSelectChord(variant, capoBlockedSymbols.has(variant.symbol))}
+                    onClick={() => selectChord(variant)}
                     onMouseEnter={() => {
                       setPreviewVoicing(undefined);
                       setPreviewChord(variant);
@@ -184,7 +150,7 @@ export default function App() {
           ))}
         </section>
         <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
-          {visiblePositionVoicings.map((voicing) => (
+          {voicings.map((voicing) => (
             <button
               className={`position-button ${selectedVoicing?.frets.join("") === voicing.frets.join("") ? "active" : ""}`}
               key={voicing.frets.join("-")}
@@ -206,11 +172,6 @@ export default function App() {
       </main>
     </div>
   );
-}
-
-function isVoicingBlockedByCapo(voicing: GuitarVoicing, capoFret: number): boolean {
-  if (capoFret <= 0) return false;
-  return voicing.frets.some((fret) => typeof fret === "number" && fret > 0 && fret < capoFret);
 }
 
 function variantsForChord(chord: DegreeChord, keyRoot: string, mode: ScaleMode): DegreeChord[] {
