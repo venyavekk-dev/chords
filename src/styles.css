@@ -910,6 +910,7 @@ select {
 
 .sequencer-toolbar {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: var(--space-2);
@@ -992,6 +993,39 @@ select {
   margin: 0;
 }
 
+.sequencer-slots {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px;
+  border-radius: var(--radius-pill);
+  background: var(--surface-primary);
+}
+
+.sequencer-slot {
+  display: grid;
+  place-items: center;
+  min-width: 28px;
+  height: 26px;
+  padding: 0 7px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: transparent;
+  color: var(--text-secondary);
+  font-size: 0.6875rem;
+  font-variant-numeric: tabular-nums;
+  transition: background var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.sequencer-slot.filled {
+  background: var(--sequencer-accent);
+  color: var(--sequencer-accent-text);
+}
+
+.sequencer-slot:disabled {
+  cursor: default;
+}
+
 .strip-main.sequencer-selected {
   border-radius: var(--radius-card);
   box-shadow: inset 0 0 0 2px var(--sequencer-accent);
@@ -1007,7 +1041,8 @@ select {
 }
 
 .strip-main.sequencer-current,
-.variant-chip.sequencer-current {
+.variant-chip.sequencer-current,
+.sequencer-slot.current {
   animation: sequencer-blink 0.6s ease-in-out infinite;
 }
 

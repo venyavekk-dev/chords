@@ -93,14 +93,12 @@ export default function App() {
     setIsPlaying(false);
   };
 
-  const toggleSequenceChord = (chord: DegreeChord) => {
-    setSequence((current) => {
-      if (current.some((item) => item.symbol === chord.symbol)) {
-        return current.filter((item) => item.symbol !== chord.symbol);
-      }
-      if (current.length >= stepCount) return current;
-      return [...current, chord];
-    });
+  const addSequenceChord = (chord: DegreeChord) => {
+    setSequence((current) => (current.length >= stepCount ? current : [...current, chord]));
+  };
+
+  const removeSequenceStep = (index: number) => {
+    setSequence((current) => current.filter((_, i) => i !== index));
   };
 
   const clearSequence = () => {
@@ -258,6 +256,25 @@ export default function App() {
                 <Plus size={13} />
               </button>
             </div>
+            <div className="sequencer-slots" aria-label="Последовательность аккордов">
+              {Array.from({ length: stepCount }).map((_, index) => {
+                const step = sequence[index];
+                return (
+                  <button
+                    type="button"
+                    key={index}
+                    className={`sequencer-slot ${step ? "filled" : ""} ${isPlaying && currentStep === index ? "current" : ""}`}
+                    style={isPlaying && currentStep === index ? { animationDuration: `${stepMs}ms` } : undefined}
+                    onClick={() => step && removeSequenceStep(index)}
+                    disabled={!step}
+                    aria-label={step ? `Убрать шаг ${index + 1}: ${step.symbol}` : `Шаг ${index + 1} пуст`}
+                    title={step ? "Нажми, чтобы убрать" : undefined}
+                  >
+                    {step ? step.symbol : index + 1}
+                  </button>
+                );
+              })}
+            </div>
           </div>
         )}
         <section
@@ -282,7 +299,7 @@ export default function App() {
                 style={chord.symbol === playingSymbol ? { animationDuration: `${stepMs}ms` } : undefined}
                 onClick={() => {
                   selectChord(chord);
-                  if (sequencerMode) toggleSequenceChord(chord);
+                  if (sequencerMode) addSequenceChord(chord);
                 }}
               >
                 <span>{chord.degree}</span>
@@ -296,7 +313,7 @@ export default function App() {
                     key={variant.symbol}
                     onClick={() => {
                       selectChord(variant);
-                      if (sequencerMode) toggleSequenceChord(variant);
+                      if (sequencerMode) addSequenceChord(variant);
                     }}
                     onMouseEnter={() => {
                       setPreviewVoicing(undefined);
