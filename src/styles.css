@@ -1127,6 +1127,26 @@ select {
   .brand-heading {
     padding-top: 0;
   }
+
+  /* Below the tablet breakpoint the settings panel stacks under the header
+     instead of sitting beside it, so there's no brand column whose height
+     needs to stay put - let it push the chord strip down/up as it opens
+     and closes, same as before the desktop fixed-height change. */
+  .settings-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    min-height: 0;
+    opacity: 1;
+    transition: grid-template-rows 260ms var(--ease-default);
+  }
+
+  .settings-panel.is-open {
+    grid-template-rows: 1fr;
+  }
+
+  .settings-panel > .control-grid {
+    overflow: hidden;
+  }
 }
 
 @media (max-width: 67.999rem) {
