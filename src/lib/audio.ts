@@ -46,19 +46,28 @@ type SoundProfile = {
   decayStart?: number;
   release?: number;
   pickDecay?: number;
+  /** "pluck" swaps the oscillator-based voice for a Karplus-Strong plucked
+   * string (a noise burst ringing through a damped feedback delay loop)
+   * instead of the additive/subtractive synth path. */
+  synthesis?: "pluck";
+  /** Lowpass cutoff inside the string's feedback loop - lower values damp
+   * high harmonics faster, giving a darker, quicker-decaying string. */
+  stringDamping?: number;
+  /** Feedback gain (0-1) of the string loop - closer to 1 rings out longer. */
+  stringDecay?: number;
 };
 
 const SOUND_PROFILES: Record<SoundPreset, SoundProfile> = {
-  // Fender-style electric guitar with a light overdrive: sawtooth into the
-  // waveshaper drive gives the distortion something to bite into, quick pick
-  // attack instead of a soft pad swell, amp/cabinet EQ tightened toward a
-  // small combo amp rather than a wide ambient pad.
-  Velvet: { oscillator: "sawtooth", body: "sine", attack: 0.006, duration: 1.15, level: 0.42, detune: -3, lowpassStart: 5200, lowpassEnd: 2600, ampFrequency: 950, ampGain: 2, cabinet: 5200, drive: 0.22, shimmer: 0.03, pick: 0.16, pickFrequency: 2600, delay: 0.02, reverb: 0.12, stagger: 0.014, bodyRatio: 1.003, bodyLevel: 0.55, highpass: 90, pitchDrift: 0.999, shimmerRatio: 2.005, decayStart: 0.42, release: 0.22, pickDecay: 0.02 },
-  // Clean acoustic guitar (Yamaha-style steel-string): no drive, a sub-octave
-  // body oscillator for the wood/soundhole thump, bright pick/finger noise,
-  // and the amp peaking frequency dropped from an electric "quack" register
-  // down to the low-mid boxiness of an acoustic body.
-  Clean: { oscillator: "triangle", body: "sine", attack: 0.003, duration: 1.7, level: 0.46, detune: 0, lowpassStart: 8200, lowpassEnd: 3200, ampFrequency: 420, ampGain: 1.7, cabinet: 7800, drive: 0.01, shimmer: 0.03, pick: 0.2, pickFrequency: 3700, delay: 0.02, reverb: 0.14, stagger: 0.008, bodyRatio: 0.503, bodyLevel: 0.4, highpass: 60, pitchDrift: 1, shimmerRatio: 3, decayStart: 0.34, release: 0.32, pickDecay: 0.024 },
+  // Fender-style electric guitar with a light overdrive: a Karplus-Strong
+  // plucked string (see playPluckedVoice) gives a genuinely string-like pluck
+  // and decay instead of an oscillator swell, and the shared drive waveshaper
+  // downstream still adds the "light overdrive" bite on top of it.
+  Velvet: { oscillator: "sawtooth", body: "sine", attack: 0.006, duration: 1.3, level: 0.5, detune: -3, lowpassStart: 5200, lowpassEnd: 2600, ampFrequency: 950, ampGain: 2, cabinet: 5200, drive: 0.22, shimmer: 0.03, pick: 0.16, pickFrequency: 2600, delay: 0.02, reverb: 0.12, stagger: 0.014, bodyRatio: 1.003, bodyLevel: 0.16, highpass: 90, pitchDrift: 0.999, shimmerRatio: 2.005, decayStart: 0.55, release: 0.3, pickDecay: 0.02, synthesis: "pluck", stringDamping: 3400, stringDecay: 0.993 },
+  // Clean acoustic guitar (Yamaha-style steel-string): same Karplus-Strong
+  // string model as Velvet but brighter/longer-ringing (less damping, more
+  // feedback), plus a stronger sub-octave body oscillator for the wood/
+  // soundhole boom real acoustics have and a solid-body electric doesn't.
+  Clean: { oscillator: "triangle", body: "sine", attack: 0.003, duration: 1.85, level: 0.52, detune: 0, lowpassStart: 8200, lowpassEnd: 3200, ampFrequency: 420, ampGain: 1.7, cabinet: 7800, drive: 0.01, shimmer: 0.03, pick: 0.2, pickFrequency: 3700, delay: 0.02, reverb: 0.14, stagger: 0.008, bodyRatio: 0.503, bodyLevel: 0.4, highpass: 60, pitchDrift: 1, shimmerRatio: 3, decayStart: 0.5, release: 0.35, pickDecay: 0.024, synthesis: "pluck", stringDamping: 6200, stringDecay: 0.99 },
   Glass: { oscillator: "sawtooth", body: "sine", attack: 0.002, duration: 0.9, level: 0.35, detune: 4, lowpassStart: 11200, lowpassEnd: 3900, ampFrequency: 3600, ampGain: 4.8, cabinet: 9800, drive: 0.24, shimmer: 0.21, pick: 0.21, pickFrequency: 6400, delay: 0.085, reverb: 0.13, stagger: 0.018, bodyRatio: 2.008, bodyLevel: 0.12, highpass: 430, pitchDrift: 0.9994, shimmerRatio: 3.012, decayStart: 0.38, release: 0.12, pickDecay: 0.02 },
   // Organ: pure sine fundamental plus an octave "drawbar" body tone, no pick
   // transient and no drive, every note starts together (stagger 0) instead of
@@ -134,63 +143,148 @@ export function playChord(symbol: string, volume = 0.72, voicing?: GuitarVoicing
   midiNotes.forEach((midi, index) => {
     const frequency = 440 * 2 ** ((midi - 69) / 12);
     const start = now + index * profile.stagger;
-    const oscillator = context.createOscillator();
-    const body = context.createOscillator();
-    const voiceGain = context.createGain();
-    const tone = context.createBiquadFilter();
-    const highpass = profile.highpass ? context.createBiquadFilter() : undefined;
-    const bodyGain = profile.bodyLevel !== undefined ? context.createGain() : undefined;
+    if (profile.synthesis === "pluck") {
+      playPluckedVoice(context, profile, frequency, start, master, midiNotes.length);
+    } else {
+      playSubtractiveVoice(context, profile, frequency, start, master, midiNotes.length);
+    }
+  });
+}
+
+function playSubtractiveVoice(
+  context: AudioContext,
+  profile: SoundProfile,
+  frequency: number,
+  start: number,
+  master: AudioNode,
+  chordSize: number,
+) {
+  const oscillator = context.createOscillator();
+  const body = context.createOscillator();
+  const voiceGain = context.createGain();
+  const tone = context.createBiquadFilter();
+  const highpass = profile.highpass ? context.createBiquadFilter() : undefined;
+  const bodyGain = profile.bodyLevel !== undefined ? context.createGain() : undefined;
+  const shimmer = context.createOscillator();
+  const shimmerGain = context.createGain();
+  const pick = context.createBufferSource();
+  const pickGain = context.createGain();
+  const pickTone = context.createBiquadFilter();
+
+  oscillator.type = profile.oscillator;
+  oscillator.frequency.setValueAtTime(frequency, start);
+  oscillator.detune.setValueAtTime(profile.detune, start);
+  oscillator.frequency.exponentialRampToValueAtTime(frequency * (profile.pitchDrift ?? 0.998), start + profile.duration * 0.55);
+  body.type = profile.body;
+  body.frequency.setValueAtTime(frequency * (profile.bodyRatio ?? 0.999), start);
+  bodyGain?.gain.setValueAtTime(profile.bodyLevel ?? 1, start);
+  shimmer.type = "sine";
+  shimmer.frequency.setValueAtTime(frequency * (profile.shimmerRatio ?? 2.01), start);
+  shimmerGain.gain.setValueAtTime(profile.shimmer / chordSize, start);
+  shimmerGain.gain.setTargetAtTime(0.0001, start + profile.duration * 0.58, profile.duration * 0.1);
+  tone.type = "lowpass";
+  tone.frequency.setValueAtTime(profile.lowpassStart + frequency * 1.2, start);
+  tone.frequency.exponentialRampToValueAtTime(profile.lowpassEnd + frequency * 0.6, start + profile.duration * 0.62);
+  tone.Q.setValueAtTime(0.52, start);
+  voiceGain.gain.setValueAtTime(0.0001, start);
+  voiceGain.gain.linearRampToValueAtTime(profile.level / Math.sqrt(chordSize), start + profile.attack);
+  voiceGain.gain.setTargetAtTime(0.0001, start + profile.duration * (profile.decayStart ?? 0.58), profile.duration * (profile.release ?? 0.14));
+  if (highpass) {
+    highpass.type = "highpass";
+    highpass.frequency.setValueAtTime(profile.highpass ?? 20, start);
+    highpass.Q.setValueAtTime(0.6, start);
+  }
+  pick.buffer = createPickBuffer(context);
+  pickTone.type = "bandpass";
+  pickTone.frequency.setValueAtTime(profile.pickFrequency, start);
+  pickTone.Q.setValueAtTime(1.2, start);
+  pickGain.gain.setValueAtTime(profile.pick / Math.sqrt(chordSize), start);
+  pickGain.gain.setTargetAtTime(0.0001, start + (profile.pickDecay ?? 0.035), 0.012);
+  oscillator.connect(tone);
+  if (bodyGain) body.connect(bodyGain).connect(tone);
+  else body.connect(tone);
+  if (highpass) tone.connect(voiceGain).connect(highpass).connect(master);
+  else tone.connect(voiceGain).connect(master);
+  shimmer.connect(shimmerGain).connect(master);
+  pick.connect(pickTone).connect(pickGain).connect(master);
+  oscillator.start(start);
+  body.start(start);
+  shimmer.start(start);
+  pick.start(start);
+  oscillator.stop(start + profile.duration);
+  body.stop(start + profile.duration);
+  shimmer.stop(start + profile.duration * 0.72);
+  pick.stop(start + 0.08);
+}
+
+/**
+ * Karplus-Strong plucked string: a short noise burst rings through a delay
+ * line tuned to the note's period, with a damping lowpass filter inside the
+ * feedback loop so high harmonics die off faster than the fundamental - the
+ * same physical behaviour a real plucked string has.
+ */
+function playPluckedVoice(
+  context: AudioContext,
+  profile: SoundProfile,
+  frequency: number,
+  start: number,
+  master: AudioNode,
+  chordSize: number,
+) {
+  const stringLoop = context.createDelay(1);
+  stringLoop.delayTime.setValueAtTime(1 / frequency, start);
+  const damping = context.createBiquadFilter();
+  damping.type = "lowpass";
+  damping.frequency.setValueAtTime(profile.stringDamping ?? 4500, start);
+  damping.Q.setValueAtTime(0.4, start);
+  const feedback = context.createGain();
+  feedback.gain.setValueAtTime(profile.stringDecay ?? 0.99, start);
+
+  const excitation = context.createBufferSource();
+  excitation.buffer = createPickBuffer(context);
+  const excitationTone = context.createBiquadFilter();
+  excitationTone.type = "bandpass";
+  excitationTone.frequency.setValueAtTime(profile.pickFrequency, start);
+  excitationTone.Q.setValueAtTime(0.9, start);
+  const excitationGain = context.createGain();
+  excitationGain.gain.setValueAtTime(1 / Math.sqrt(chordSize), start);
+
+  const outputGain = context.createGain();
+  outputGain.gain.setValueAtTime(0.0001, start);
+  outputGain.gain.linearRampToValueAtTime(profile.level / Math.sqrt(chordSize), start + Math.max(profile.attack, 0.002));
+  outputGain.gain.setTargetAtTime(0.0001, start + profile.duration * (profile.decayStart ?? 0.55), profile.duration * (profile.release ?? 0.2));
+
+  excitation.connect(excitationTone).connect(excitationGain).connect(stringLoop);
+  stringLoop.connect(damping);
+  damping.connect(feedback).connect(stringLoop);
+  damping.connect(outputGain).connect(master);
+
+  excitation.start(start);
+  excitation.stop(start + 0.06);
+
+  if (profile.bodyLevel !== undefined) {
+    const bodyReso = context.createOscillator();
+    const bodyGain = context.createGain();
+    bodyReso.type = profile.body;
+    bodyReso.frequency.setValueAtTime(frequency * (profile.bodyRatio ?? 0.5), start);
+    bodyGain.gain.setValueAtTime(profile.bodyLevel, start);
+    bodyGain.gain.setTargetAtTime(0.0001, start + profile.duration * 0.35, profile.duration * 0.22);
+    bodyReso.connect(bodyGain).connect(master);
+    bodyReso.start(start);
+    bodyReso.stop(start + profile.duration);
+  }
+
+  if (profile.shimmer > 0) {
     const shimmer = context.createOscillator();
     const shimmerGain = context.createGain();
-    const pick = context.createBufferSource();
-    const pickGain = context.createGain();
-    const pickTone = context.createBiquadFilter();
-
-    oscillator.type = profile.oscillator;
-    oscillator.frequency.setValueAtTime(frequency, start);
-    oscillator.detune.setValueAtTime(profile.detune, start);
-    oscillator.frequency.exponentialRampToValueAtTime(frequency * (profile.pitchDrift ?? 0.998), start + profile.duration * 0.55);
-    body.type = profile.body;
-    body.frequency.setValueAtTime(frequency * (profile.bodyRatio ?? 0.999), start);
-    bodyGain?.gain.setValueAtTime(profile.bodyLevel ?? 1, start);
     shimmer.type = "sine";
     shimmer.frequency.setValueAtTime(frequency * (profile.shimmerRatio ?? 2.01), start);
-    shimmerGain.gain.setValueAtTime(profile.shimmer / chord.tones.length, start);
-    shimmerGain.gain.setTargetAtTime(0.0001, start + profile.duration * 0.58, profile.duration * 0.1);
-    tone.type = "lowpass";
-    tone.frequency.setValueAtTime(profile.lowpassStart + frequency * 1.2, start);
-    tone.frequency.exponentialRampToValueAtTime(profile.lowpassEnd + frequency * 0.6, start + profile.duration * 0.62);
-    tone.Q.setValueAtTime(0.52, start);
-    voiceGain.gain.setValueAtTime(0.0001, start);
-    voiceGain.gain.linearRampToValueAtTime(profile.level / Math.sqrt(midiNotes.length), start + profile.attack);
-    voiceGain.gain.setTargetAtTime(0.0001, start + profile.duration * (profile.decayStart ?? 0.58), profile.duration * (profile.release ?? 0.14));
-    if (highpass) {
-      highpass.type = "highpass";
-      highpass.frequency.setValueAtTime(profile.highpass ?? 20, start);
-      highpass.Q.setValueAtTime(0.6, start);
-    }
-    pick.buffer = createPickBuffer(context);
-    pickTone.type = "bandpass";
-    pickTone.frequency.setValueAtTime(profile.pickFrequency, start);
-    pickTone.Q.setValueAtTime(1.2, start);
-    pickGain.gain.setValueAtTime(profile.pick / Math.sqrt(midiNotes.length), start);
-    pickGain.gain.setTargetAtTime(0.0001, start + (profile.pickDecay ?? 0.035), 0.012);
-    oscillator.connect(tone);
-    if (bodyGain) body.connect(bodyGain).connect(tone);
-    else body.connect(tone);
-    if (highpass) tone.connect(voiceGain).connect(highpass).connect(master);
-    else tone.connect(voiceGain).connect(master);
+    shimmerGain.gain.setValueAtTime(profile.shimmer / chordSize, start);
+    shimmerGain.gain.setTargetAtTime(0.0001, start + profile.duration * 0.4, profile.duration * 0.15);
     shimmer.connect(shimmerGain).connect(master);
-    pick.connect(pickTone).connect(pickGain).connect(master);
-    oscillator.start(start);
-    body.start(start);
     shimmer.start(start);
-    pick.start(start);
-    oscillator.stop(start + profile.duration);
-    body.stop(start + profile.duration);
-    shimmer.stop(start + profile.duration * 0.72);
-    pick.stop(start + 0.08);
-  });
+    shimmer.stop(start + profile.duration * 0.6);
+  }
 }
 
 function createPickBuffer(context: AudioContext) {
