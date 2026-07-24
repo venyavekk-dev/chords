@@ -23,6 +23,7 @@ const DEFAULT_LOGO_SIZE = 34;
 
 export function TopBar(props: Props) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [design, setDesign] = useState<"classic" | "retro">("classic");
   const [settingsOpen, setSettingsOpen] = useState(true);
   const [logoSize, setLogoSize] = useState(DEFAULT_LOGO_SIZE);
   const nameRef = useRef<HTMLHeadingElement>(null);
@@ -33,6 +34,10 @@ export function TopBar(props: Props) {
     document.documentElement.dataset.theme = theme;
     document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f7f5f0" : "#1c1c1c");
   }, [theme]);
+
+  useEffect(() => {
+    document.documentElement.dataset.design = design;
+  }, [design]);
 
   useEffect(() => {
     const el = nameRef.current;
@@ -96,6 +101,18 @@ export function TopBar(props: Props) {
               <i />
             </span>
             Тема
+          </button>
+          <button
+            type="button"
+            className={`onboarding-toggle design-toggle ${design === "retro" ? "active" : ""}`}
+            aria-pressed={design === "retro"}
+            onClick={() => setDesign((current) => current === "classic" ? "retro" : "classic")}
+          >
+            <span className="design-rocker" aria-hidden="true">
+              <i className="design-rocker-lobe" />
+              <i className="design-rocker-lobe" />
+            </span>
+            Дизайн
           </button>
         </div>
       </div>
