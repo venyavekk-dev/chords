@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronLeft, ChevronRight, Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
@@ -13,6 +14,43 @@ import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } f
 
 const initial = loadState();
 
+type ChordPreset = { degrees: string[]; bpm: number; label: string; mode: ScaleMode; root: string };
+
+const CHORD_PRESETS: ChordPreset[] = [
+  { degrees: ["I", "V", "vi", "IV"], bpm: 76, label: "Let It Be — The Beatles", mode: "Major", root: "C" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 78, label: "No Woman No Cry — Bob Marley", mode: "Major", root: "C" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 110, label: "With or Without You — U2", mode: "Major", root: "D" },
+  { degrees: ["vi", "IV", "I", "V"], bpm: 67, label: "Someone Like You — Adele", mode: "Major", root: "A" },
+  { degrees: ["vi", "IV", "I", "V"], bpm: 82, label: "Complicated — Avril Lavigne", mode: "Major", root: "D" },
+  { degrees: ["vi", "IV", "I", "V"], bpm: 110, label: "Grenade — Bruno Mars", mode: "Major", root: "D#" },
+  { degrees: ["I", "IV", "V"], bpm: 148, label: "Twist and Shout — The Beatles", mode: "Major", root: "C" },
+  { degrees: ["I", "IV", "V"], bpm: 98, label: "Wild Thing — The Troggs", mode: "Major", root: "A" },
+  { degrees: ["I", "vi", "IV", "V"], bpm: 118, label: "Stand By Me — Ben E. King", mode: "Major", root: "A" },
+  { degrees: ["IV", "I", "V", "vi"], bpm: 119, label: "Don't Stop Believin' — Journey", mode: "Major", root: "E" },
+  { degrees: ["I", "IV", "I", "V"], bpm: 98, label: "Sweet Home Alabama — Lynyrd Skynyrd", mode: "Major", root: "D" },
+  { degrees: ["ii", "V", "I"], bpm: 120, label: "Autumn Leaves — jazz standard", mode: "Major", root: "G" },
+  { degrees: ["I", "vi", "ii", "V"], bpm: 70, label: "Blue Moon — jazz standard", mode: "Major", root: "C" },
+  { degrees: ["I", "V", "vi", "iii", "IV", "I", "IV", "V"], bpm: 76, label: "Canon in D — Pachelbel", mode: "Major", root: "D" },
+  { degrees: ["I", "IV", "V", "IV"], bpm: 180, label: "La Bamba — Ritchie Valens", mode: "Major", root: "C" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 110, label: "Numb — Linkin Park", mode: "Major", root: "F" },
+  { degrees: ["I", "IV", "V"], bpm: 168, label: "Johnny B. Goode — Chuck Berry", mode: "Major", root: "A#" },
+  { degrees: ["ii", "V", "I"], bpm: 120, label: "Fly Me to the Moon — jazz standard", mode: "Major", root: "C" },
+  { degrees: ["I", "vi", "IV", "V"], bpm: 117, label: "Every Breath You Take — The Police", mode: "Major", root: "G" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 140, label: "I'm Yours — Jason Mraz", mode: "Major", root: "G" },
+  { degrees: ["I", "IV", "V", "vi"], bpm: 148, label: "Brown Eyed Girl — Van Morrison", mode: "Major", root: "G" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 84, label: "Zombie — The Cranberries", mode: "Minor", root: "E" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 129, label: "Beggin' — Måneskin", mode: "Minor", root: "A" },
+  { degrees: ["i", "iv", "v"], bpm: 100, label: "House of the Rising Sun — trad.", mode: "Minor", root: "A" },
+  { degrees: ["i", "VII", "VI", "V"], bpm: 82, label: "Stairway to Heaven — Led Zeppelin", mode: "Minor", root: "A" },
+  { degrees: ["i", "VII", "VI", "V"], bpm: 105, label: "Hit the Road Jack — Ray Charles", mode: "Minor", root: "A" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 95, label: "Torn — Natalie Imbruglia", mode: "Minor", root: "A" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 119, label: "Poker Face — Lady Gaga", mode: "Minor", root: "G#" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 143, label: "Little Talks — Of Monsters and Men", mode: "Minor", root: "G" },
+  { degrees: ["i", "iv", "v"], bpm: 70, label: "Feeling Good — Nina Simone", mode: "Minor", root: "D" },
+  { degrees: ["i", "iv", "v"], bpm: 74, label: "Wicked Game — Chris Isaak", mode: "Minor", root: "B" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 130, label: "Personal Jesus — Depeche Mode", mode: "Minor", root: "F#" },
+];
+
 export default function App() {
   const [baseKeyRoot, setBaseKeyRoot] = useState(initial.keyRoot ?? "E");
   const [scaleMode, setScaleMode] = useState<ScaleMode>(initial.scaleMode ?? "Major");
@@ -23,6 +61,15 @@ export default function App() {
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
+  const [sequencerMode, setSequencerMode] = useState(false);
+  const [sequence, setSequence] = useState<DegreeChord[]>([]);
+  const [stepCount, setStepCount] = useState(4);
+  const [bpm, setBpm] = useState(96);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentStep, setCurrentStep] = useState<number | null>(null);
+  const [dragStepIndex, setDragStepIndex] = useState<number | null>(null);
+  const [presetIndex, setPresetIndex] = useState(0);
+  const [presetRevealed, setPresetRevealed] = useState(false);
   const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -51,6 +98,118 @@ export default function App() {
   useEffect(() => {
     saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
   }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
+
+  useEffect(() => {
+    setSequence([]);
+    setIsPlaying(false);
+    setPresetIndex(0);
+  }, [baseKeyRoot, scaleMode]);
+
+  const playbackSettings = useRef({ volume, sound, capoFret, voicingMemory });
+  playbackSettings.current = { volume, sound, capoFret, voicingMemory };
+  const sequenceRef = useRef(sequence);
+  sequenceRef.current = sequence;
+  const stepMs = (60000 / bpm) * 2;
+
+  useEffect(() => {
+    if (!isPlaying || sequence.length === 0) {
+      setCurrentStep(null);
+      return;
+    }
+    let index = 0;
+    const playStep = () => {
+      const steps = sequenceRef.current;
+      if (steps.length === 0) return;
+      const position = index % steps.length;
+      const chord = steps[position];
+      const { volume: currentVolume, sound: currentSound, capoFret: currentCapo, voicingMemory: currentMemory } = playbackSettings.current;
+      const stepVoicings = generateVoicings(chord.symbol, currentCapo);
+      const voicing = pickVoicing(stepVoicings, currentMemory[chord.symbol]);
+      playChord(chord.symbol, currentVolume, voicing, currentSound);
+      setCurrentStep(position);
+      index += 1;
+    };
+    playStep();
+    const id = window.setInterval(playStep, stepMs);
+    return () => window.clearInterval(id);
+  }, [isPlaying, bpm, sequence.length]);
+
+  const toggleSequencerMode = () => {
+    setSequencerMode((mode) => !mode);
+    setIsPlaying(false);
+  };
+
+  const addSequenceChord = (chord: DegreeChord) => {
+    setSequence((current) => (current.length >= stepCount ? current : [...current, chord]));
+  };
+
+  const removeSequenceStep = (index: number) => {
+    setSequence((current) => current.filter((_, i) => i !== index));
+  };
+
+  const moveSequenceStep = (fromIndex: number, toIndex: number) => {
+    setSequence((current) => {
+      if (fromIndex >= current.length || fromIndex === toIndex) return current;
+      const next = [...current];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
+  };
+
+  const clearSequence = () => {
+    setIsPlaying(false);
+    setSequence([]);
+  };
+
+  const changeStepCount = (next: number) => {
+    const clamped = Math.max(2, Math.min(8, next));
+    setStepCount(clamped);
+    setSequence((current) => current.slice(0, clamped));
+  };
+
+  const togglePlay = () => setIsPlaying((playing) => !playing);
+
+  const modePresets = CHORD_PRESETS.filter((preset) => preset.mode === scaleMode);
+  const availablePresets = [
+    ...modePresets.filter((preset) => preset.root === baseKeyRoot),
+    ...modePresets.filter((preset) => preset.root !== baseKeyRoot),
+  ];
+  const currentPreset = availablePresets[presetIndex % availablePresets.length];
+
+  const applyPreset = (preset: ChordPreset) => {
+    const matched = preset.degrees
+      .map((degree) => chords.find((chord) => chord.degree === degree))
+      .filter((chord): chord is DegreeChord => Boolean(chord));
+    if (matched.length === 0) return;
+    setIsPlaying(false);
+    setStepCount(Math.max(2, Math.min(8, matched.length)));
+    setSequence(matched);
+    setBpm(preset.bpm);
+  };
+
+  const revealPreset = () => {
+    setPresetRevealed(true);
+    applyPreset(currentPreset);
+  };
+
+  const stepPreset = (direction: 1 | -1) => {
+    const total = availablePresets.length;
+    const nextIndex = (((presetIndex + direction) % total) + total) % total;
+    setPresetIndex(nextIndex);
+    applyPreset(availablePresets[nextIndex]);
+  };
+
+  const shuffleSequence = () => {
+    setIsPlaying(false);
+    setSequence(Array.from({ length: stepCount }, () => chords[Math.floor(Math.random() * chords.length)]));
+  };
+
+  const copySequence = () => {
+    if (sequence.length === 0) return;
+    const text = `${sequence.map((chord) => chord.symbol).join(" - ")}, ${bpm} BPM`;
+    navigator.clipboard?.writeText(text);
+  };
 
   const selectChord = (chord: DegreeChord) => {
     setPreviewChord(undefined);
@@ -99,6 +258,8 @@ export default function App() {
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
         onVolume={setVolume}
+        sequencerMode={sequencerMode}
+        onToggleSequencer={toggleSequencerMode}
       />
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
@@ -111,6 +272,160 @@ export default function App() {
         )}
         {(instrument === "Piano" || instrument === "Both") && (
           <PianoKeyboard chordSymbol={visibleChord.symbol} voicing={visibleVoicing} />
+        )}
+        {sequencerMode && (
+          <div className="sequencer-toolbar">
+            <button
+              type="button"
+              className={`sequencer-icon-button play ${isPlaying ? "is-playing" : ""}`}
+              onClick={togglePlay}
+              disabled={sequence.length === 0}
+              aria-label={isPlaying ? "Остановить" : "Играть последовательность"}
+            >
+              {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+            </button>
+            <button
+              type="button"
+              className="sequencer-icon-button"
+              onClick={shuffleSequence}
+              aria-label="Случайные аккорды"
+            >
+              <Shuffle size={16} />
+            </button>
+            <div className="sequencer-steps" aria-label="Количество шагов">
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => changeStepCount(stepCount - 1)}
+                disabled={stepCount <= 2}
+                aria-label="Меньше шагов"
+              >
+                <Minus size={13} />
+              </button>
+              <strong>{stepCount}</strong>
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => changeStepCount(stepCount + 1)}
+                disabled={stepCount >= 8}
+                aria-label="Больше шагов"
+              >
+                <Plus size={13} />
+              </button>
+            </div>
+            <div className="sequencer-bpm">
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => setBpm((value) => Math.max(40, value - 5))}
+                disabled={bpm <= 40}
+                aria-label="Медленнее"
+              >
+                <Minus size={13} />
+              </button>
+              <label>
+                BPM
+                <input
+                  type="number"
+                  min={40}
+                  max={220}
+                  value={bpm}
+                  onChange={(event) => {
+                    const value = Number(event.target.value);
+                    if (!Number.isNaN(value)) setBpm(value);
+                  }}
+                  onBlur={(event) => {
+                    const value = Number(event.target.value);
+                    setBpm(Math.max(40, Math.min(220, Number.isNaN(value) ? bpm : value)));
+                  }}
+                />
+              </label>
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => setBpm((value) => Math.min(220, value + 5))}
+                disabled={bpm >= 220}
+                aria-label="Быстрее"
+              >
+                <Plus size={13} />
+              </button>
+            </div>
+            <div className="sequencer-slots" aria-label="Последовательность аккордов">
+              {Array.from({ length: stepCount }).map((_, index) => {
+                const step = sequence[index];
+                return (
+                  <button
+                    type="button"
+                    key={index}
+                    className={`sequencer-slot ${step ? "filled" : ""} ${isPlaying && currentStep === index ? "current" : ""} ${dragStepIndex === index ? "dragging" : ""}`}
+                    style={isPlaying && currentStep === index ? { animationDuration: `${stepMs}ms` } : undefined}
+                    onClick={() => step && removeSequenceStep(index)}
+                    disabled={!step}
+                    aria-label={step ? `Убрать шаг ${index + 1}: ${step.symbol}` : `Шаг ${index + 1} пуст`}
+                    title={step ? "Нажми, чтобы убрать, перетащи, чтобы переставить" : undefined}
+                    draggable={Boolean(step)}
+                    onDragStart={() => setDragStepIndex(index)}
+                    onDragOver={(event) => {
+                      if (dragStepIndex === null) return;
+                      event.preventDefault();
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      if (dragStepIndex === null) return;
+                      moveSequenceStep(dragStepIndex, index);
+                      setDragStepIndex(null);
+                    }}
+                    onDragEnd={() => setDragStepIndex(null)}
+                  >
+                    {step ? step.symbol : index + 1}
+                  </button>
+                );
+              })}
+            </div>
+            {presetRevealed ? (
+              <div className="sequencer-preset">
+                <button
+                  type="button"
+                  className="sequencer-icon-button small"
+                  onClick={() => stepPreset(-1)}
+                  aria-label="Предыдущий пример"
+                >
+                  <ChevronLeft size={13} />
+                </button>
+                <span title="Подставить популярную прогрессию">{currentPreset.label}</span>
+                <button
+                  type="button"
+                  className="sequencer-icon-button small"
+                  onClick={() => stepPreset(1)}
+                  aria-label="Следующий пример"
+                >
+                  <ChevronRight size={13} />
+                </button>
+              </div>
+            ) : (
+              <button type="button" className="sequencer-preset-cta" onClick={revealPreset}>
+                Эксплор
+              </button>
+            )}
+            <button
+              type="button"
+              className="sequencer-icon-button"
+              onClick={copySequence}
+              disabled={sequence.length === 0}
+              aria-label="Скопировать последовательность"
+            >
+              <Copy size={16} />
+            </button>
+            <button
+              type="button"
+              className="sequencer-icon-button"
+              onClick={clearSequence}
+              disabled={sequence.length === 0}
+              aria-label="Удалить аккорды"
+            >
+              <Trash2 size={16} />
+            </button>
+          </div>
         )}
         <section
           className="chord-strip"
@@ -129,7 +444,13 @@ export default function App() {
               }}
             >
               <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
-              <button className="strip-main" onClick={() => selectChord(chord)}>
+              <button
+                className="strip-main"
+                onClick={() => {
+                  selectChord(chord);
+                  if (sequencerMode) addSequenceChord(chord);
+                }}
+              >
                 <span>{chord.degree}</span>
                 <strong>{chord.symbol}</strong>
               </button>
@@ -138,7 +459,10 @@ export default function App() {
                   <button
                     className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""}`}
                     key={variant.symbol}
-                    onClick={() => selectChord(variant)}
+                    onClick={() => {
+                      selectChord(variant);
+                      if (sequencerMode) addSequenceChord(variant);
+                    }}
                     onMouseEnter={() => {
                       setPreviewVoicing(undefined);
                       setPreviewChord(variant);
