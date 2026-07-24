@@ -117,6 +117,53 @@
   --hint-bg: rgba(235, 231, 224, 0.96);
 }
 
+/* Retro design skin ("Дизайн" toggle). A single fixed warm-hardware palette
+   that intentionally ignores the light/dark theme toggle (see TopBar.tsx,
+   which disables that toggle while this is active) - same reasoning as the
+   paywall overlay elsewhere in this file. Placed after the light-theme block
+   so it wins the cascade regardless of which theme is set underneath. */
+:root[data-design="retro"] {
+  color-scheme: dark;
+  --retro-amber: #e8952f;
+  --retro-amber-deep: #d9821e;
+  --retro-yellow: #f2c94c;
+  --retro-ink: #2c2410;
+  --retro-bevel-hi: rgba(255, 246, 214, 0.22);
+  --retro-bevel-lo: rgba(15, 12, 4, 0.4);
+
+  --page-bg: #17150f;
+  --text-primary: #eee7d0;
+  --text-secondary: #b7ac89;
+  --text-strong: #fbf5e2;
+  --surface-primary: #6f7a52;
+  --surface-hover: #7c8760;
+  --surface-active: var(--retro-yellow);
+  --card-active-bg: var(--retro-yellow);
+  --card-active-text: var(--retro-ink);
+  --card-active-muted: rgba(44, 36, 16, 0.66);
+  --card-chip-bg: rgba(23, 21, 15, 0.2);
+  --card-chip-text: rgba(44, 36, 16, 0.76);
+  --card-chip-selected-bg: var(--retro-ink);
+  --card-chip-selected-text: #f7efd2;
+  --card-grid-line: rgba(44, 36, 16, 0.42);
+  --card-dot: var(--retro-ink);
+  --border-default: rgba(15, 12, 4, 0.32);
+  --border-strong: rgba(15, 12, 4, 0.52);
+  --note-fill: #f4ecd2;
+  --note-ink: var(--retro-ink);
+  --function-good: #8fb35e;
+  --function-ok: #e0a83c;
+  --function-weak: #c85a3c;
+  --home-bg: rgba(143, 179, 94, 0.28);
+  --home-text: #e6f2d6;
+  --home-border: rgba(143, 179, 94, 0.6);
+  --tension-bg: rgba(200, 90, 60, 0.28);
+  --tension-text: #ffe3d6;
+  --tension-border: rgba(200, 90, 60, 0.62);
+  --header-bg: rgba(37, 33, 19, 0.92);
+  --hint-bg: rgba(37, 33, 19, 0.95);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -277,6 +324,11 @@ select {
 
 .onboarding-toggle.active {
   color: var(--text-primary);
+}
+
+.onboarding-toggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
 }
 
 .onboarding-switch {
@@ -1373,4 +1425,102 @@ select {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* Retro design skin, part 2: texture and bevels on top of the retro token
+   palette above. Most controls (pill toggles, key/scale/sound selectors,
+   note dots, hint banners) already re-theme for free because they're built
+   entirely from the CSS custom properties redefined under
+   :root[data-design="retro"] - this section only adds what tokens alone
+   can't: background textures, raised/pressed panel bevels, and the handful
+   of colors the base stylesheet hardcodes instead of tokenizing (piano
+   keys, string/fret grid lines). Purely additive - deleting this block and
+   the token block above fully removes the retro skin with no component
+   changes needed. */
+
+[data-design="retro"] body {
+  background-image:
+    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.016) 0 2px, transparent 2px 6px),
+    radial-gradient(ellipse 1100px 650px at 50% -8%, rgba(232, 149, 47, 0.06), transparent 60%);
+}
+
+[data-design="retro"] .topbar {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 55%);
+  box-shadow: inset 0 -1px 0 var(--retro-bevel-lo);
+}
+
+[data-design="retro"] .minimal-fretboard,
+[data-design="retro"] .piano-keyboard,
+[data-design="retro"] .segmented-control,
+[data-design="retro"] .volume-slider-track {
+  border: 1px solid var(--border-strong);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.1) 92%);
+  box-shadow: inset 0 1px 0 var(--retro-bevel-hi), inset 0 -3px 5px var(--retro-bevel-lo), 0 3px 0 rgba(0, 0, 0, 0.22);
+}
+
+[data-design="retro"] .strip-chord,
+[data-design="retro"] .position-button {
+  border-color: var(--border-strong);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.1) 92%);
+  box-shadow: inset 0 1px 0 var(--retro-bevel-hi), inset 0 -2px 4px var(--retro-bevel-lo), 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+[data-design="retro"] .strip-chord.active,
+[data-design="retro"] .position-button.active {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(0, 0, 0, 0.06) 92%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 4px rgba(120, 90, 10, 0.35), 0 0 14px rgba(242, 201, 76, 0.4);
+}
+
+[data-design="retro"] .segmented-control button.active {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 8px rgba(242, 201, 76, 0.4);
+}
+
+[data-design="retro"] .fret-number.capo-active {
+  box-shadow: 0 0 0 1px var(--retro-ink), 0 0 8px rgba(242, 201, 76, 0.55);
+}
+
+[data-design="retro"] .relationship-hint {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.1));
+  box-shadow: inset 0 1px 0 var(--retro-bevel-hi), 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+[data-design="retro"] .onboarding-acknowledge {
+  box-shadow: inset 0 1px 0 var(--retro-bevel-hi), inset 0 -2px 3px var(--retro-bevel-lo);
+}
+
+[data-design="retro"] .white-key {
+  background: linear-gradient(180deg, #f3e9c9, #e4d6a8);
+  border-right-color: rgba(44, 36, 16, 0.35);
+  color: var(--retro-ink);
+}
+
+[data-design="retro"] .black-key {
+  background: linear-gradient(180deg, #2c2214, #1a140c);
+  color: #f4ecd2;
+}
+
+[data-design="retro"] .piano-key.active {
+  background: var(--retro-yellow);
+}
+
+[data-design="retro"] .black-key.active {
+  background: var(--retro-amber-deep);
+}
+
+[data-design="retro"] .string-cell {
+  background-image: linear-gradient(180deg, transparent 48.75%, rgba(23, 18, 8, 0.55) 49%, rgba(23, 18, 8, 0.55) 51%, transparent 51.25%);
+}
+
+[data-design="retro"] .mini-cell {
+  background-image: linear-gradient(180deg, transparent 46%, rgba(23, 18, 8, 0.5) 47%, rgba(23, 18, 8, 0.5) 53%, transparent 54%);
+}
+
+[data-design="retro"] .control-group legend,
+[data-design="retro"] .instrument-heading small {
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+[data-design="retro"] .brand h1 span {
+  font-weight: 700;
 }

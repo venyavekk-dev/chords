@@ -32,8 +32,9 @@ export function TopBar(props: Props) {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f7f5f0" : "#1c1c1c");
-  }, [theme]);
+    const metaColor = design === "retro" ? "#171510" : theme === "light" ? "#f7f5f0" : "#1c1c1c";
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", metaColor);
+  }, [theme, design]);
 
   useEffect(() => {
     document.documentElement.dataset.design = design;
@@ -93,6 +94,8 @@ export function TopBar(props: Props) {
             type="button"
             className={`onboarding-toggle theme-toggle ${theme === "light" ? "active" : ""}`}
             aria-pressed={theme === "light"}
+            disabled={design === "retro"}
+            aria-disabled={design === "retro"}
             onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
           >
             <span className="onboarding-switch theme-switch" aria-hidden="true">
