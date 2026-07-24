@@ -126,8 +126,8 @@
    Akai MPK Mini's own orange/black, Korg Minilogue's actual panel/knob
    colors (pulled from the minilogue-editor project's source), and Roland
    Juno-60's panel photo (blue section header, cream buttons, orange
-   selected-state). --piano-*/--string-line are helper tokens consumed by
-   the shared piano-key/string-line overrides further down this file. */
+   selected-state). The --piano- and --string-line tokens are helpers
+   consumed by the shared piano-key/string-line overrides further down. */
 :root[data-design="akai"] {
   color-scheme: dark;
   --page-bg: #0e0e0e;
@@ -1514,100 +1514,149 @@ select {
   }
 }
 
-/* Retro design skin, part 2: texture and bevels on top of the retro token
-   palette above. Most controls (pill toggles, key/scale/sound selectors,
-   note dots, hint banners) already re-theme for free because they're built
-   entirely from the CSS custom properties redefined under
-   :root[data-design="retro"] - this section only adds what tokens alone
-   can't: background textures, raised/pressed panel bevels, and the handful
-   of colors the base stylesheet hardcodes instead of tokenizing (piano
-   keys, string/fret grid lines). Purely additive - deleting this block and
-   the token block above fully removes the retro skin with no component
-   changes needed. */
+/* Retro design skins, part 2: texture and bevels shared by all three skins
+   (Akai/Korg/Juno) on top of the token palettes above. Most controls (pill
+   toggles, key/scale/sound selectors, note dots, hint banners) already
+   re-theme for free because they're built entirely from the CSS custom
+   properties redefined under :root[data-design="..."] - this section only
+   adds what tokens alone can't: background textures, raised/pressed panel
+   bevels, and the handful of colors the base stylesheet hardcodes instead
+   of tokenizing (piano keys, string/fret grid lines - via the --piano- and
+   --string-line helper tokens each skin block defines). The accent glow
+   reuses --piano-active since that's already each skin's one saturated
+   accent color (Akai orange / Korg red / Juno amber). Purely additive -
+   deleting this block and the three token blocks above fully removes the
+   retro skins with no component changes needed. */
 
-[data-design="retro"] body {
+[data-design="akai"] body,
+[data-design="korg"] body,
+[data-design="juno"] body {
   background-image:
-    repeating-linear-gradient(135deg, rgba(255, 255, 255, 0.016) 0 2px, transparent 2px 6px),
-    radial-gradient(ellipse 1100px 650px at 50% -8%, rgba(232, 149, 47, 0.06), transparent 60%);
+    repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.02) 0 2px, transparent 2px 6px),
+    radial-gradient(ellipse 1100px 650px at 50% -8%, color-mix(in srgb, var(--piano-active) 8%, transparent), transparent 60%);
 }
 
-[data-design="retro"] .topbar {
+[data-design="akai"] .topbar,
+[data-design="korg"] .topbar,
+[data-design="juno"] .topbar {
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 55%);
-  box-shadow: inset 0 -1px 0 var(--retro-bevel-lo);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.3);
 }
 
-[data-design="retro"] .minimal-fretboard,
-[data-design="retro"] .piano-keyboard,
-[data-design="retro"] .segmented-control,
-[data-design="retro"] .volume-slider-track {
+[data-design="akai"] .minimal-fretboard,
+[data-design="akai"] .piano-keyboard,
+[data-design="akai"] .segmented-control,
+[data-design="akai"] .volume-slider-track,
+[data-design="korg"] .minimal-fretboard,
+[data-design="korg"] .piano-keyboard,
+[data-design="korg"] .segmented-control,
+[data-design="korg"] .volume-slider-track,
+[data-design="juno"] .minimal-fretboard,
+[data-design="juno"] .piano-keyboard,
+[data-design="juno"] .segmented-control,
+[data-design="juno"] .volume-slider-track {
   border: 1px solid var(--border-strong);
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.1) 92%);
-  box-shadow: inset 0 1px 0 var(--retro-bevel-hi), inset 0 -3px 5px var(--retro-bevel-lo), 0 3px 0 rgba(0, 0, 0, 0.22);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -3px 5px rgba(0, 0, 0, 0.3), 0 3px 0 rgba(0, 0, 0, 0.22);
 }
 
-[data-design="retro"] .strip-chord,
-[data-design="retro"] .position-button {
+[data-design="akai"] .strip-chord,
+[data-design="akai"] .position-button,
+[data-design="korg"] .strip-chord,
+[data-design="korg"] .position-button,
+[data-design="juno"] .strip-chord,
+[data-design="juno"] .position-button {
   border-color: var(--border-strong);
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.1) 92%);
-  box-shadow: inset 0 1px 0 var(--retro-bevel-hi), inset 0 -2px 4px var(--retro-bevel-lo), 0 2px 0 rgba(0, 0, 0, 0.2);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -2px 4px rgba(0, 0, 0, 0.28), 0 2px 0 rgba(0, 0, 0, 0.2);
 }
 
-[data-design="retro"] .strip-chord.active,
-[data-design="retro"] .position-button.active {
-  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.4), rgba(0, 0, 0, 0.06) 92%);
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.65), inset 0 -2px 4px rgba(120, 90, 10, 0.35), 0 0 14px rgba(242, 201, 76, 0.4);
+[data-design="akai"] .strip-chord.active,
+[data-design="akai"] .position-button.active,
+[data-design="korg"] .strip-chord.active,
+[data-design="korg"] .position-button.active,
+[data-design="juno"] .strip-chord.active,
+[data-design="juno"] .position-button.active {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(0, 0, 0, 0.08) 92%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -2px 4px rgba(0, 0, 0, 0.3), 0 0 14px color-mix(in srgb, var(--piano-active) 45%, transparent);
 }
 
-[data-design="retro"] .segmented-control button.active {
-  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), 0 0 8px rgba(242, 201, 76, 0.4);
+[data-design="akai"] .segmented-control button.active,
+[data-design="korg"] .segmented-control button.active,
+[data-design="juno"] .segmented-control button.active {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 8px color-mix(in srgb, var(--piano-active) 40%, transparent);
 }
 
-[data-design="retro"] .fret-number.capo-active {
-  box-shadow: 0 0 0 1px var(--retro-ink), 0 0 8px rgba(242, 201, 76, 0.55);
+[data-design="akai"] .fret-number.capo-active,
+[data-design="korg"] .fret-number.capo-active,
+[data-design="juno"] .fret-number.capo-active {
+  box-shadow: 0 0 0 1px var(--card-active-text), 0 0 8px color-mix(in srgb, var(--piano-active) 55%, transparent);
 }
 
-[data-design="retro"] .relationship-hint {
+[data-design="akai"] .relationship-hint,
+[data-design="korg"] .relationship-hint,
+[data-design="juno"] .relationship-hint {
   background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.1));
-  box-shadow: inset 0 1px 0 var(--retro-bevel-hi), 0 6px 18px rgba(0, 0, 0, 0.4);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 6px 18px rgba(0, 0, 0, 0.4);
 }
 
-[data-design="retro"] .onboarding-acknowledge {
-  box-shadow: inset 0 1px 0 var(--retro-bevel-hi), inset 0 -2px 3px var(--retro-bevel-lo);
+[data-design="akai"] .onboarding-acknowledge,
+[data-design="korg"] .onboarding-acknowledge,
+[data-design="juno"] .onboarding-acknowledge {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -2px 3px rgba(0, 0, 0, 0.28);
 }
 
-[data-design="retro"] .white-key {
-  background: linear-gradient(180deg, #f3e9c9, #e4d6a8);
-  border-right-color: rgba(44, 36, 16, 0.35);
-  color: var(--retro-ink);
+[data-design="akai"] .white-key,
+[data-design="korg"] .white-key,
+[data-design="juno"] .white-key {
+  background: var(--piano-white);
+  border-right-color: var(--piano-white-line);
+  color: var(--note-ink);
 }
 
-[data-design="retro"] .black-key {
-  background: linear-gradient(180deg, #2c2214, #1a140c);
-  color: #f4ecd2;
+[data-design="akai"] .black-key,
+[data-design="korg"] .black-key,
+[data-design="juno"] .black-key {
+  background: var(--piano-black);
+  color: var(--note-fill);
 }
 
-[data-design="retro"] .piano-key.active {
-  background: var(--retro-yellow);
+[data-design="akai"] .piano-key.active,
+[data-design="korg"] .piano-key.active,
+[data-design="juno"] .piano-key.active {
+  background: var(--piano-active);
 }
 
-[data-design="retro"] .black-key.active {
-  background: var(--retro-amber-deep);
+[data-design="akai"] .black-key.active,
+[data-design="korg"] .black-key.active,
+[data-design="juno"] .black-key.active {
+  background: var(--piano-black-active);
 }
 
-[data-design="retro"] .string-cell {
-  background-image: linear-gradient(180deg, transparent 48.75%, rgba(23, 18, 8, 0.55) 49%, rgba(23, 18, 8, 0.55) 51%, transparent 51.25%);
+[data-design="akai"] .string-cell,
+[data-design="korg"] .string-cell,
+[data-design="juno"] .string-cell {
+  background-image: linear-gradient(180deg, transparent 48.75%, var(--string-line) 49%, var(--string-line) 51%, transparent 51.25%);
 }
 
-[data-design="retro"] .mini-cell {
-  background-image: linear-gradient(180deg, transparent 46%, rgba(23, 18, 8, 0.5) 47%, rgba(23, 18, 8, 0.5) 53%, transparent 54%);
+[data-design="akai"] .mini-cell,
+[data-design="korg"] .mini-cell,
+[data-design="juno"] .mini-cell {
+  background-image: linear-gradient(180deg, transparent 46%, var(--string-line) 47%, var(--string-line) 53%, transparent 54%);
 }
 
-[data-design="retro"] .control-group legend,
-[data-design="retro"] .instrument-heading small {
+[data-design="akai"] .control-group legend,
+[data-design="akai"] .instrument-heading small,
+[data-design="korg"] .control-group legend,
+[data-design="korg"] .instrument-heading small,
+[data-design="juno"] .control-group legend,
+[data-design="juno"] .instrument-heading small {
   letter-spacing: 0.05em;
   text-transform: uppercase;
 }
 
-[data-design="retro"] .brand h1 span {
+[data-design="akai"] .brand h1 span,
+[data-design="korg"] .brand h1 span,
+[data-design="juno"] .brand h1 span {
   font-weight: 700;
 }
