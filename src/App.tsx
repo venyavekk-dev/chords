@@ -9,7 +9,7 @@ import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
-import { playChord } from "./lib/audio";
+import { playChord, SOUND_PRESETS } from "./lib/audio";
 import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
 
 const initial = loadState();
@@ -56,7 +56,9 @@ export default function App() {
   const [scaleMode, setScaleMode] = useState<ScaleMode>(initial.scaleMode ?? "Major");
   const [instrument, setInstrument] = useState<Instrument>(initial.instrument ?? "Guitar");
   const [volume, setVolume] = useState(initial.volume ?? 0.2);
-  const [sound, setSound] = useState<SoundPreset>(initial.sound ?? "Velvet");
+  const [sound, setSound] = useState<SoundPreset>(
+    initial.sound && SOUND_PRESETS.includes(initial.sound) ? initial.sound : "Velvet",
+  );
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [capoFret, setCapoFret] = useState(0);

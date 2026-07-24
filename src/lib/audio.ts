@@ -1,6 +1,8 @@
 import type { GuitarVoicing, SoundPreset } from "../types/music";
 import { NOTES, parseChord } from "./musicTheory";
 
+export const SOUND_PRESETS: SoundPreset[] = ["Velvet", "Clean", "Air"];
+
 let audioContext: AudioContext | undefined;
 let reverbBuffer: AudioBuffer | undefined;
 let activeMaster: GainNode | undefined;
@@ -51,8 +53,6 @@ type SoundProfile = {
 const SOUND_PROFILES: Record<SoundPreset, SoundProfile> = {
   Velvet: { oscillator: "triangle", body: "sine", attack: 0.072, duration: 1.42, level: 0.39, detune: -3, lowpassStart: 5600, lowpassEnd: 2450, ampFrequency: 1350, ampGain: 1.4, cabinet: 5900, drive: 0.04, shimmer: 0.042, pick: 0.004, pickFrequency: 2500, delay: 0.055, reverb: 0.19, stagger: 0.012, bodyRatio: 1.003, bodyLevel: 0.62, highpass: 95, pitchDrift: 1, shimmerRatio: 2.005, decayStart: 0.66, release: 0.18, pickDecay: 0.018 },
   Clean: { oscillator: "triangle", body: "sine", attack: 0.003, duration: 1.48, level: 0.48, detune: 0, lowpassStart: 8600, lowpassEnd: 2850, ampFrequency: 2100, ampGain: 2.1, cabinet: 7600, drive: 0.025, shimmer: 0.11, pick: 0.17, pickFrequency: 3350, delay: 0.018, reverb: 0.095, stagger: 0.006, bodyRatio: 2.003, bodyLevel: 0.24, highpass: 70, pitchDrift: 1, shimmerRatio: 3.997, decayStart: 0.2, release: 0.28, pickDecay: 0.026 },
-  Glass: { oscillator: "sawtooth", body: "sine", attack: 0.002, duration: 0.9, level: 0.35, detune: 4, lowpassStart: 11200, lowpassEnd: 3900, ampFrequency: 3600, ampGain: 4.8, cabinet: 9800, drive: 0.24, shimmer: 0.21, pick: 0.21, pickFrequency: 6400, delay: 0.085, reverb: 0.13, stagger: 0.018, bodyRatio: 2.008, bodyLevel: 0.12, highpass: 430, pitchDrift: 0.9994, shimmerRatio: 3.012, decayStart: 0.38, release: 0.12, pickDecay: 0.02 },
-  Nylon: { oscillator: "triangle", body: "sine", attack: 0.009, duration: 0.82, level: 0.47, detune: -7, lowpassStart: 2650, lowpassEnd: 980, ampFrequency: 430, ampGain: 1.8, cabinet: 2350, drive: 0.08, shimmer: 0.008, pick: 0.14, pickFrequency: 1450, delay: 0, reverb: 0.045, stagger: 0.026 },
   Air: { oscillator: "sine", body: "sine", attack: 0.045, duration: 1.55, level: 0.38, detune: 5, lowpassStart: 5200, lowpassEnd: 2100, ampFrequency: 1100, ampGain: 2.2, cabinet: 5100, drive: 0.03, shimmer: 0.085, pick: 0.012, pickFrequency: 3300, delay: 0.17, reverb: 0.34, stagger: 0.04 },
 };
 

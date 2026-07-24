@@ -2,6 +2,7 @@ import { Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Instrument, ScaleMode, SoundPreset } from "../types/music";
 import { NOTES } from "../lib/musicTheory";
+import { SOUND_PRESETS } from "../lib/audio";
 
 type Props = {
   keyRoot: string;
@@ -29,7 +30,10 @@ export function TopBar(props: Props) {
   const [logoSize, setLogoSize] = useState(DEFAULT_LOGO_SIZE);
   const nameRef = useRef<HTMLHeadingElement>(null);
   const instruments: Instrument[] = ["Guitar", "Piano", "Both"];
-  const sounds: SoundPreset[] = ["Velvet", "Clean", "Glass", "Nylon", "Air"];
+  const cycleSound = () => {
+    const nextIndex = (SOUND_PRESETS.indexOf(props.sound) + 1) % SOUND_PRESETS.length;
+    props.onSound(SOUND_PRESETS[nextIndex]);
+  };
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
@@ -136,16 +140,6 @@ export function TopBar(props: Props) {
               ))}
             </div>
           </fieldset>
-          <fieldset className="control-group sound-control">
-            <legend>Sound</legend>
-            <div className="segmented-control sound-toggle">
-              {sounds.map((sound) => (
-                <button type="button" aria-pressed={props.sound === sound} className={props.sound === sound ? "active" : ""} key={sound} onClick={() => props.onSound(sound)}>
-                  <i aria-hidden="true" />{sound}
-                </button>
-              ))}
-            </div>
-          </fieldset>
           <fieldset className="control-group volume-control">
             <legend>Volume</legend>
             <div className="volume-slider-track">
@@ -162,6 +156,13 @@ export function TopBar(props: Props) {
               />
               <span className="volume-slider-value">{Math.round(props.volume * 100)}%</span>
             </div>
+          </fieldset>
+          <fieldset className="control-group sound-control">
+            <legend>Sound</legend>
+            <button type="button" className="sound-cycle" onClick={cycleSound}>
+              <i aria-hidden="true" className={`sound-dot sound-dot-${props.sound.toLowerCase()}`} />
+              {props.sound}
+            </button>
           </fieldset>
         </div>
       </div>
