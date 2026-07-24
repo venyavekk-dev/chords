@@ -225,7 +225,7 @@ select {
 
 .brand-toggle-stack {
   display: grid;
-  align-self: center;
+  align-self: start;
   justify-items: start;
   gap: 1px;
 }
