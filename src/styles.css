@@ -993,6 +993,27 @@ select {
   margin: 0;
 }
 
+.sequencer-preset {
+  display: flex;
+  align-items: center;
+  height: 34px;
+  max-width: 220px;
+  padding: 0 14px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sequencer-preset:hover {
+  background: var(--surface-hover);
+}
+
 .sequencer-slots {
   display: flex;
   align-items: center;

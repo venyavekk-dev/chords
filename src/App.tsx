@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Minus, Pause, Play, Plus, Trash2 } from "lucide-react";
+import { Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
@@ -13,6 +13,18 @@ import { playChord } from "./lib/audio";
 import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
 
 const initial = loadState();
+
+type ChordPreset = { degrees: string[]; bpm: number; label: string; mode: ScaleMode };
+
+const CHORD_PRESETS: ChordPreset[] = [
+  { degrees: ["I", "V", "vi", "IV"], bpm: 76, label: "Let It Be — The Beatles", mode: "Major" },
+  { degrees: ["vi", "IV", "I", "V"], bpm: 67, label: "Someone Like You — Adele", mode: "Major" },
+  { degrees: ["I", "IV", "V"], bpm: 148, label: "Twist and Shout — The Beatles", mode: "Major" },
+  { degrees: ["ii", "V", "I"], bpm: 120, label: "Autumn Leaves — jazz standard", mode: "Major" },
+  { degrees: ["I", "V", "vi", "iii", "IV", "I", "IV", "V"], bpm: 76, label: "Canon in D — Pachelbel", mode: "Major" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 84, label: "Zombie — The Cranberries", mode: "Minor" },
+  { degrees: ["i", "iv", "v"], bpm: 100, label: "House of the Rising Sun — trad.", mode: "Minor" },
+];
 
 export default function App() {
   const [baseKeyRoot, setBaseKeyRoot] = useState(initial.keyRoot ?? "E");
@@ -31,6 +43,7 @@ export default function App() {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState<number | null>(null);
   const [dragStepIndex, setDragStepIndex] = useState<number | null>(null);
+  const [presetIndex, setPresetIndex] = useState(0);
   const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -125,6 +138,32 @@ export default function App() {
 
   const togglePlay = () => setIsPlaying((playing) => !playing);
 
+  const availablePresets = CHORD_PRESETS.filter((preset) => preset.mode === scaleMode);
+  const currentPreset = availablePresets[presetIndex % availablePresets.length];
+
+  const applyPreset = () => {
+    const matched = currentPreset.degrees
+      .map((degree) => chords.find((chord) => chord.degree === degree))
+      .filter((chord): chord is DegreeChord => Boolean(chord));
+    if (matched.length === 0) return;
+    setIsPlaying(false);
+    setStepCount(Math.max(2, Math.min(8, matched.length)));
+    setSequence(matched);
+    setBpm(currentPreset.bpm);
+    setPresetIndex((index) => (index + 1) % availablePresets.length);
+  };
+
+  const shuffleSequence = () => {
+    setIsPlaying(false);
+    setSequence(Array.from({ length: stepCount }, () => chords[Math.floor(Math.random() * chords.length)]));
+  };
+
+  const copySequence = () => {
+    if (sequence.length === 0) return;
+    const text = `${sequence.map((chord) => chord.symbol).join(" - ")}, ${bpm} BPM`;
+    navigator.clipboard?.writeText(text);
+  };
+
   const selectChord = (chord: DegreeChord) => {
     setPreviewChord(undefined);
     setPreviewVoicing(undefined);
@@ -201,6 +240,14 @@ export default function App() {
             <button
               type="button"
               className="sequencer-icon-button"
+              onClick={shuffleSequence}
+              aria-label="Случайные аккорды"
+            >
+              <Shuffle size={16} />
+            </button>
+            <button
+              type="button"
+              className="sequencer-icon-button"
               onClick={clearSequence}
               disabled={sequence.length === 0}
               aria-label="Удалить аккорды"
@@ -265,6 +312,18 @@ export default function App() {
                 <Plus size={13} />
               </button>
             </div>
+            <button type="button" className="sequencer-preset" onClick={applyPreset} title="Подставить популярную прогрессию">
+              {currentPreset.label}
+            </button>
+            <button
+              type="button"
+              className="sequencer-icon-button"
+              onClick={copySequence}
+              disabled={sequence.length === 0}
+              aria-label="Скопировать последовательность"
+            >
+              <Copy size={16} />
+            </button>
             <div className="sequencer-slots" aria-label="Последовательность аккордов">
               {Array.from({ length: stepCount }).map((_, index) => {
                 const step = sequence[index];
