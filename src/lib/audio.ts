@@ -49,10 +49,22 @@ type SoundProfile = {
 };
 
 const SOUND_PROFILES: Record<SoundPreset, SoundProfile> = {
-  Velvet: { oscillator: "triangle", body: "sine", attack: 0.072, duration: 1.42, level: 0.39, detune: -3, lowpassStart: 5600, lowpassEnd: 2450, ampFrequency: 1350, ampGain: 1.4, cabinet: 5900, drive: 0.04, shimmer: 0.042, pick: 0.004, pickFrequency: 2500, delay: 0.055, reverb: 0.19, stagger: 0.012, bodyRatio: 1.003, bodyLevel: 0.62, highpass: 95, pitchDrift: 1, shimmerRatio: 2.005, decayStart: 0.66, release: 0.18, pickDecay: 0.018 },
-  Clean: { oscillator: "triangle", body: "sine", attack: 0.003, duration: 1.48, level: 0.48, detune: 0, lowpassStart: 8600, lowpassEnd: 2850, ampFrequency: 2100, ampGain: 2.1, cabinet: 7600, drive: 0.025, shimmer: 0.11, pick: 0.17, pickFrequency: 3350, delay: 0.018, reverb: 0.095, stagger: 0.006, bodyRatio: 2.003, bodyLevel: 0.24, highpass: 70, pitchDrift: 1, shimmerRatio: 3.997, decayStart: 0.2, release: 0.28, pickDecay: 0.026 },
+  // Fender-style electric guitar with a light overdrive: sawtooth into the
+  // waveshaper drive gives the distortion something to bite into, quick pick
+  // attack instead of a soft pad swell, amp/cabinet EQ tightened toward a
+  // small combo amp rather than a wide ambient pad.
+  Velvet: { oscillator: "sawtooth", body: "sine", attack: 0.006, duration: 1.15, level: 0.42, detune: -3, lowpassStart: 5200, lowpassEnd: 2600, ampFrequency: 950, ampGain: 2, cabinet: 5200, drive: 0.22, shimmer: 0.03, pick: 0.16, pickFrequency: 2600, delay: 0.02, reverb: 0.12, stagger: 0.014, bodyRatio: 1.003, bodyLevel: 0.55, highpass: 90, pitchDrift: 0.999, shimmerRatio: 2.005, decayStart: 0.42, release: 0.22, pickDecay: 0.02 },
+  // Clean acoustic guitar (Yamaha-style steel-string): no drive, a sub-octave
+  // body oscillator for the wood/soundhole thump, bright pick/finger noise,
+  // and the amp peaking frequency dropped from an electric "quack" register
+  // down to the low-mid boxiness of an acoustic body.
+  Clean: { oscillator: "triangle", body: "sine", attack: 0.003, duration: 1.7, level: 0.46, detune: 0, lowpassStart: 8200, lowpassEnd: 3200, ampFrequency: 420, ampGain: 1.7, cabinet: 7800, drive: 0.01, shimmer: 0.03, pick: 0.2, pickFrequency: 3700, delay: 0.02, reverb: 0.14, stagger: 0.008, bodyRatio: 0.503, bodyLevel: 0.4, highpass: 60, pitchDrift: 1, shimmerRatio: 3, decayStart: 0.34, release: 0.32, pickDecay: 0.024 },
   Glass: { oscillator: "sawtooth", body: "sine", attack: 0.002, duration: 0.9, level: 0.35, detune: 4, lowpassStart: 11200, lowpassEnd: 3900, ampFrequency: 3600, ampGain: 4.8, cabinet: 9800, drive: 0.24, shimmer: 0.21, pick: 0.21, pickFrequency: 6400, delay: 0.085, reverb: 0.13, stagger: 0.018, bodyRatio: 2.008, bodyLevel: 0.12, highpass: 430, pitchDrift: 0.9994, shimmerRatio: 3.012, decayStart: 0.38, release: 0.12, pickDecay: 0.02 },
-  Nylon: { oscillator: "triangle", body: "sine", attack: 0.009, duration: 0.82, level: 0.47, detune: -7, lowpassStart: 2650, lowpassEnd: 980, ampFrequency: 430, ampGain: 1.8, cabinet: 2350, drive: 0.08, shimmer: 0.008, pick: 0.14, pickFrequency: 1450, delay: 0, reverb: 0.045, stagger: 0.026 },
+  // Organ: pure sine fundamental plus an octave "drawbar" body tone, no pick
+  // transient and no drive, every note starts together (stagger 0) instead of
+  // strumming. Sustains at a steady level (decayStart is late) but the tail
+  // once the note ends is short/normal, not a long swelling fade.
+  Nylon: { oscillator: "sine", body: "sine", attack: 0.008, duration: 1.1, level: 0.42, detune: 0, lowpassStart: 4200, lowpassEnd: 3800, ampFrequency: 900, ampGain: 1.1, cabinet: 4200, drive: 0, shimmer: 0.05, pick: 0, pickFrequency: 1200, delay: 0, reverb: 0.06, stagger: 0, bodyRatio: 2, bodyLevel: 0.28, highpass: 40, pitchDrift: 1, shimmerRatio: 3, decayStart: 0.88, release: 0.1, pickDecay: 0.01 },
   Air: { oscillator: "sine", body: "sine", attack: 0.045, duration: 1.55, level: 0.38, detune: 5, lowpassStart: 5200, lowpassEnd: 2100, ampFrequency: 1100, ampGain: 2.2, cabinet: 5100, drive: 0.03, shimmer: 0.085, pick: 0.012, pickFrequency: 3300, delay: 0.17, reverb: 0.34, stagger: 0.04 },
 };
 
