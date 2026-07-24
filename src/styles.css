@@ -328,18 +328,15 @@ select {
 }
 
 .settings-panel {
-  display: grid;
-  grid-template-rows: 0fr;
-  min-height: 0;
-  transition: grid-template-rows 260ms var(--ease-default);
+  /* Always takes up its full height, open or closed, so toggling only
+     fades the controls in/out instead of resizing the header and pushing
+     the fretboard/piano below it up or down. */
+  opacity: 0;
+  transition: opacity 220ms var(--ease-default);
 }
 
 .settings-panel.is-open {
-  grid-template-rows: 1fr;
-}
-
-.settings-panel > .control-grid {
-  overflow: hidden;
+  opacity: 1;
 }
 
 .control-grid {
