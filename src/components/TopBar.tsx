@@ -85,16 +85,16 @@ export function TopBar(props: Props) {
               <span className="onboarding-switch" aria-hidden="true"><i /></span>
               Настройки
             </button>
-            <button
-              type="button"
-              className={`onboarding-toggle sequencer-toggle ${props.sequencerMode ? "active" : ""}`}
-              aria-pressed={props.sequencerMode}
-              onClick={props.onToggleSequencer}
-            >
-              <span className="onboarding-switch" aria-hidden="true"><i /></span>
-              Секвенсор
-            </button>
           </div>
+          <button
+            type="button"
+            className={`onboarding-toggle sequencer-toggle ${props.sequencerMode ? "active" : ""}`}
+            aria-pressed={props.sequencerMode}
+            onClick={props.onToggleSequencer}
+          >
+            <span className="onboarding-switch" aria-hidden="true"><i /></span>
+            Секвенсор
+          </button>
           <button
             type="button"
             className={`onboarding-toggle theme-toggle ${theme === "light" ? "active" : ""}`}

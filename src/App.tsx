@@ -221,16 +221,43 @@ export default function App() {
                 <Plus size={13} />
               </button>
             </div>
-            <label className="sequencer-bpm">
-              BPM
-              <input
-                type="number"
-                min={40}
-                max={220}
-                value={bpm}
-                onChange={(event) => setBpm(Math.max(40, Math.min(220, Number(event.target.value) || bpm)))}
-              />
-            </label>
+            <div className="sequencer-bpm">
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => setBpm((value) => Math.max(40, value - 5))}
+                disabled={bpm <= 40}
+                aria-label="Медленнее"
+              >
+                <Minus size={13} />
+              </button>
+              <label>
+                BPM
+                <input
+                  type="number"
+                  min={40}
+                  max={220}
+                  value={bpm}
+                  onChange={(event) => {
+                    const value = Number(event.target.value);
+                    if (!Number.isNaN(value)) setBpm(value);
+                  }}
+                  onBlur={(event) => {
+                    const value = Number(event.target.value);
+                    setBpm(Math.max(40, Math.min(220, Number.isNaN(value) ? bpm : value)));
+                  }}
+                />
+              </label>
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => setBpm((value) => Math.min(220, value + 5))}
+                disabled={bpm >= 220}
+                aria-label="Быстрее"
+              >
+                <Plus size={13} />
+              </button>
+            </div>
           </div>
         )}
         <section
@@ -253,7 +280,10 @@ export default function App() {
               <button
                 className={`strip-main ${sequencerMode && sequencedSymbols.has(chord.symbol) ? "sequencer-selected" : ""} ${chord.symbol === playingSymbol ? "sequencer-current" : ""}`}
                 style={chord.symbol === playingSymbol ? { animationDuration: `${stepMs}ms` } : undefined}
-                onClick={() => (sequencerMode ? toggleSequenceChord(chord) : selectChord(chord))}
+                onClick={() => {
+                  selectChord(chord);
+                  if (sequencerMode) toggleSequenceChord(chord);
+                }}
               >
                 <span>{chord.degree}</span>
                 <strong>{chord.symbol}</strong>
@@ -264,7 +294,10 @@ export default function App() {
                     className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""} ${sequencerMode && sequencedSymbols.has(variant.symbol) ? "sequencer-selected" : ""} ${variant.symbol === playingSymbol ? "sequencer-current" : ""}`}
                     style={variant.symbol === playingSymbol ? { animationDuration: `${stepMs}ms` } : undefined}
                     key={variant.symbol}
-                    onClick={() => (sequencerMode ? toggleSequenceChord(variant) : selectChord(variant))}
+                    onClick={() => {
+                      selectChord(variant);
+                      if (sequencerMode) toggleSequenceChord(variant);
+                    }}
                     onMouseEnter={() => {
                       setPreviewVoicing(undefined);
                       setPreviewChord(variant);
