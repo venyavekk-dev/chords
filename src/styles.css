@@ -325,6 +325,21 @@ select {
   right: 2px;
 }
 
+.settings-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  min-height: 0;
+  transition: grid-template-rows 260ms var(--ease-default);
+}
+
+.settings-panel.is-open {
+  grid-template-rows: 1fr;
+}
+
+.settings-panel > .control-grid {
+  overflow: hidden;
+}
+
 .control-grid {
   display: grid;
   grid-template-columns: minmax(18rem, 2.1fr) minmax(8rem, 0.72fr) minmax(10rem, 1fr);
