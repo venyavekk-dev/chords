@@ -124,6 +124,7 @@
 html {
   background: var(--page-bg);
   overflow-x: clip;
+  scrollbar-gutter: stable;
 }
 
 body {
@@ -170,7 +171,7 @@ select {
   z-index: 30;
   display: grid;
   grid-template-columns: minmax(14rem, 0.42fr) minmax(0, 1.58fr);
-  align-items: start;
+  align-items: stretch;
   column-gap: var(--space-8);
   row-gap: var(--space-4);
   width: 100%;
@@ -183,7 +184,7 @@ select {
 
 .brand {
   display: grid;
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto 1fr;
   gap: var(--space-2);
   min-width: 0;
 }
@@ -193,6 +194,9 @@ select {
   align-items: center;
   gap: 12px;
   min-width: 0;
+  /* Lines the logo/title up with the note buttons inside the Key control,
+     not the "Key" legend above them - tuned to this layout's current sizes. */
+  padding-top: 1.4375rem;
 }
 
 .brand img {
@@ -221,7 +225,7 @@ select {
 
 .brand-toggle-stack {
   display: grid;
-  align-self: center;
+  align-self: start;
   justify-items: start;
   gap: 1px;
 }
@@ -321,6 +325,18 @@ select {
 
 .theme-switch .theme-icon-moon {
   right: 2px;
+}
+
+.settings-panel {
+  /* Always takes up its full height, open or closed, so toggling only
+     fades the controls in/out instead of resizing the header and pushing
+     the fretboard/piano below it up or down. */
+  opacity: 0;
+  transition: opacity 220ms var(--ease-default);
+}
+
+.settings-panel.is-open {
+  opacity: 1;
 }
 
 .control-grid {
@@ -1106,6 +1122,30 @@ select {
     grid-template-columns: 1fr;
     align-items: start;
     gap: var(--space-8);
+  }
+
+  .brand-heading {
+    padding-top: 0;
+  }
+
+  /* Below the tablet breakpoint the settings panel stacks under the header
+     instead of sitting beside it, so there's no brand column whose height
+     needs to stay put - let it push the chord strip down/up as it opens
+     and closes, same as before the desktop fixed-height change. */
+  .settings-panel {
+    display: grid;
+    grid-template-rows: 0fr;
+    min-height: 0;
+    opacity: 1;
+    transition: grid-template-rows 260ms var(--ease-default);
+  }
+
+  .settings-panel.is-open {
+    grid-template-rows: 1fr;
+  }
+
+  .settings-panel > .control-grid {
+    overflow: hidden;
   }
 }
 
