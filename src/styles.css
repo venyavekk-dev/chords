@@ -1466,6 +1466,24 @@ select {
     padding-bottom: calc(11px + env(safe-area-inset-bottom));
   }
 
+  .sequencer-steps,
+  .sequencer-bpm,
+  .sequencer-slots,
+  .sequencer-preset {
+    flex: 1 1 100%;
+    justify-content: center;
+  }
+
+  .sequencer-slots {
+    justify-content: flex-start;
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .sequencer-slots::-webkit-scrollbar {
+    display: none;
+  }
+
 }
 
 @media (max-width: 22rem) {

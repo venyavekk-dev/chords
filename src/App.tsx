@@ -14,29 +14,29 @@ import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } f
 
 const initial = loadState();
 
-type ChordPreset = { degrees: string[]; bpm: number; label: string; mode: ScaleMode };
+type ChordPreset = { degrees: string[]; bpm: number; label: string; mode: ScaleMode; root: string };
 
 const CHORD_PRESETS: ChordPreset[] = [
-  { degrees: ["I", "V", "vi", "IV"], bpm: 76, label: "Let It Be — The Beatles", mode: "Major" },
-  { degrees: ["I", "V", "vi", "IV"], bpm: 78, label: "No Woman No Cry — Bob Marley", mode: "Major" },
-  { degrees: ["I", "V", "vi", "IV"], bpm: 110, label: "With or Without You — U2", mode: "Major" },
-  { degrees: ["vi", "IV", "I", "V"], bpm: 67, label: "Someone Like You — Adele", mode: "Major" },
-  { degrees: ["vi", "IV", "I", "V"], bpm: 82, label: "Complicated — Avril Lavigne", mode: "Major" },
-  { degrees: ["vi", "IV", "I", "V"], bpm: 110, label: "Grenade — Bruno Mars", mode: "Major" },
-  { degrees: ["I", "IV", "V"], bpm: 148, label: "Twist and Shout — The Beatles", mode: "Major" },
-  { degrees: ["I", "IV", "V"], bpm: 98, label: "Wild Thing — The Troggs", mode: "Major" },
-  { degrees: ["I", "vi", "IV", "V"], bpm: 118, label: "Stand By Me — Ben E. King", mode: "Major" },
-  { degrees: ["IV", "I", "V", "vi"], bpm: 119, label: "Don't Stop Believin' — Journey", mode: "Major" },
-  { degrees: ["I", "IV", "I", "V"], bpm: 98, label: "Sweet Home Alabama — Lynyrd Skynyrd", mode: "Major" },
-  { degrees: ["ii", "V", "I"], bpm: 120, label: "Autumn Leaves — jazz standard", mode: "Major" },
-  { degrees: ["I", "vi", "ii", "V"], bpm: 70, label: "Blue Moon — jazz standard", mode: "Major" },
-  { degrees: ["I", "V", "vi", "iii", "IV", "I", "IV", "V"], bpm: 76, label: "Canon in D — Pachelbel", mode: "Major" },
-  { degrees: ["I", "IV", "V", "IV"], bpm: 180, label: "La Bamba — Ritchie Valens", mode: "Major" },
-  { degrees: ["i", "VI", "III", "VII"], bpm: 84, label: "Zombie — The Cranberries", mode: "Minor" },
-  { degrees: ["i", "VI", "III", "VII"], bpm: 129, label: "Beggin' — Måneskin", mode: "Minor" },
-  { degrees: ["i", "iv", "v"], bpm: 100, label: "House of the Rising Sun — trad.", mode: "Minor" },
-  { degrees: ["i", "VII", "VI", "V"], bpm: 82, label: "Stairway to Heaven — Led Zeppelin", mode: "Minor" },
-  { degrees: ["i", "VII", "VI", "V"], bpm: 105, label: "Hit the Road Jack — Ray Charles", mode: "Minor" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 76, label: "Let It Be — The Beatles", mode: "Major", root: "C" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 78, label: "No Woman No Cry — Bob Marley", mode: "Major", root: "C" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 110, label: "With or Without You — U2", mode: "Major", root: "D" },
+  { degrees: ["vi", "IV", "I", "V"], bpm: 67, label: "Someone Like You — Adele", mode: "Major", root: "A" },
+  { degrees: ["vi", "IV", "I", "V"], bpm: 82, label: "Complicated — Avril Lavigne", mode: "Major", root: "D" },
+  { degrees: ["vi", "IV", "I", "V"], bpm: 110, label: "Grenade — Bruno Mars", mode: "Major", root: "D#" },
+  { degrees: ["I", "IV", "V"], bpm: 148, label: "Twist and Shout — The Beatles", mode: "Major", root: "C" },
+  { degrees: ["I", "IV", "V"], bpm: 98, label: "Wild Thing — The Troggs", mode: "Major", root: "A" },
+  { degrees: ["I", "vi", "IV", "V"], bpm: 118, label: "Stand By Me — Ben E. King", mode: "Major", root: "A" },
+  { degrees: ["IV", "I", "V", "vi"], bpm: 119, label: "Don't Stop Believin' — Journey", mode: "Major", root: "E" },
+  { degrees: ["I", "IV", "I", "V"], bpm: 98, label: "Sweet Home Alabama — Lynyrd Skynyrd", mode: "Major", root: "D" },
+  { degrees: ["ii", "V", "I"], bpm: 120, label: "Autumn Leaves — jazz standard", mode: "Major", root: "G" },
+  { degrees: ["I", "vi", "ii", "V"], bpm: 70, label: "Blue Moon — jazz standard", mode: "Major", root: "C" },
+  { degrees: ["I", "V", "vi", "iii", "IV", "I", "IV", "V"], bpm: 76, label: "Canon in D — Pachelbel", mode: "Major", root: "D" },
+  { degrees: ["I", "IV", "V", "IV"], bpm: 180, label: "La Bamba — Ritchie Valens", mode: "Major", root: "C" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 84, label: "Zombie — The Cranberries", mode: "Minor", root: "E" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 129, label: "Beggin' — Måneskin", mode: "Minor", root: "A" },
+  { degrees: ["i", "iv", "v"], bpm: 100, label: "House of the Rising Sun — trad.", mode: "Minor", root: "A" },
+  { degrees: ["i", "VII", "VI", "V"], bpm: 82, label: "Stairway to Heaven — Led Zeppelin", mode: "Minor", root: "A" },
+  { degrees: ["i", "VII", "VI", "V"], bpm: 105, label: "Hit the Road Jack — Ray Charles", mode: "Minor", root: "A" },
 ];
 
 export default function App() {
@@ -85,6 +85,12 @@ export default function App() {
   useEffect(() => {
     saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
   }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
+
+  useEffect(() => {
+    setSequence([]);
+    setIsPlaying(false);
+    setPresetIndex(0);
+  }, [baseKeyRoot, scaleMode]);
 
   const playbackSettings = useRef({ volume, sound, capoFret, voicingMemory });
   playbackSettings.current = { volume, sound, capoFret, voicingMemory };
@@ -151,7 +157,9 @@ export default function App() {
 
   const togglePlay = () => setIsPlaying((playing) => !playing);
 
-  const availablePresets = CHORD_PRESETS.filter((preset) => preset.mode === scaleMode);
+  const modePresets = CHORD_PRESETS.filter((preset) => preset.mode === scaleMode);
+  const keyPresets = modePresets.filter((preset) => preset.root === baseKeyRoot);
+  const availablePresets = keyPresets.length > 0 ? keyPresets : modePresets;
   const currentPreset = availablePresets[presetIndex % availablePresets.length];
 
   const stepPreset = (direction: 1 | -1) => {
@@ -261,15 +269,6 @@ export default function App() {
             >
               <Shuffle size={16} />
             </button>
-            <button
-              type="button"
-              className="sequencer-icon-button"
-              onClick={clearSequence}
-              disabled={sequence.length === 0}
-              aria-label="Удалить аккорды"
-            >
-              <Trash2 size={16} />
-            </button>
             <div className="sequencer-steps" aria-label="Количество шагов">
               <button
                 type="button"
@@ -328,34 +327,6 @@ export default function App() {
                 <Plus size={13} />
               </button>
             </div>
-            <div className="sequencer-preset">
-              <button
-                type="button"
-                className="sequencer-icon-button small"
-                onClick={() => stepPreset(-1)}
-                aria-label="Предыдущий пример"
-              >
-                <ChevronLeft size={13} />
-              </button>
-              <span title="Подставить популярную прогрессию">{currentPreset.label}</span>
-              <button
-                type="button"
-                className="sequencer-icon-button small"
-                onClick={() => stepPreset(1)}
-                aria-label="Следующий пример"
-              >
-                <ChevronRight size={13} />
-              </button>
-            </div>
-            <button
-              type="button"
-              className="sequencer-icon-button"
-              onClick={copySequence}
-              disabled={sequence.length === 0}
-              aria-label="Скопировать последовательность"
-            >
-              <Copy size={16} />
-            </button>
             <div className="sequencer-slots" aria-label="Последовательность аккордов">
               {Array.from({ length: stepCount }).map((_, index) => {
                 const step = sequence[index];
@@ -388,6 +359,43 @@ export default function App() {
                 );
               })}
             </div>
+            <div className="sequencer-preset">
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => stepPreset(-1)}
+                aria-label="Предыдущий пример"
+              >
+                <ChevronLeft size={13} />
+              </button>
+              <span title="Подставить популярную прогрессию">{currentPreset.label}</span>
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => stepPreset(1)}
+                aria-label="Следующий пример"
+              >
+                <ChevronRight size={13} />
+              </button>
+            </div>
+            <button
+              type="button"
+              className="sequencer-icon-button"
+              onClick={copySequence}
+              disabled={sequence.length === 0}
+              aria-label="Скопировать последовательность"
+            >
+              <Copy size={16} />
+            </button>
+            <button
+              type="button"
+              className="sequencer-icon-button"
+              onClick={clearSequence}
+              disabled={sequence.length === 0}
+              aria-label="Удалить аккорды"
+            >
+              <Trash2 size={16} />
+            </button>
           </div>
         )}
         <section
