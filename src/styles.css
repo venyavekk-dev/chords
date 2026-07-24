@@ -117,51 +117,138 @@
   --hint-bg: rgba(235, 231, 224, 0.96);
 }
 
-/* Retro design skin ("Дизайн" toggle). A single fixed warm-hardware palette
-   that intentionally ignores the light/dark theme toggle (see TopBar.tsx,
-   which disables that toggle while this is active) - same reasoning as the
-   paywall overlay elsewhere in this file. Placed after the light-theme block
-   so it wins the cascade regardless of which theme is set underneath. */
-:root[data-design="retro"] {
+/* Retro design skins ("Дизайн" picker). Three fixed hardware-inspired
+   palettes that intentionally ignore the light/dark theme toggle (see
+   TopBar.tsx, which disables that toggle while any of these are active) -
+   same reasoning as the paywall overlay elsewhere in this file. Placed
+   after the light-theme block so they win the cascade regardless of which
+   theme is set underneath. Colors were checked against real references:
+   Akai MPK Mini's own orange/black, Korg Minilogue's actual panel/knob
+   colors (pulled from the minilogue-editor project's source), and Roland
+   Juno-60's panel photo (blue section header, cream buttons, orange
+   selected-state). --piano-*/--string-line are helper tokens consumed by
+   the shared piano-key/string-line overrides further down this file. */
+:root[data-design="akai"] {
   color-scheme: dark;
-  --retro-amber: #e8952f;
-  --retro-amber-deep: #d9821e;
-  --retro-yellow: #f2c94c;
-  --retro-ink: #2c2410;
-  --retro-bevel-hi: rgba(255, 246, 214, 0.22);
-  --retro-bevel-lo: rgba(15, 12, 4, 0.4);
+  --page-bg: #0e0e0e;
+  --text-primary: #f1efe9;
+  --text-secondary: #8f8b82;
+  --text-strong: #fdfbf6;
+  --surface-primary: #1d1c1a;
+  --surface-hover: #262420;
+  --surface-active: #f1efe9;
+  --card-active-bg: linear-gradient(180deg, #ff6a34, #e8481a);
+  --card-active-text: #1a0b04;
+  --card-active-muted: rgba(26, 11, 4, 0.7);
+  --card-chip-bg: rgba(241, 239, 233, 0.14);
+  --card-chip-text: rgba(241, 239, 233, 0.76);
+  --card-chip-selected-bg: #1a0b04;
+  --card-chip-selected-text: #f1efe9;
+  --card-grid-line: rgba(26, 11, 4, 0.4);
+  --card-dot: #1a0b04;
+  --border-default: rgba(241, 239, 233, 0.14);
+  --border-strong: rgba(241, 239, 233, 0.3);
+  --note-fill: #f1efe9;
+  --note-ink: #1a0b04;
+  --function-good: #6fae5c;
+  --function-ok: #d0a23c;
+  --function-weak: #d1503a;
+  --home-bg: rgba(111, 174, 92, 0.26);
+  --home-text: #e4f2d8;
+  --home-border: rgba(111, 174, 92, 0.58);
+  --tension-bg: rgba(209, 80, 58, 0.28);
+  --tension-text: #ffe1d6;
+  --tension-border: rgba(209, 80, 58, 0.6);
+  --header-bg: rgba(14, 14, 14, 0.9);
+  --hint-bg: rgba(22, 22, 22, 0.95);
+  --piano-white: #2c2a28;
+  --piano-white-line: #111111;
+  --piano-black: #050505;
+  --piano-active: #ff5a1f;
+  --piano-black-active: #d8430f;
+  --string-line: rgba(241, 239, 233, 0.35);
+}
 
-  --page-bg: #17150f;
-  --text-primary: #eee7d0;
-  --text-secondary: #b7ac89;
-  --text-strong: #fbf5e2;
-  --surface-primary: #6f7a52;
-  --surface-hover: #7c8760;
-  --surface-active: var(--retro-yellow);
-  --card-active-bg: var(--retro-yellow);
-  --card-active-text: var(--retro-ink);
-  --card-active-muted: rgba(44, 36, 16, 0.66);
-  --card-chip-bg: rgba(23, 21, 15, 0.2);
-  --card-chip-text: rgba(44, 36, 16, 0.76);
-  --card-chip-selected-bg: var(--retro-ink);
-  --card-chip-selected-text: #f7efd2;
-  --card-grid-line: rgba(44, 36, 16, 0.42);
-  --card-dot: var(--retro-ink);
-  --border-default: rgba(15, 12, 4, 0.32);
-  --border-strong: rgba(15, 12, 4, 0.52);
-  --note-fill: #f4ecd2;
-  --note-ink: var(--retro-ink);
-  --function-good: #8fb35e;
-  --function-ok: #e0a83c;
-  --function-weak: #c85a3c;
-  --home-bg: rgba(143, 179, 94, 0.28);
-  --home-text: #e6f2d6;
-  --home-border: rgba(143, 179, 94, 0.6);
-  --tension-bg: rgba(200, 90, 60, 0.28);
-  --tension-text: #ffe3d6;
-  --tension-border: rgba(200, 90, 60, 0.62);
-  --header-bg: rgba(37, 33, 19, 0.92);
-  --hint-bg: rgba(37, 33, 19, 0.95);
+:root[data-design="korg"] {
+  color-scheme: light;
+  --page-bg: #201a12;
+  --text-primary: #37342f;
+  --text-secondary: #837d75;
+  --text-strong: #1c1a17;
+  --surface-primary: #dfdbdd;
+  --surface-hover: #eae7e3;
+  --surface-active: #f6f5f3;
+  --card-active-bg: linear-gradient(180deg, #e2505f, #b52c3a);
+  --card-active-text: #fff5f4;
+  --card-active-muted: rgba(255, 245, 244, 0.72);
+  --card-chip-bg: rgba(46, 48, 49, 0.14);
+  --card-chip-text: rgba(46, 48, 49, 0.72);
+  --card-chip-selected-bg: #2e3031;
+  --card-chip-selected-text: #f6f5f3;
+  --card-grid-line: rgba(255, 245, 244, 0.4);
+  --card-dot: #fff5f4;
+  --border-default: rgba(55, 52, 47, 0.16);
+  --border-strong: rgba(55, 52, 47, 0.34);
+  --note-fill: #2e3031;
+  --note-ink: #f6f5f3;
+  --function-good: #3f8f52;
+  --function-ok: #b98a1e;
+  --function-weak: #c0392b;
+  --home-bg: rgba(63, 143, 82, 0.22);
+  --home-text: #f0f8ea;
+  --home-border: rgba(63, 143, 82, 0.5);
+  --tension-bg: rgba(192, 57, 43, 0.2);
+  --tension-text: #4a1410;
+  --tension-border: rgba(192, 57, 43, 0.5);
+  --header-bg: rgba(58, 40, 24, 0.9);
+  --hint-bg: rgba(32, 26, 18, 0.94);
+  --piano-white: #efe9dc;
+  --piano-white-line: #8c8579;
+  --piano-black: #211d1a;
+  --piano-active: #d03445;
+  --piano-black-active: #a4232f;
+  --string-line: rgba(55, 52, 47, 0.4);
+}
+
+:root[data-design="juno"] {
+  color-scheme: dark;
+  --page-bg: #0d0d0d;
+  --text-primary: #ece7d8;
+  --text-secondary: #8f897a;
+  --text-strong: #faf6ea;
+  --surface-primary: #e6dcc0;
+  --surface-hover: #ddd0ab;
+  --surface-active: #f5a83c;
+  --card-active-bg: linear-gradient(180deg, #f5a83c, #d9791b);
+  --card-active-text: #241a06;
+  --card-active-muted: rgba(36, 26, 6, 0.7);
+  --card-chip-bg: rgba(36, 26, 6, 0.14);
+  --card-chip-text: rgba(36, 26, 6, 0.76);
+  --card-chip-selected-bg: #241a06;
+  --card-chip-selected-text: #f5ecd4;
+  --card-grid-line: rgba(36, 26, 6, 0.4);
+  --card-dot: #241a06;
+  --border-default: rgba(36, 26, 6, 0.16);
+  --border-strong: rgba(36, 26, 6, 0.32);
+  --note-fill: #241a06;
+  --note-ink: #f5ecd4;
+  --function-good: #4a8f4e;
+  --function-ok: #c98a1e;
+  --function-weak: #c0392b;
+  --home-bg: rgba(74, 143, 78, 0.24);
+  --home-text: #eaf6e6;
+  --home-border: rgba(74, 143, 78, 0.55);
+  --tension-bg: rgba(192, 57, 43, 0.26);
+  --tension-text: #ffe4dd;
+  --tension-border: rgba(192, 57, 43, 0.56);
+  --header-bg: rgba(13, 13, 13, 0.9);
+  --hint-bg: rgba(19, 19, 19, 0.95);
+  --piano-white: #ece4c9;
+  --piano-white-line: #171310;
+  --piano-black: #141414;
+  --piano-active: #f0972e;
+  --piano-black-active: #c9741a;
+  --string-line: rgba(36, 26, 6, 0.4);
 }
 
 * {
