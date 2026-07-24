@@ -124,8 +124,6 @@ export default function App() {
   };
 
   const togglePlay = () => setIsPlaying((playing) => !playing);
-  const sequencedSymbols = new Set(sequence.map((item) => item.symbol));
-  const playingSymbol = isPlaying && currentStep !== null ? sequence[currentStep]?.symbol : undefined;
 
   const selectChord = (chord: DegreeChord) => {
     setPreviewChord(undefined);
@@ -319,8 +317,7 @@ export default function App() {
             >
               <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
               <button
-                className={`strip-main ${sequencerMode && sequencedSymbols.has(chord.symbol) ? "sequencer-selected" : ""} ${chord.symbol === playingSymbol ? "sequencer-current" : ""}`}
-                style={chord.symbol === playingSymbol ? { animationDuration: `${stepMs}ms` } : undefined}
+                className="strip-main"
                 onClick={() => {
                   selectChord(chord);
                   if (sequencerMode) addSequenceChord(chord);
@@ -332,8 +329,7 @@ export default function App() {
               <div className="variant-row">
                 {chordVariants[index].map((variant) => (
                   <button
-                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""} ${sequencerMode && sequencedSymbols.has(variant.symbol) ? "sequencer-selected" : ""} ${variant.symbol === playingSymbol ? "sequencer-current" : ""}`}
-                    style={variant.symbol === playingSymbol ? { animationDuration: `${stepMs}ms` } : undefined}
+                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""}`}
                     key={variant.symbol}
                     onClick={() => {
                       selectChord(variant);
