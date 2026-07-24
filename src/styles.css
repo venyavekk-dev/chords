@@ -117,6 +117,140 @@
   --hint-bg: rgba(235, 231, 224, 0.96);
 }
 
+/* Retro design skins ("Дизайн" picker). Three fixed hardware-inspired
+   palettes that intentionally ignore the light/dark theme toggle (see
+   TopBar.tsx, which disables that toggle while any of these are active) -
+   same reasoning as the paywall overlay elsewhere in this file. Placed
+   after the light-theme block so they win the cascade regardless of which
+   theme is set underneath. Colors were checked against real references:
+   Akai MPK Mini's own orange/black, Korg Minilogue's actual panel/knob
+   colors (pulled from the minilogue-editor project's source), and Roland
+   Juno-60's panel photo (blue section header, cream buttons, orange
+   selected-state). The --piano- and --string-line tokens are helpers
+   consumed by the shared piano-key/string-line overrides further down. */
+:root[data-design="akai"] {
+  color-scheme: dark;
+  --page-bg: #0e0e0e;
+  --text-primary: #f1efe9;
+  --text-secondary: #8f8b82;
+  --text-strong: #fdfbf6;
+  --surface-primary: #1d1c1a;
+  --surface-hover: #262420;
+  --surface-active: #f1efe9;
+  --card-active-bg: linear-gradient(180deg, #ff6a34, #e8481a);
+  --card-active-text: #1a0b04;
+  --card-active-muted: rgba(26, 11, 4, 0.7);
+  --card-chip-bg: rgba(241, 239, 233, 0.14);
+  --card-chip-text: rgba(241, 239, 233, 0.76);
+  --card-chip-selected-bg: #1a0b04;
+  --card-chip-selected-text: #f1efe9;
+  --card-grid-line: rgba(26, 11, 4, 0.4);
+  --card-dot: #1a0b04;
+  --border-default: rgba(241, 239, 233, 0.14);
+  --border-strong: rgba(241, 239, 233, 0.3);
+  --note-fill: #f1efe9;
+  --note-ink: #1a0b04;
+  --function-good: #6fae5c;
+  --function-ok: #d0a23c;
+  --function-weak: #d1503a;
+  --home-bg: rgba(111, 174, 92, 0.26);
+  --home-text: #e4f2d8;
+  --home-border: rgba(111, 174, 92, 0.58);
+  --tension-bg: rgba(209, 80, 58, 0.28);
+  --tension-text: #ffe1d6;
+  --tension-border: rgba(209, 80, 58, 0.6);
+  --header-bg: rgba(14, 14, 14, 0.9);
+  --hint-bg: rgba(22, 22, 22, 0.95);
+  --piano-white: #2c2a28;
+  --piano-white-line: #111111;
+  --piano-black: #050505;
+  --piano-active: #ff5a1f;
+  --piano-black-active: #d8430f;
+  --string-line: rgba(241, 239, 233, 0.35);
+}
+
+:root[data-design="korg"] {
+  color-scheme: light;
+  --page-bg: #201a12;
+  --text-primary: #37342f;
+  --text-secondary: #837d75;
+  --text-strong: #1c1a17;
+  --surface-primary: #dfdbdd;
+  --surface-hover: #eae7e3;
+  --surface-active: #f6f5f3;
+  --card-active-bg: linear-gradient(180deg, #e2505f, #b52c3a);
+  --card-active-text: #fff5f4;
+  --card-active-muted: rgba(255, 245, 244, 0.72);
+  --card-chip-bg: rgba(46, 48, 49, 0.14);
+  --card-chip-text: rgba(46, 48, 49, 0.72);
+  --card-chip-selected-bg: #2e3031;
+  --card-chip-selected-text: #f6f5f3;
+  --card-grid-line: rgba(255, 245, 244, 0.4);
+  --card-dot: #fff5f4;
+  --border-default: rgba(55, 52, 47, 0.16);
+  --border-strong: rgba(55, 52, 47, 0.34);
+  --note-fill: #2e3031;
+  --note-ink: #f6f5f3;
+  --function-good: #3f8f52;
+  --function-ok: #b98a1e;
+  --function-weak: #c0392b;
+  --home-bg: rgba(63, 143, 82, 0.22);
+  --home-text: #f0f8ea;
+  --home-border: rgba(63, 143, 82, 0.5);
+  --tension-bg: rgba(192, 57, 43, 0.2);
+  --tension-text: #4a1410;
+  --tension-border: rgba(192, 57, 43, 0.5);
+  --header-bg: rgba(58, 40, 24, 0.9);
+  --hint-bg: rgba(32, 26, 18, 0.94);
+  --piano-white: #efe9dc;
+  --piano-white-line: #8c8579;
+  --piano-black: #211d1a;
+  --piano-active: #d03445;
+  --piano-black-active: #a4232f;
+  --string-line: rgba(55, 52, 47, 0.4);
+}
+
+:root[data-design="juno"] {
+  color-scheme: dark;
+  --page-bg: #0d0d0d;
+  --text-primary: #ece7d8;
+  --text-secondary: #8f897a;
+  --text-strong: #faf6ea;
+  --surface-primary: #e6dcc0;
+  --surface-hover: #ddd0ab;
+  --surface-active: #f5a83c;
+  --card-active-bg: linear-gradient(180deg, #f5a83c, #d9791b);
+  --card-active-text: #241a06;
+  --card-active-muted: rgba(36, 26, 6, 0.7);
+  --card-chip-bg: rgba(36, 26, 6, 0.14);
+  --card-chip-text: rgba(36, 26, 6, 0.76);
+  --card-chip-selected-bg: #241a06;
+  --card-chip-selected-text: #f5ecd4;
+  --card-grid-line: rgba(36, 26, 6, 0.4);
+  --card-dot: #241a06;
+  --border-default: rgba(36, 26, 6, 0.16);
+  --border-strong: rgba(36, 26, 6, 0.32);
+  --note-fill: #241a06;
+  --note-ink: #f5ecd4;
+  --function-good: #4a8f4e;
+  --function-ok: #c98a1e;
+  --function-weak: #c0392b;
+  --home-bg: rgba(74, 143, 78, 0.24);
+  --home-text: #eaf6e6;
+  --home-border: rgba(74, 143, 78, 0.55);
+  --tension-bg: rgba(192, 57, 43, 0.26);
+  --tension-text: #ffe4dd;
+  --tension-border: rgba(192, 57, 43, 0.56);
+  --header-bg: rgba(13, 13, 13, 0.9);
+  --hint-bg: rgba(19, 19, 19, 0.95);
+  --piano-white: #ece4c9;
+  --piano-white-line: #171310;
+  --piano-black: #141414;
+  --piano-active: #f0972e;
+  --piano-black-active: #c9741a;
+  --string-line: rgba(36, 26, 6, 0.4);
+}
+
 * {
   box-sizing: border-box;
 }
@@ -279,6 +413,11 @@ select {
   color: var(--text-primary);
 }
 
+.onboarding-toggle:disabled {
+  opacity: 0.4;
+  cursor: not-allowed;
+}
+
 .onboarding-switch {
   position: relative;
   width: 26px;
@@ -326,6 +465,204 @@ select {
 .theme-switch .theme-icon-moon {
   right: 2px;
 }
+
+.design-rocker {
+  position: relative;
+  display: flex;
+  width: 28px;
+  height: 14px;
+  border-radius: 3px;
+  overflow: hidden;
+  border: 1px solid var(--border-strong);
+  background: var(--surface-primary);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.35);
+}
+
+.design-rocker-lobe {
+  flex: 1;
+  background: var(--surface-primary);
+  transition: background var(--transition-fast), box-shadow var(--transition-fast);
+}
+
+.design-rocker-lobe:first-child {
+  border-right: 1px solid var(--border-default);
+}
+
+.design-toggle:not(.active) .design-rocker-lobe:first-child {
+  background: var(--surface-active);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.design-toggle.active .design-rocker-lobe:last-child {
+  background: linear-gradient(180deg, #f0a83c, #d9821e);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 4px rgba(217, 130, 30, 0.55);
+}
+
+/* Design picker modal - opened by the "Дизайн" toggle above. Same visual
+   family as the rest of the app (uses the live theme tokens for the card
+   itself, so it re-skins along with whatever design is currently active),
+   but the swatches inside are hardcoded per-skin so all four previews are
+   visible at once regardless of which one is live. */
+body.design-picker-open {
+  overflow: hidden;
+}
+
+.design-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(10, 9, 7, 0.55);
+  backdrop-filter: blur(6px);
+  animation: design-picker-fade 180ms var(--ease-default);
+}
+
+@keyframes design-picker-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.design-picker-card {
+  position: relative;
+  width: min(100%, 46rem);
+  max-height: min(86vh, 44rem);
+  overflow-y: auto;
+  border-radius: var(--radius-card);
+  padding: var(--space-6);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6);
+}
+
+.design-picker-card h2 {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+}
+
+.design-picker-sub {
+  margin: 0 0 var(--space-5);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.design-picker-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+.design-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-4);
+}
+
+.design-picker-option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-card);
+  background: var(--surface-hover);
+  color: inherit;
+  text-align: left;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.design-picker-option.selected {
+  border-color: var(--text-strong);
+}
+
+.design-picker-option:hover,
+.design-picker-option:focus-visible {
+  border-color: #4d8cff;
+  transform: translateY(-2px);
+}
+
+.design-picker-option-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.design-picker-option-blurb {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.design-picker-select {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  font-size: 0.72rem;
+}
+
+.design-picker-option.selected .design-picker-select {
+  border-color: transparent;
+  background: var(--text-strong);
+  color: var(--page-bg);
+}
+
+.design-swatch {
+  display: block;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.design-swatch-panel {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+}
+
+.design-swatch-chip {
+  flex: 1;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.design-swatch-keys {
+  display: flex;
+  height: 12px;
+}
+
+.design-swatch-keys i {
+  flex: 1;
+}
+
+.design-swatch-classic .design-swatch-panel { background: #252525; }
+.design-swatch-classic .design-swatch-chip { background: #333230; }
+.design-swatch-classic .design-swatch-chip-active { background: #a8a8a8; }
+.design-swatch-classic .design-swatch-keys i { background: #d8d5ce; border-right: 1px solid #77736d; }
+
+.design-swatch-akai .design-swatch-panel { background: #161616; }
+.design-swatch-akai .design-swatch-chip { background: #2a2824; }
+.design-swatch-akai .design-swatch-chip-active { background: linear-gradient(180deg, #ff6a34, #e8481a); }
+.design-swatch-akai .design-swatch-keys i { background: #2c2a28; border-right: 1px solid #111111; }
+
+.design-swatch-korg .design-swatch-panel { background: #dfdbdd; }
+.design-swatch-korg .design-swatch-chip { background: #2e3031; }
+.design-swatch-korg .design-swatch-chip-active { background: linear-gradient(180deg, #e2505f, #b52c3a); }
+.design-swatch-korg .design-swatch-keys i { background: #efe9dc; border-right: 1px solid #b9b2a6; }
+
+.design-swatch-juno .design-swatch-panel { background: #131313; }
+.design-swatch-juno .design-swatch-chip { background: #e6dcc0; }
+.design-swatch-juno .design-swatch-chip-active { background: linear-gradient(180deg, #f5a83c, #d9791b); }
+.design-swatch-juno .design-swatch-keys i { background: #ece4c9; border-right: 1px solid #171310; }
 
 .settings-panel {
   /* Always takes up its full height, open or closed, so toggling only
@@ -1341,4 +1678,151 @@ select {
     animation-duration: 0.01ms !important;
     animation-iteration-count: 1 !important;
   }
+}
+
+/* Retro design skins, part 2: texture and bevels shared by all three skins
+   (Akai/Korg/Juno) on top of the token palettes above. Most controls (pill
+   toggles, key/scale/sound selectors, note dots, hint banners) already
+   re-theme for free because they're built entirely from the CSS custom
+   properties redefined under :root[data-design="..."] - this section only
+   adds what tokens alone can't: background textures, raised/pressed panel
+   bevels, and the handful of colors the base stylesheet hardcodes instead
+   of tokenizing (piano keys, string/fret grid lines - via the --piano- and
+   --string-line helper tokens each skin block defines). The accent glow
+   reuses --piano-active since that's already each skin's one saturated
+   accent color (Akai orange / Korg red / Juno amber). Purely additive -
+   deleting this block and the three token blocks above fully removes the
+   retro skins with no component changes needed. */
+
+[data-design="akai"] body,
+[data-design="korg"] body,
+[data-design="juno"] body {
+  background-image:
+    repeating-linear-gradient(135deg, rgba(0, 0, 0, 0.02) 0 2px, transparent 2px 6px),
+    radial-gradient(ellipse 1100px 650px at 50% -8%, color-mix(in srgb, var(--piano-active) 8%, transparent), transparent 60%);
+}
+
+[data-design="akai"] .topbar,
+[data-design="korg"] .topbar,
+[data-design="juno"] .topbar {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.035), transparent 55%);
+  box-shadow: inset 0 -1px 0 rgba(0, 0, 0, 0.3);
+}
+
+[data-design="akai"] .minimal-fretboard,
+[data-design="akai"] .piano-keyboard,
+[data-design="akai"] .segmented-control,
+[data-design="akai"] .volume-slider-track,
+[data-design="korg"] .minimal-fretboard,
+[data-design="korg"] .piano-keyboard,
+[data-design="korg"] .segmented-control,
+[data-design="korg"] .volume-slider-track,
+[data-design="juno"] .minimal-fretboard,
+[data-design="juno"] .piano-keyboard,
+[data-design="juno"] .segmented-control,
+[data-design="juno"] .volume-slider-track {
+  border: 1px solid var(--border-strong);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.1) 92%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -3px 5px rgba(0, 0, 0, 0.3), 0 3px 0 rgba(0, 0, 0, 0.22);
+}
+
+[data-design="akai"] .strip-chord,
+[data-design="akai"] .position-button,
+[data-design="korg"] .strip-chord,
+[data-design="korg"] .position-button,
+[data-design="juno"] .strip-chord,
+[data-design="juno"] .position-button {
+  border-color: var(--border-strong);
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.06), rgba(0, 0, 0, 0.1) 92%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.16), inset 0 -2px 4px rgba(0, 0, 0, 0.28), 0 2px 0 rgba(0, 0, 0, 0.2);
+}
+
+[data-design="akai"] .strip-chord.active,
+[data-design="akai"] .position-button.active,
+[data-design="korg"] .strip-chord.active,
+[data-design="korg"] .position-button.active,
+[data-design="juno"] .strip-chord.active,
+[data-design="juno"] .position-button.active {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.32), rgba(0, 0, 0, 0.08) 92%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.55), inset 0 -2px 4px rgba(0, 0, 0, 0.3), 0 0 14px color-mix(in srgb, var(--piano-active) 45%, transparent);
+}
+
+[data-design="akai"] .segmented-control button.active,
+[data-design="korg"] .segmented-control button.active,
+[data-design="juno"] .segmented-control button.active {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.5), 0 0 8px color-mix(in srgb, var(--piano-active) 40%, transparent);
+}
+
+[data-design="akai"] .fret-number.capo-active,
+[data-design="korg"] .fret-number.capo-active,
+[data-design="juno"] .fret-number.capo-active {
+  box-shadow: 0 0 0 1px var(--card-active-text), 0 0 8px color-mix(in srgb, var(--piano-active) 55%, transparent);
+}
+
+[data-design="akai"] .relationship-hint,
+[data-design="korg"] .relationship-hint,
+[data-design="juno"] .relationship-hint {
+  background-image: linear-gradient(180deg, rgba(255, 255, 255, 0.04), rgba(0, 0, 0, 0.1));
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), 0 6px 18px rgba(0, 0, 0, 0.4);
+}
+
+[data-design="akai"] .onboarding-acknowledge,
+[data-design="korg"] .onboarding-acknowledge,
+[data-design="juno"] .onboarding-acknowledge {
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.14), inset 0 -2px 3px rgba(0, 0, 0, 0.28);
+}
+
+[data-design="akai"] .white-key,
+[data-design="korg"] .white-key,
+[data-design="juno"] .white-key {
+  background: var(--piano-white);
+  border-right-color: var(--piano-white-line);
+  color: var(--note-ink);
+}
+
+[data-design="akai"] .black-key,
+[data-design="korg"] .black-key,
+[data-design="juno"] .black-key {
+  background: var(--piano-black);
+  color: var(--note-fill);
+}
+
+[data-design="akai"] .piano-key.active,
+[data-design="korg"] .piano-key.active,
+[data-design="juno"] .piano-key.active {
+  background: var(--piano-active);
+}
+
+[data-design="akai"] .black-key.active,
+[data-design="korg"] .black-key.active,
+[data-design="juno"] .black-key.active {
+  background: var(--piano-black-active);
+}
+
+[data-design="akai"] .string-cell,
+[data-design="korg"] .string-cell,
+[data-design="juno"] .string-cell {
+  background-image: linear-gradient(180deg, transparent 48.75%, var(--string-line) 49%, var(--string-line) 51%, transparent 51.25%);
+}
+
+[data-design="akai"] .mini-cell,
+[data-design="korg"] .mini-cell,
+[data-design="juno"] .mini-cell {
+  background-image: linear-gradient(180deg, transparent 46%, var(--string-line) 47%, var(--string-line) 53%, transparent 54%);
+}
+
+[data-design="akai"] .control-group legend,
+[data-design="akai"] .instrument-heading small,
+[data-design="korg"] .control-group legend,
+[data-design="korg"] .instrument-heading small,
+[data-design="juno"] .control-group legend,
+[data-design="juno"] .instrument-heading small {
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+
+[data-design="akai"] .brand h1 span,
+[data-design="korg"] .brand h1 span,
+[data-design="juno"] .brand h1 span {
+  font-weight: 700;
 }

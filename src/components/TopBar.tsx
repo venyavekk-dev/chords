@@ -1,7 +1,15 @@
 import { Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { Instrument, ScaleMode, SoundPreset } from "../types/music";
+import type { DesignSkin, Instrument, ScaleMode, SoundPreset } from "../types/music";
 import { NOTES } from "../lib/musicTheory";
+import { DesignPickerModal } from "./DesignPickerModal";
+
+const DESIGN_META_COLOR: Record<DesignSkin, string> = {
+  classic: "",
+  akai: "#0e0e0e",
+  korg: "#201a12",
+  juno: "#0d0d0d",
+};
 
 type Props = {
   keyRoot: string;
@@ -23,6 +31,8 @@ const DEFAULT_LOGO_SIZE = 34;
 
 export function TopBar(props: Props) {
   const [theme, setTheme] = useState<"dark" | "light">("dark");
+  const [design, setDesign] = useState<DesignSkin>("classic");
+  const [designPickerOpen, setDesignPickerOpen] = useState(false);
   const [settingsOpen, setSettingsOpen] = useState(true);
   const [logoSize, setLogoSize] = useState(DEFAULT_LOGO_SIZE);
   const nameRef = useRef<HTMLHeadingElement>(null);
@@ -31,8 +41,13 @@ export function TopBar(props: Props) {
 
   useEffect(() => {
     document.documentElement.dataset.theme = theme;
-    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", theme === "light" ? "#f7f5f0" : "#1c1c1c");
-  }, [theme]);
+    const metaColor = DESIGN_META_COLOR[design] || (theme === "light" ? "#f7f5f0" : "#1c1c1c");
+    document.querySelector('meta[name="theme-color"]')?.setAttribute("content", metaColor);
+  }, [theme, design]);
+
+  useEffect(() => {
+    document.documentElement.dataset.design = design;
+  }, [design]);
 
   useEffect(() => {
     const el = nameRef.current;
@@ -88,6 +103,8 @@ export function TopBar(props: Props) {
             type="button"
             className={`onboarding-toggle theme-toggle ${theme === "light" ? "active" : ""}`}
             aria-pressed={theme === "light"}
+            disabled={design !== "classic"}
+            aria-disabled={design !== "classic"}
             onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
           >
             <span className="onboarding-switch theme-switch" aria-hidden="true">
@@ -96,6 +113,19 @@ export function TopBar(props: Props) {
               <i />
             </span>
             Тема
+          </button>
+          <button
+            type="button"
+            className={`onboarding-toggle design-toggle ${design !== "classic" ? "active" : ""}`}
+            aria-haspopup="dialog"
+            aria-expanded={designPickerOpen}
+            onClick={() => setDesignPickerOpen(true)}
+          >
+            <span className="design-rocker" aria-hidden="true">
+              <i className="design-rocker-lobe" />
+              <i className="design-rocker-lobe" />
+            </span>
+            Дизайн
           </button>
         </div>
       </div>
@@ -154,6 +184,15 @@ export function TopBar(props: Props) {
           </fieldset>
         </div>
       </div>
+      <DesignPickerModal
+        open={designPickerOpen}
+        current={design}
+        onSelect={(skin) => {
+          setDesign(skin);
+          setDesignPickerOpen(false);
+        }}
+        onClose={() => setDesignPickerOpen(false)}
+      />
     </header>
   );
 }
