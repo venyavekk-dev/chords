@@ -1,6 +1,6 @@
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
@@ -18,12 +18,25 @@ type ChordPreset = { degrees: string[]; bpm: number; label: string; mode: ScaleM
 
 const CHORD_PRESETS: ChordPreset[] = [
   { degrees: ["I", "V", "vi", "IV"], bpm: 76, label: "Let It Be — The Beatles", mode: "Major" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 78, label: "No Woman No Cry — Bob Marley", mode: "Major" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 110, label: "With or Without You — U2", mode: "Major" },
   { degrees: ["vi", "IV", "I", "V"], bpm: 67, label: "Someone Like You — Adele", mode: "Major" },
+  { degrees: ["vi", "IV", "I", "V"], bpm: 82, label: "Complicated — Avril Lavigne", mode: "Major" },
+  { degrees: ["vi", "IV", "I", "V"], bpm: 110, label: "Grenade — Bruno Mars", mode: "Major" },
   { degrees: ["I", "IV", "V"], bpm: 148, label: "Twist and Shout — The Beatles", mode: "Major" },
+  { degrees: ["I", "IV", "V"], bpm: 98, label: "Wild Thing — The Troggs", mode: "Major" },
+  { degrees: ["I", "vi", "IV", "V"], bpm: 118, label: "Stand By Me — Ben E. King", mode: "Major" },
+  { degrees: ["IV", "I", "V", "vi"], bpm: 119, label: "Don't Stop Believin' — Journey", mode: "Major" },
+  { degrees: ["I", "IV", "I", "V"], bpm: 98, label: "Sweet Home Alabama — Lynyrd Skynyrd", mode: "Major" },
   { degrees: ["ii", "V", "I"], bpm: 120, label: "Autumn Leaves — jazz standard", mode: "Major" },
+  { degrees: ["I", "vi", "ii", "V"], bpm: 70, label: "Blue Moon — jazz standard", mode: "Major" },
   { degrees: ["I", "V", "vi", "iii", "IV", "I", "IV", "V"], bpm: 76, label: "Canon in D — Pachelbel", mode: "Major" },
+  { degrees: ["I", "IV", "V", "IV"], bpm: 180, label: "La Bamba — Ritchie Valens", mode: "Major" },
   { degrees: ["i", "VI", "III", "VII"], bpm: 84, label: "Zombie — The Cranberries", mode: "Minor" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 129, label: "Beggin' — Måneskin", mode: "Minor" },
   { degrees: ["i", "iv", "v"], bpm: 100, label: "House of the Rising Sun — trad.", mode: "Minor" },
+  { degrees: ["i", "VII", "VI", "V"], bpm: 82, label: "Stairway to Heaven — Led Zeppelin", mode: "Minor" },
+  { degrees: ["i", "VII", "VI", "V"], bpm: 105, label: "Hit the Road Jack — Ray Charles", mode: "Minor" },
 ];
 
 export default function App() {
@@ -141,16 +154,19 @@ export default function App() {
   const availablePresets = CHORD_PRESETS.filter((preset) => preset.mode === scaleMode);
   const currentPreset = availablePresets[presetIndex % availablePresets.length];
 
-  const applyPreset = () => {
-    const matched = currentPreset.degrees
+  const stepPreset = (direction: 1 | -1) => {
+    const total = availablePresets.length;
+    const nextIndex = (((presetIndex + direction) % total) + total) % total;
+    const preset = availablePresets[nextIndex];
+    setPresetIndex(nextIndex);
+    const matched = preset.degrees
       .map((degree) => chords.find((chord) => chord.degree === degree))
       .filter((chord): chord is DegreeChord => Boolean(chord));
     if (matched.length === 0) return;
     setIsPlaying(false);
     setStepCount(Math.max(2, Math.min(8, matched.length)));
     setSequence(matched);
-    setBpm(currentPreset.bpm);
-    setPresetIndex((index) => (index + 1) % availablePresets.length);
+    setBpm(preset.bpm);
   };
 
   const shuffleSequence = () => {
@@ -312,9 +328,25 @@ export default function App() {
                 <Plus size={13} />
               </button>
             </div>
-            <button type="button" className="sequencer-preset" onClick={applyPreset} title="Подставить популярную прогрессию">
-              {currentPreset.label}
-            </button>
+            <div className="sequencer-preset">
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => stepPreset(-1)}
+                aria-label="Предыдущий пример"
+              >
+                <ChevronLeft size={13} />
+              </button>
+              <span title="Подставить популярную прогрессию">{currentPreset.label}</span>
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => stepPreset(1)}
+                aria-label="Следующий пример"
+              >
+                <ChevronRight size={13} />
+              </button>
+            </div>
             <button
               type="button"
               className="sequencer-icon-button"
