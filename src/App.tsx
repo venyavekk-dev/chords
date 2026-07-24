@@ -32,11 +32,23 @@ const CHORD_PRESETS: ChordPreset[] = [
   { degrees: ["I", "vi", "ii", "V"], bpm: 70, label: "Blue Moon — jazz standard", mode: "Major", root: "C" },
   { degrees: ["I", "V", "vi", "iii", "IV", "I", "IV", "V"], bpm: 76, label: "Canon in D — Pachelbel", mode: "Major", root: "D" },
   { degrees: ["I", "IV", "V", "IV"], bpm: 180, label: "La Bamba — Ritchie Valens", mode: "Major", root: "C" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 110, label: "Numb — Linkin Park", mode: "Major", root: "F" },
+  { degrees: ["I", "IV", "V"], bpm: 168, label: "Johnny B. Goode — Chuck Berry", mode: "Major", root: "A#" },
+  { degrees: ["ii", "V", "I"], bpm: 120, label: "Fly Me to the Moon — jazz standard", mode: "Major", root: "C" },
+  { degrees: ["I", "vi", "IV", "V"], bpm: 117, label: "Every Breath You Take — The Police", mode: "Major", root: "G" },
+  { degrees: ["I", "V", "vi", "IV"], bpm: 140, label: "I'm Yours — Jason Mraz", mode: "Major", root: "G" },
+  { degrees: ["I", "IV", "V", "vi"], bpm: 148, label: "Brown Eyed Girl — Van Morrison", mode: "Major", root: "G" },
   { degrees: ["i", "VI", "III", "VII"], bpm: 84, label: "Zombie — The Cranberries", mode: "Minor", root: "E" },
   { degrees: ["i", "VI", "III", "VII"], bpm: 129, label: "Beggin' — Måneskin", mode: "Minor", root: "A" },
   { degrees: ["i", "iv", "v"], bpm: 100, label: "House of the Rising Sun — trad.", mode: "Minor", root: "A" },
   { degrees: ["i", "VII", "VI", "V"], bpm: 82, label: "Stairway to Heaven — Led Zeppelin", mode: "Minor", root: "A" },
   { degrees: ["i", "VII", "VI", "V"], bpm: 105, label: "Hit the Road Jack — Ray Charles", mode: "Minor", root: "A" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 95, label: "Torn — Natalie Imbruglia", mode: "Minor", root: "A" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 119, label: "Poker Face — Lady Gaga", mode: "Minor", root: "G#" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 143, label: "Little Talks — Of Monsters and Men", mode: "Minor", root: "G" },
+  { degrees: ["i", "iv", "v"], bpm: 70, label: "Feeling Good — Nina Simone", mode: "Minor", root: "D" },
+  { degrees: ["i", "iv", "v"], bpm: 74, label: "Wicked Game — Chris Isaak", mode: "Minor", root: "B" },
+  { degrees: ["i", "VI", "III", "VII"], bpm: 130, label: "Personal Jesus — Depeche Mode", mode: "Minor", root: "F#" },
 ];
 
 export default function App() {
@@ -158,8 +170,10 @@ export default function App() {
   const togglePlay = () => setIsPlaying((playing) => !playing);
 
   const modePresets = CHORD_PRESETS.filter((preset) => preset.mode === scaleMode);
-  const keyPresets = modePresets.filter((preset) => preset.root === baseKeyRoot);
-  const availablePresets = keyPresets.length > 0 ? keyPresets : modePresets;
+  const availablePresets = [
+    ...modePresets.filter((preset) => preset.root === baseKeyRoot),
+    ...modePresets.filter((preset) => preset.root !== baseKeyRoot),
+  ];
   const currentPreset = availablePresets[presetIndex % availablePresets.length];
 
   const stepPreset = (direction: 1 | -1) => {
