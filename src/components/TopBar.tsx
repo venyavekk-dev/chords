@@ -2,6 +2,7 @@ import { Moon, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Instrument, ScaleMode, SoundPreset } from "../types/music";
 import { NOTES } from "../lib/musicTheory";
+import { formatTrialRemaining } from "../lib/trial";
 
 type Props = {
   keyRoot: string;
@@ -9,6 +10,7 @@ type Props = {
   instrument: Instrument;
   sound: SoundPreset;
   onboardingOpen: boolean;
+  trialRemainingMs: number;
   volume: number;
   onKeyRoot: (value: string) => void;
   onScaleMode: (value: ScaleMode) => void;
@@ -16,6 +18,7 @@ type Props = {
   onSound: (value: SoundPreset) => void;
   onPlayChord: () => void;
   onToggleOnboarding: () => void;
+  onTrialLinkClick: () => void;
   onVolume: (value: number) => void;
 };
 
@@ -82,6 +85,9 @@ export function TopBar(props: Props) {
             >
               <span className="onboarding-switch" aria-hidden="true"><i /></span>
               Настройки
+            </button>
+            <button type="button" className="trial-timer-link" onClick={props.onTrialLinkClick}>
+              Пробный период {formatTrialRemaining(props.trialRemainingMs)}
             </button>
           </div>
           <button

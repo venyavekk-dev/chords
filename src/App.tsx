@@ -1,6 +1,7 @@
 import type { ReactNode } from "react";
 import { useEffect, useMemo, useState } from "react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
+import { PaywallOverlay } from "./components/PaywallOverlay";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
@@ -8,6 +9,7 @@ import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
+import { loadTrial, saveTrial, TRIAL_MS } from "./lib/trial";
 import { playChord } from "./lib/audio";
 import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
 
@@ -21,6 +23,10 @@ export default function App() {
   const [sound, setSound] = useState<SoundPreset>(initial.sound ?? "Velvet");
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
+  const [trial, setTrial] = useState(() => loadTrial());
+  const [now, setNow] = useState(() => Date.now());
+  const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
+  const trialExpired = !trial.purchased && (trial.locked || trialRemainingMs <= 0);
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
@@ -51,6 +57,34 @@ export default function App() {
   useEffect(() => {
     saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
   }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
+
+  useEffect(() => {
+    if (trialExpired) return;
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [trialExpired]);
+
+  useEffect(() => {
+    document.body.classList.toggle("paywall-locked", trialExpired);
+  }, [trialExpired]);
+
+  const openPaywall = () => {
+    const next = { ...trial, locked: true };
+    setTrial(next);
+    saveTrial(next);
+  };
+
+  const dismissPaywall = () => {
+    const next = { startedAt: Date.now(), locked: false, purchased: false };
+    setTrial(next);
+    saveTrial(next);
+  };
+
+  const markPurchased = () => {
+    const next = { ...trial, locked: false, purchased: true };
+    setTrial(next);
+    saveTrial(next);
+  };
 
   const selectChord = (chord: DegreeChord) => {
     setPreviewChord(undefined);
@@ -91,6 +125,7 @@ export default function App() {
         instrument={instrument}
         sound={sound}
         onboardingOpen={onboardingOpen}
+        trialRemainingMs={trialRemainingMs}
         volume={volume}
         onKeyRoot={changeKeyRoot}
         onScaleMode={setScaleMode}
@@ -98,8 +133,16 @@ export default function App() {
         onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound)}
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
+        onTrialLinkClick={openPaywall}
         onVolume={setVolume}
       />
+      {trialExpired && (
+        <PaywallOverlay
+          onDismiss={dismissPaywall}
+          onPurchase={markPurchased}
+          checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
+        />
+      )}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
           <MinimalFretboard
