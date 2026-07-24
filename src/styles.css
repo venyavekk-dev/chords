@@ -1013,6 +1013,21 @@ select {
   white-space: nowrap;
 }
 
+.sequencer-preset-cta {
+  height: 34px;
+  padding: 0 16px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font-size: 0.75rem;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.sequencer-preset-cta:hover {
+  background: var(--surface-hover);
+}
+
 .sequencer-slots {
   display: flex;
   align-items: center;

@@ -69,6 +69,7 @@ export default function App() {
   const [currentStep, setCurrentStep] = useState<number | null>(null);
   const [dragStepIndex, setDragStepIndex] = useState<number | null>(null);
   const [presetIndex, setPresetIndex] = useState(0);
+  const [presetRevealed, setPresetRevealed] = useState(false);
   const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -176,11 +177,7 @@ export default function App() {
   ];
   const currentPreset = availablePresets[presetIndex % availablePresets.length];
 
-  const stepPreset = (direction: 1 | -1) => {
-    const total = availablePresets.length;
-    const nextIndex = (((presetIndex + direction) % total) + total) % total;
-    const preset = availablePresets[nextIndex];
-    setPresetIndex(nextIndex);
+  const applyPreset = (preset: ChordPreset) => {
     const matched = preset.degrees
       .map((degree) => chords.find((chord) => chord.degree === degree))
       .filter((chord): chord is DegreeChord => Boolean(chord));
@@ -189,6 +186,18 @@ export default function App() {
     setStepCount(Math.max(2, Math.min(8, matched.length)));
     setSequence(matched);
     setBpm(preset.bpm);
+  };
+
+  const revealPreset = () => {
+    setPresetRevealed(true);
+    applyPreset(currentPreset);
+  };
+
+  const stepPreset = (direction: 1 | -1) => {
+    const total = availablePresets.length;
+    const nextIndex = (((presetIndex + direction) % total) + total) % total;
+    setPresetIndex(nextIndex);
+    applyPreset(availablePresets[nextIndex]);
   };
 
   const shuffleSequence = () => {
@@ -373,25 +382,31 @@ export default function App() {
                 );
               })}
             </div>
-            <div className="sequencer-preset">
-              <button
-                type="button"
-                className="sequencer-icon-button small"
-                onClick={() => stepPreset(-1)}
-                aria-label="Предыдущий пример"
-              >
-                <ChevronLeft size={13} />
+            {presetRevealed ? (
+              <div className="sequencer-preset">
+                <button
+                  type="button"
+                  className="sequencer-icon-button small"
+                  onClick={() => stepPreset(-1)}
+                  aria-label="Предыдущий пример"
+                >
+                  <ChevronLeft size={13} />
+                </button>
+                <span title="Подставить популярную прогрессию">{currentPreset.label}</span>
+                <button
+                  type="button"
+                  className="sequencer-icon-button small"
+                  onClick={() => stepPreset(1)}
+                  aria-label="Следующий пример"
+                >
+                  <ChevronRight size={13} />
+                </button>
+              </div>
+            ) : (
+              <button type="button" className="sequencer-preset-cta" onClick={revealPreset}>
+                Эксплор
               </button>
-              <span title="Подставить популярную прогрессию">{currentPreset.label}</span>
-              <button
-                type="button"
-                className="sequencer-icon-button small"
-                onClick={() => stepPreset(1)}
-                aria-label="Следующий пример"
-              >
-                <ChevronRight size={13} />
-              </button>
-            </div>
+            )}
             <button
               type="button"
               className="sequencer-icon-button"
