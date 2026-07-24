@@ -26,7 +26,7 @@ export default function App() {
   const [trial, setTrial] = useState(() => loadTrial());
   const [now, setNow] = useState(() => Date.now());
   const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
-  const trialExpired = trial.locked || trialRemainingMs <= 0;
+  const trialExpired = !trial.purchased && (trial.locked || trialRemainingMs <= 0);
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
@@ -75,7 +75,13 @@ export default function App() {
   };
 
   const dismissPaywall = () => {
-    const next = { startedAt: Date.now(), locked: false };
+    const next = { startedAt: Date.now(), locked: false, purchased: false };
+    setTrial(next);
+    saveTrial(next);
+  };
+
+  const markPurchased = () => {
+    const next = { ...trial, locked: false, purchased: true };
     setTrial(next);
     saveTrial(next);
   };
@@ -130,7 +136,13 @@ export default function App() {
         onTrialLinkClick={openPaywall}
         onVolume={setVolume}
       />
-      {trialExpired && <PaywallOverlay onDismiss={dismissPaywall} />}
+      {trialExpired && (
+        <PaywallOverlay
+          onDismiss={dismissPaywall}
+          onPurchase={markPurchased}
+          checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
+        />
+      )}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
           <MinimalFretboard

@@ -5,18 +5,19 @@ export const TRIAL_MS = 5 * 60 * 1000;
 export type TrialState = {
   startedAt: number;
   locked: boolean;
+  purchased: boolean;
 };
 
 export function loadTrial(): TrialState {
   try {
     const parsed = JSON.parse(localStorage.getItem(KEY) ?? "null") as Partial<TrialState> | null;
     if (parsed && typeof parsed.startedAt === "number") {
-      return { startedAt: parsed.startedAt, locked: Boolean(parsed.locked) };
+      return { startedAt: parsed.startedAt, locked: Boolean(parsed.locked), purchased: Boolean(parsed.purchased) };
     }
   } catch {
     // fall through to a fresh trial
   }
-  const fresh: TrialState = { startedAt: Date.now(), locked: false };
+  const fresh: TrialState = { startedAt: Date.now(), locked: false, purchased: false };
   localStorage.setItem(KEY, JSON.stringify(fresh));
   return fresh;
 }
