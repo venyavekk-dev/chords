@@ -17,6 +17,8 @@ type Props = {
   onPlayChord: () => void;
   onToggleOnboarding: () => void;
   onVolume: (value: number) => void;
+  sequencerMode: boolean;
+  onToggleSequencer: () => void;
 };
 
 const DEFAULT_LOGO_SIZE = 34;
@@ -82,6 +84,15 @@ export function TopBar(props: Props) {
             >
               <span className="onboarding-switch" aria-hidden="true"><i /></span>
               Настройки
+            </button>
+            <button
+              type="button"
+              className={`onboarding-toggle sequencer-toggle ${props.sequencerMode ? "active" : ""}`}
+              aria-pressed={props.sequencerMode}
+              onClick={props.onToggleSequencer}
+            >
+              <span className="onboarding-switch" aria-hidden="true"><i /></span>
+              Секвенсор
             </button>
           </div>
           <button

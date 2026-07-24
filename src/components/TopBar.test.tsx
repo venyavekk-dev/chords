@@ -19,6 +19,8 @@ describe("TopBar onboarding", () => {
         onSound={() => undefined}
         onToggleOnboarding={() => undefined}
         onVolume={() => undefined}
+        sequencerMode={false}
+        onToggleSequencer={() => undefined}
       />,
     );
 

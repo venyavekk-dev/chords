@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Minus, Pause, Play, Plus, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
@@ -23,6 +24,12 @@ export default function App() {
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
+  const [sequencerMode, setSequencerMode] = useState(false);
+  const [sequence, setSequence] = useState<DegreeChord[]>([]);
+  const [stepCount, setStepCount] = useState(4);
+  const [bpm, setBpm] = useState(96);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [currentStep, setCurrentStep] = useState<number | null>(null);
   const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -51,6 +58,65 @@ export default function App() {
   useEffect(() => {
     saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
   }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
+
+  const playbackSettings = useRef({ volume, sound, capoFret, voicingMemory });
+  playbackSettings.current = { volume, sound, capoFret, voicingMemory };
+  const sequenceRef = useRef(sequence);
+  sequenceRef.current = sequence;
+  const stepMs = (60000 / bpm) * 2;
+
+  useEffect(() => {
+    if (!isPlaying || sequence.length === 0) {
+      setCurrentStep(null);
+      return;
+    }
+    let index = 0;
+    const playStep = () => {
+      const steps = sequenceRef.current;
+      if (steps.length === 0) return;
+      const position = index % steps.length;
+      const chord = steps[position];
+      const { volume: currentVolume, sound: currentSound, capoFret: currentCapo, voicingMemory: currentMemory } = playbackSettings.current;
+      const stepVoicings = generateVoicings(chord.symbol, currentCapo);
+      const voicing = pickVoicing(stepVoicings, currentMemory[chord.symbol]);
+      playChord(chord.symbol, currentVolume, voicing, currentSound);
+      setCurrentStep(position);
+      index += 1;
+    };
+    playStep();
+    const id = window.setInterval(playStep, stepMs);
+    return () => window.clearInterval(id);
+  }, [isPlaying, bpm, sequence.length]);
+
+  const toggleSequencerMode = () => {
+    setSequencerMode((mode) => !mode);
+    setIsPlaying(false);
+  };
+
+  const toggleSequenceChord = (chord: DegreeChord) => {
+    setSequence((current) => {
+      if (current.some((item) => item.symbol === chord.symbol)) {
+        return current.filter((item) => item.symbol !== chord.symbol);
+      }
+      if (current.length >= stepCount) return current;
+      return [...current, chord];
+    });
+  };
+
+  const clearSequence = () => {
+    setIsPlaying(false);
+    setSequence([]);
+  };
+
+  const changeStepCount = (next: number) => {
+    const clamped = Math.max(2, Math.min(8, next));
+    setStepCount(clamped);
+    setSequence((current) => current.slice(0, clamped));
+  };
+
+  const togglePlay = () => setIsPlaying((playing) => !playing);
+  const sequencedSymbols = new Set(sequence.map((item) => item.symbol));
+  const playingSymbol = isPlaying && currentStep !== null ? sequence[currentStep]?.symbol : undefined;
 
   const selectChord = (chord: DegreeChord) => {
     setPreviewChord(undefined);
@@ -99,6 +165,8 @@ export default function App() {
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
         onVolume={setVolume}
+        sequencerMode={sequencerMode}
+        onToggleSequencer={toggleSequencerMode}
       />
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
@@ -111,6 +179,59 @@ export default function App() {
         )}
         {(instrument === "Piano" || instrument === "Both") && (
           <PianoKeyboard chordSymbol={visibleChord.symbol} voicing={visibleVoicing} />
+        )}
+        {sequencerMode && (
+          <div className="sequencer-toolbar">
+            <button
+              type="button"
+              className={`sequencer-icon-button play ${isPlaying ? "is-playing" : ""}`}
+              onClick={togglePlay}
+              disabled={sequence.length === 0}
+              aria-label={isPlaying ? "Остановить" : "Играть последовательность"}
+            >
+              {isPlaying ? <Pause size={16} /> : <Play size={16} />}
+            </button>
+            <button
+              type="button"
+              className="sequencer-icon-button"
+              onClick={clearSequence}
+              disabled={sequence.length === 0}
+              aria-label="Удалить аккорды"
+            >
+              <Trash2 size={16} />
+            </button>
+            <div className="sequencer-steps" aria-label="Количество шагов">
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => changeStepCount(stepCount - 1)}
+                disabled={stepCount <= 2}
+                aria-label="Меньше шагов"
+              >
+                <Minus size={13} />
+              </button>
+              <strong>{stepCount}</strong>
+              <button
+                type="button"
+                className="sequencer-icon-button small"
+                onClick={() => changeStepCount(stepCount + 1)}
+                disabled={stepCount >= 8}
+                aria-label="Больше шагов"
+              >
+                <Plus size={13} />
+              </button>
+            </div>
+            <label className="sequencer-bpm">
+              BPM
+              <input
+                type="number"
+                min={40}
+                max={220}
+                value={bpm}
+                onChange={(event) => setBpm(Math.max(40, Math.min(220, Number(event.target.value) || bpm)))}
+              />
+            </label>
+          </div>
         )}
         <section
           className="chord-strip"
@@ -129,16 +250,21 @@ export default function App() {
               }}
             >
               <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
-              <button className="strip-main" onClick={() => selectChord(chord)}>
+              <button
+                className={`strip-main ${sequencerMode && sequencedSymbols.has(chord.symbol) ? "sequencer-selected" : ""} ${chord.symbol === playingSymbol ? "sequencer-current" : ""}`}
+                style={chord.symbol === playingSymbol ? { animationDuration: `${stepMs}ms` } : undefined}
+                onClick={() => (sequencerMode ? toggleSequenceChord(chord) : selectChord(chord))}
+              >
                 <span>{chord.degree}</span>
                 <strong>{chord.symbol}</strong>
               </button>
               <div className="variant-row">
                 {chordVariants[index].map((variant) => (
                   <button
-                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""}`}
+                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""} ${sequencerMode && sequencedSymbols.has(variant.symbol) ? "sequencer-selected" : ""} ${variant.symbol === playingSymbol ? "sequencer-current" : ""}`}
+                    style={variant.symbol === playingSymbol ? { animationDuration: `${stepMs}ms` } : undefined}
                     key={variant.symbol}
-                    onClick={() => selectChord(variant)}
+                    onClick={() => (sequencerMode ? toggleSequenceChord(variant) : selectChord(variant))}
                     onMouseEnter={() => {
                       setPreviewVoicing(undefined);
                       setPreviewChord(variant);
