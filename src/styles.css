@@ -171,7 +171,7 @@ select {
   z-index: 30;
   display: grid;
   grid-template-columns: minmax(14rem, 0.42fr) minmax(0, 1.58fr);
-  align-items: start;
+  align-items: stretch;
   column-gap: var(--space-8);
   row-gap: var(--space-4);
   width: 100%;
@@ -184,7 +184,7 @@ select {
 
 .brand {
   display: grid;
-  grid-template-rows: repeat(2, minmax(0, 1fr));
+  grid-template-rows: auto 1fr;
   gap: var(--space-2);
   min-width: 0;
 }
@@ -194,6 +194,9 @@ select {
   align-items: center;
   gap: 12px;
   min-width: 0;
+  /* Lines the logo/title up with the note buttons inside the Key control,
+     not the "Key" legend above them - tuned to this layout's current sizes. */
+  padding-top: 1.4375rem;
 }
 
 .brand img {
@@ -337,28 +340,6 @@ select {
 
 .settings-panel > .control-grid {
   overflow: hidden;
-}
-
-@media (min-width: 64rem) {
-  /* Above the tablet breakpoint there's room to float this over the workspace
-     instead of pushing it down, so opening/closing settings never moves the
-     brand column or anything below the header. */
-  .settings-panel {
-    position: absolute;
-    top: calc(100% + var(--space-4));
-    left: var(--page-padding);
-    right: var(--page-padding);
-    z-index: 1;
-  }
-
-  .settings-panel > .control-grid {
-    padding: var(--space-5);
-    border: 1px solid var(--border-default);
-    border-radius: var(--radius-card);
-    background: var(--header-bg);
-    backdrop-filter: blur(18px);
-    box-shadow: 0 18px 40px rgba(0, 0, 0, 0.35);
-  }
 }
 
 .control-grid {
@@ -1144,6 +1125,10 @@ select {
     grid-template-columns: 1fr;
     align-items: start;
     gap: var(--space-8);
+  }
+
+  .brand-heading {
+    padding-top: 0;
   }
 }
 
