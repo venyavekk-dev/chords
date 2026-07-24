@@ -498,6 +498,172 @@ select {
   box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 0 4px rgba(217, 130, 30, 0.55);
 }
 
+/* Design picker modal - opened by the "Дизайн" toggle above. Same visual
+   family as the rest of the app (uses the live theme tokens for the card
+   itself, so it re-skins along with whatever design is currently active),
+   but the swatches inside are hardcoded per-skin so all four previews are
+   visible at once regardless of which one is live. */
+body.design-picker-open {
+  overflow: hidden;
+}
+
+.design-picker-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 100;
+  display: grid;
+  place-items: center;
+  padding: var(--space-4);
+  background: rgba(10, 9, 7, 0.55);
+  backdrop-filter: blur(6px);
+  animation: design-picker-fade 180ms var(--ease-default);
+}
+
+@keyframes design-picker-fade {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+.design-picker-card {
+  position: relative;
+  width: min(100%, 46rem);
+  max-height: min(86vh, 44rem);
+  overflow-y: auto;
+  border-radius: var(--radius-card);
+  padding: var(--space-6);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  box-shadow: 0 30px 60px -20px rgba(0, 0, 0, 0.6);
+}
+
+.design-picker-card h2 {
+  margin: 0 0 4px;
+  font-size: 1.25rem;
+}
+
+.design-picker-sub {
+  margin: 0 0 var(--space-5);
+  color: var(--text-secondary);
+  font-size: 0.875rem;
+}
+
+.design-picker-close {
+  position: absolute;
+  top: var(--space-4);
+  right: var(--space-4);
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border: 1px solid var(--border-default);
+  border-radius: var(--radius-pill);
+  background: var(--surface-hover);
+  color: var(--text-secondary);
+}
+
+.design-picker-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(11rem, 1fr));
+  gap: var(--space-4);
+}
+
+.design-picker-option {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 12px;
+  border: 2px solid transparent;
+  border-radius: var(--radius-card);
+  background: var(--surface-hover);
+  color: inherit;
+  text-align: left;
+  transition: border-color var(--transition-fast), transform var(--transition-fast);
+}
+
+.design-picker-option.selected {
+  border-color: var(--text-strong);
+}
+
+.design-picker-option:hover,
+.design-picker-option:focus-visible {
+  border-color: #4d8cff;
+  transform: translateY(-2px);
+}
+
+.design-picker-option-name {
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+
+.design-picker-option-blurb {
+  font-size: 0.75rem;
+  line-height: 1.4;
+  color: var(--text-secondary);
+}
+
+.design-picker-select {
+  align-self: flex-start;
+  margin-top: 2px;
+  padding: 5px 10px;
+  border-radius: var(--radius-pill);
+  border: 1px solid var(--border-strong);
+  font-size: 0.72rem;
+}
+
+.design-picker-option.selected .design-picker-select {
+  border-color: transparent;
+  background: var(--text-strong);
+  color: var(--page-bg);
+}
+
+.design-swatch {
+  display: block;
+  border-radius: 6px;
+  overflow: hidden;
+  border: 1px solid rgba(0, 0, 0, 0.25);
+}
+
+.design-swatch-panel {
+  display: flex;
+  gap: 4px;
+  padding: 8px;
+}
+
+.design-swatch-chip {
+  flex: 1;
+  height: 18px;
+  border-radius: 4px;
+}
+
+.design-swatch-keys {
+  display: flex;
+  height: 12px;
+}
+
+.design-swatch-keys i {
+  flex: 1;
+}
+
+.design-swatch-classic .design-swatch-panel { background: #252525; }
+.design-swatch-classic .design-swatch-chip { background: #333230; }
+.design-swatch-classic .design-swatch-chip-active { background: #a8a8a8; }
+.design-swatch-classic .design-swatch-keys i { background: #d8d5ce; border-right: 1px solid #77736d; }
+
+.design-swatch-akai .design-swatch-panel { background: #161616; }
+.design-swatch-akai .design-swatch-chip { background: #2a2824; }
+.design-swatch-akai .design-swatch-chip-active { background: linear-gradient(180deg, #ff6a34, #e8481a); }
+.design-swatch-akai .design-swatch-keys i { background: #2c2a28; border-right: 1px solid #111111; }
+
+.design-swatch-korg .design-swatch-panel { background: #dfdbdd; }
+.design-swatch-korg .design-swatch-chip { background: #2e3031; }
+.design-swatch-korg .design-swatch-chip-active { background: linear-gradient(180deg, #e2505f, #b52c3a); }
+.design-swatch-korg .design-swatch-keys i { background: #efe9dc; border-right: 1px solid #b9b2a6; }
+
+.design-swatch-juno .design-swatch-panel { background: #131313; }
+.design-swatch-juno .design-swatch-chip { background: #e6dcc0; }
+.design-swatch-juno .design-swatch-chip-active { background: linear-gradient(180deg, #f5a83c, #d9791b); }
+.design-swatch-juno .design-swatch-keys i { background: #ece4c9; border-right: 1px solid #171310; }
+
 .settings-panel {
   /* Always takes up its full height, open or closed, so toggling only
      fades the controls in/out instead of resizing the header and pushing

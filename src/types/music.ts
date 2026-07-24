@@ -1,3 +1,4 @@
+export type DesignSkin = "classic" | "akai" | "korg" | "juno";
 export type ScaleMode = "Major" | "Minor";
 export type Instrument = "Guitar" | "Piano" | "Both";
 export type SoundPreset = "Velvet" | "Clean" | "Glass" | "Nylon" | "Air";
