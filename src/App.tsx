@@ -30,6 +30,7 @@ export default function App() {
   const [bpm, setBpm] = useState(96);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentStep, setCurrentStep] = useState<number | null>(null);
+  const [dragStepIndex, setDragStepIndex] = useState<number | null>(null);
   const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -99,6 +100,16 @@ export default function App() {
 
   const removeSequenceStep = (index: number) => {
     setSequence((current) => current.filter((_, i) => i !== index));
+  };
+
+  const moveSequenceStep = (fromIndex: number, toIndex: number) => {
+    setSequence((current) => {
+      if (fromIndex >= current.length || fromIndex === toIndex) return current;
+      const next = [...current];
+      const [moved] = next.splice(fromIndex, 1);
+      next.splice(toIndex, 0, moved);
+      return next;
+    });
   };
 
   const clearSequence = () => {
@@ -263,12 +274,25 @@ export default function App() {
                   <button
                     type="button"
                     key={index}
-                    className={`sequencer-slot ${step ? "filled" : ""} ${isPlaying && currentStep === index ? "current" : ""}`}
+                    className={`sequencer-slot ${step ? "filled" : ""} ${isPlaying && currentStep === index ? "current" : ""} ${dragStepIndex === index ? "dragging" : ""}`}
                     style={isPlaying && currentStep === index ? { animationDuration: `${stepMs}ms` } : undefined}
                     onClick={() => step && removeSequenceStep(index)}
                     disabled={!step}
                     aria-label={step ? `Убрать шаг ${index + 1}: ${step.symbol}` : `Шаг ${index + 1} пуст`}
-                    title={step ? "Нажми, чтобы убрать" : undefined}
+                    title={step ? "Нажми, чтобы убрать, перетащи, чтобы переставить" : undefined}
+                    draggable={Boolean(step)}
+                    onDragStart={() => setDragStepIndex(index)}
+                    onDragOver={(event) => {
+                      if (dragStepIndex === null) return;
+                      event.preventDefault();
+                    }}
+                    onDrop={(event) => {
+                      event.preventDefault();
+                      if (dragStepIndex === null) return;
+                      moveSequenceStep(dragStepIndex, index);
+                      setDragStepIndex(null);
+                    }}
+                    onDragEnd={() => setDragStepIndex(null)}
                   >
                     {step ? step.symbol : index + 1}
                   </button>
