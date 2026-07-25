@@ -171,11 +171,11 @@ select {
   position: sticky;
   top: 0;
   z-index: 30;
-  display: grid;
-  grid-template-columns: minmax(14rem, 0.42fr) minmax(0, 1.58fr);
-  align-items: stretch;
-  column-gap: var(--space-8);
-  row-gap: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
@@ -184,24 +184,14 @@ select {
   backdrop-filter: blur(18px);
 }
 
-.brand {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: var(--space-2);
-  min-width: 0;
-}
-
 .brand-heading {
   display: flex;
   align-items: center;
   gap: 12px;
   min-width: 0;
-  /* Lines the logo/title up with the note buttons inside the Key control,
-     not the "Key" legend above them - tuned to this layout's current sizes. */
-  padding-top: 1.4375rem;
 }
 
-.brand img {
+.brand-heading img {
   display: block;
   width: 56px;
   height: 34px;
@@ -220,43 +210,35 @@ select {
   transform: scale(0.92);
 }
 
-.brand h1 {
+.brand-heading h1 {
   display: block;
   margin: 0;
 }
 
 .brand-toggle-stack {
-  display: grid;
-  align-self: start;
-  justify-items: start;
-  gap: 1px;
-}
-
-.toggle-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
+  flex-wrap: wrap;
   gap: var(--space-4);
 }
 
-.brand h1 {
+.brand-heading h1 {
   color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.5;
 }
 
-.brand h1 i {
+.brand-heading h1 i {
   font-weight: 400;
 }
 
-.brand h1 span,
-.brand h1 i {
+.brand-heading h1 span,
+.brand-heading h1 i {
   white-space: nowrap;
 }
 
-.brand h1 a {
+.brand-heading h1 a {
   color: inherit;
   text-decoration-color: var(--border-strong);
   text-decoration-thickness: 1px;
@@ -330,22 +312,42 @@ select {
 }
 
 .settings-panel {
-  /* Always takes up its full height, open or closed, so toggling only
-     fades the controls in/out instead of resizing the header and pushing
-     the fretboard/piano below it up or down. */
-  opacity: 0;
-  transition: opacity 220ms var(--ease-default);
+  width: 100%;
+  max-width: var(--content-max);
+  margin: 0 auto;
+  padding: 0 var(--page-padding) var(--space-4);
+  display: grid;
+  grid-template-rows: 0fr;
+  min-height: 0;
+  transition: grid-template-rows 260ms var(--ease-default);
 }
 
 .settings-panel.is-open {
-  opacity: 1;
+  grid-template-rows: 1fr;
+}
+
+.settings-panel > .control-grid {
+  overflow: hidden;
 }
 
 .control-grid {
-  display: grid;
-  grid-template-columns: minmax(18rem, 2.1fr) minmax(8rem, 0.72fr) minmax(10rem, 1fr);
+  display: flex;
+  flex-wrap: wrap;
+  align-items: stretch;
   gap: var(--space-2);
   min-width: 0;
+}
+
+.key-control {
+  flex: 3 1 18rem;
+}
+
+.scale-control {
+  flex: 1 1 8rem;
+}
+
+.instrument-control {
+  flex: 1.4 1 10rem;
 }
 
 .control-group {
@@ -371,13 +373,13 @@ select {
 }
 
 .sound-control {
-  grid-column: 1 / 3;
+  flex: 1 1 7rem;
 }
 
 .volume-control {
   display: grid;
   gap: 5px;
-  grid-column: 3;
+  flex: 1 1 7rem;
   align-content: start;
   min-width: 0;
   color: var(--text-secondary);
@@ -466,32 +468,36 @@ select {
   font-variant-numeric: tabular-nums;
 }
 
-.sound-toggle button {
+.sound-cycle {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 6px;
+  width: 100%;
+  min-height: 40px;
+  padding: 6px 12px;
+  border: 0;
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  font-size: 0.8125rem;
+  transition: background var(--transition-fast), color var(--transition-fast);
 }
 
-.sound-toggle i {
+.sound-cycle:hover {
+  background: var(--surface-hover);
+}
+
+.sound-dot {
   flex: 0 0 auto;
   width: 7px;
   height: 7px;
   border-radius: var(--radius-pill);
-  background: currentColor;
-  opacity: 0.55;
 }
 
-.sound-toggle button:nth-child(1) i { background: #a58aac; }
-.sound-toggle button:nth-child(2) i { background: #78ad8c; }
-.sound-toggle button:nth-child(3) i { background: #78a9c5; }
-.sound-toggle button:nth-child(4) i { background: #c49b69; }
-.sound-toggle button:nth-child(5) i { background: #aaa; }
-
-.sound-toggle button.active i {
-  background: var(--page-bg);
-  opacity: 0.8;
-}
+.sound-dot-velvet { background: #a58aac; }
+.sound-dot-clean { background: #78ad8c; }
+.sound-dot-air { background: #aaa; }
 
 .volume-slider {
   position: absolute;
@@ -1291,55 +1297,11 @@ select {
 
 @media (max-width: 63.999rem) {
   :root { --page-padding: 2rem; }
-
-  .topbar {
-    grid-template-columns: 1fr;
-    align-items: start;
-    gap: var(--space-8);
-  }
-
-  .brand-heading {
-    padding-top: 0;
-  }
-
-  /* Below the tablet breakpoint the settings panel stacks under the header
-     instead of sitting beside it, so there's no brand column whose height
-     needs to stay put - let it push the chord strip down/up as it opens
-     and closes, same as before the desktop fixed-height change. */
-  .settings-panel {
-    display: grid;
-    grid-template-rows: 0fr;
-    min-height: 0;
-    opacity: 1;
-    transition: grid-template-rows 260ms var(--ease-default);
-  }
-
-  .settings-panel.is-open {
-    grid-template-rows: 1fr;
-  }
-
-  .settings-panel > .control-grid {
-    overflow: hidden;
-  }
 }
 
 @media (max-width: 67.999rem) {
-  .control-grid {
-    grid-template-columns: repeat(2, minmax(0, 1fr));
-  }
-
-  .key-control,
-  .sound-control,
-  .volume-control {
-    grid-column: 1 / -1;
-  }
-
-  .scale-control {
-    grid-column: 1;
-  }
-
-  .instrument-control {
-    grid-column: 2;
+  .key-control {
+    flex-basis: 100%;
   }
 
   .chord-strip {
@@ -1356,22 +1318,20 @@ select {
 
   .topbar {
     position: relative;
-    grid-template-columns: 1fr;
-    align-items: start;
-    gap: var(--space-5);
+    align-items: flex-start;
     padding-top: var(--space-5);
     padding-bottom: var(--space-5);
     background: var(--page-bg);
     backdrop-filter: none;
   }
 
-  .brand {
-    width: 100%;
-  }
-
   .brand-heading {
     width: 100%;
-    align-items: flex-start;
+    align-items: center;
+  }
+
+  .brand-toggle-stack {
+    width: 100%;
   }
 
   .control-grid {
@@ -1385,24 +1345,12 @@ select {
     scrollbar-width: none;
   }
 
-  .sound-toggle {
-    display: flex;
-    overflow-x: auto;
-    overscroll-behavior-x: contain;
-    scrollbar-width: none;
-  }
-
-  .note-toggle::-webkit-scrollbar,
-  .sound-toggle::-webkit-scrollbar {
+  .note-toggle::-webkit-scrollbar {
     display: none;
   }
 
   .note-toggle button {
     flex: 0 0 42px;
-  }
-
-  .sound-toggle button {
-    flex: 0 0 86px;
   }
 
   .volume-slider {
@@ -1505,16 +1453,8 @@ select {
 @media (max-width: 22rem) {
   :root { --page-padding: 1rem; }
 
-  .control-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .key-control,
-  .scale-control,
-  .instrument-control,
-  .sound-control,
-  .volume-control {
-    grid-column: 1;
+  .control-grid > .control-group {
+    flex-basis: 100%;
   }
 
   .chord-strip,
