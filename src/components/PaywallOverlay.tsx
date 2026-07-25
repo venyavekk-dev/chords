@@ -70,9 +70,9 @@ export function PaywallOverlay({ onDismiss, onPurchase, checkoutUrl }: Props) {
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
       <div className="paywall-hero">
-        <span className="paywall-eyebrow">Демо-версия</span>
-        <h2 id="paywall-title">Пробный период закончился</h2>
-        <p className="paywall-subtitle">Разовый платёж — {PRICE_LABEL}. Доступ навсегда.</p>
+        <span className="paywall-eyebrow">Донейт</span>
+        <h2 id="paywall-title">Поддержи Chord Tulza</h2>
+        <p className="paywall-subtitle">Разовый донейт — {PRICE_LABEL}. Открывает полный доступ навсегда.</p>
 
         <a
           href={PAYMENT_LINK}
@@ -80,7 +80,7 @@ export function PaywallOverlay({ onDismiss, onPurchase, checkoutUrl }: Props) {
           rel="noreferrer"
           className="paywall-cta paywall-cta-primary paywall-cta-full"
         >
-          Оплатить {PRICE_LABEL}
+          Задонатить {PRICE_LABEL}
         </a>
 
         <div className="paywall-divider">или переведите вручную</div>
@@ -98,9 +98,9 @@ export function PaywallOverlay({ onDismiss, onPurchase, checkoutUrl }: Props) {
 
         <div className="paywall-actions">
           <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onPurchase}>
-            Я оплатил(а)
+            Я задонатил(а)
           </button>
-          <button type="button" className="paywall-cta-text" onClick={onDismiss}>Подробнее</button>
+          <button type="button" className="paywall-cta-text" onClick={onDismiss}>Не сейчас</button>
         </div>
       </div>
     </div>
