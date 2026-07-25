@@ -66,7 +66,7 @@ export default function App() {
   const [trial, setTrial] = useState(() => loadTrial());
   const [now, setNow] = useState(() => Date.now());
   const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
-  const trialExpired = !trial.purchased && (trial.locked || trialRemainingMs <= 0);
+  const trialExpired = !trial.purchased && trial.locked;
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const [sequencerMode, setSequencerMode] = useState(false);
@@ -124,7 +124,7 @@ export default function App() {
   };
 
   const dismissPaywall = () => {
-    const next = { startedAt: Date.now(), locked: false, purchased: false };
+    const next = { ...trial, locked: false };
     setTrial(next);
     saveTrial(next);
   };
