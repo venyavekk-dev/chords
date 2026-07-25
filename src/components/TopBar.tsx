@@ -53,67 +53,63 @@ export function TopBar(props: Props) {
   return (
     <>
       <header className="topbar">
-        <div className="brand">
-          <div className="brand-heading">
-            <button
-              type="button"
-              className="brand-logo"
-              style={{ height: logoSize }}
-              aria-label="Проиграть текущий аккорд"
-              onClick={props.onPlayChord}
-            >
-              <img src="/logo.svg" alt="" style={{ height: logoSize, width: "auto" }} />
-            </button>
-            <h1 ref={nameRef}><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
-          </div>
-          <div className="brand-toggle-stack">
-            <div className="toggle-row">
-              <button
-                type="button"
-                className={`onboarding-toggle ${props.onboardingOpen ? "active" : ""}`}
-                aria-pressed={props.onboardingOpen}
-                aria-expanded={props.onboardingOpen}
-                aria-controls="relationship-hint"
-                onClick={props.onToggleOnboarding}
-              >
-                <span className="onboarding-switch" aria-hidden="true"><i /></span>
-                Онбординг
-              </button>
-              <button
-                type="button"
-                className={`onboarding-toggle settings-toggle ${settingsOpen ? "active" : ""}`}
-                aria-pressed={settingsOpen}
-                aria-expanded={settingsOpen}
-                aria-controls="workspace-settings"
-                onClick={() => setSettingsOpen((open) => !open)}
-              >
-                <span className="onboarding-switch" aria-hidden="true"><i /></span>
-                Настройки
-              </button>
-            </div>
-            <button
-              type="button"
-              className={`onboarding-toggle sequencer-toggle ${props.sequencerMode ? "active" : ""}`}
-              aria-pressed={props.sequencerMode}
-              onClick={props.onToggleSequencer}
-            >
-              <span className="onboarding-switch" aria-hidden="true"><i /></span>
-              Секвенсор
-            </button>
-            <button
-              type="button"
-              className={`onboarding-toggle theme-toggle ${theme === "light" ? "active" : ""}`}
-              aria-pressed={theme === "light"}
-              onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
-            >
-              <span className="onboarding-switch theme-switch" aria-hidden="true">
-                <Sun size={8} className="theme-icon theme-icon-sun" />
-                <Moon size={8} className="theme-icon theme-icon-moon" />
-                <i />
-              </span>
-              Тема
-            </button>
-          </div>
+        <div className="brand-heading">
+          <button
+            type="button"
+            className="brand-logo"
+            style={{ height: logoSize }}
+            aria-label="Проиграть текущий аккорд"
+            onClick={props.onPlayChord}
+          >
+            <img src="/logo.svg" alt="" style={{ height: logoSize, width: "auto" }} />
+          </button>
+          <h1 ref={nameRef}><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
+        </div>
+        <div className="brand-toggle-stack">
+          <button
+            type="button"
+            className={`onboarding-toggle ${props.onboardingOpen ? "active" : ""}`}
+            aria-pressed={props.onboardingOpen}
+            aria-expanded={props.onboardingOpen}
+            aria-controls="relationship-hint"
+            onClick={props.onToggleOnboarding}
+          >
+            <span className="onboarding-switch" aria-hidden="true"><i /></span>
+            Онбординг
+          </button>
+          <button
+            type="button"
+            className={`onboarding-toggle sequencer-toggle ${props.sequencerMode ? "active" : ""}`}
+            aria-pressed={props.sequencerMode}
+            onClick={props.onToggleSequencer}
+          >
+            <span className="onboarding-switch" aria-hidden="true"><i /></span>
+            Секвенсор
+          </button>
+          <button
+            type="button"
+            className={`onboarding-toggle theme-toggle ${theme === "light" ? "active" : ""}`}
+            aria-pressed={theme === "light"}
+            onClick={() => setTheme((current) => current === "dark" ? "light" : "dark")}
+          >
+            <span className="onboarding-switch theme-switch" aria-hidden="true">
+              <Sun size={8} className="theme-icon theme-icon-sun" />
+              <Moon size={8} className="theme-icon theme-icon-moon" />
+              <i />
+            </span>
+            Тема
+          </button>
+          <button
+            type="button"
+            className={`onboarding-toggle settings-toggle ${settingsOpen ? "active" : ""}`}
+            aria-pressed={settingsOpen}
+            aria-expanded={settingsOpen}
+            aria-controls="workspace-settings"
+            onClick={() => setSettingsOpen((open) => !open)}
+          >
+            <span className="onboarding-switch" aria-hidden="true"><i /></span>
+            Настройки
+          </button>
         </div>
       </header>
       <div className={`settings-panel ${settingsOpen ? "is-open" : ""}`} id="workspace-settings" inert={!settingsOpen}>

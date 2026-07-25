@@ -171,19 +171,17 @@ select {
   position: sticky;
   top: 0;
   z-index: 30;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: var(--space-4);
   width: 100%;
   max-width: var(--content-max);
   margin: 0 auto;
   padding: var(--space-5) var(--page-padding);
   background: var(--header-bg);
   backdrop-filter: blur(18px);
-}
-
-.brand {
-  display: grid;
-  grid-template-rows: auto 1fr;
-  gap: var(--space-2);
-  min-width: 0;
 }
 
 .brand-heading {
@@ -193,7 +191,7 @@ select {
   min-width: 0;
 }
 
-.brand img {
+.brand-heading img {
   display: block;
   width: 56px;
   height: 34px;
@@ -212,43 +210,35 @@ select {
   transform: scale(0.92);
 }
 
-.brand h1 {
+.brand-heading h1 {
   display: block;
   margin: 0;
 }
 
 .brand-toggle-stack {
-  display: grid;
-  align-self: start;
-  justify-items: start;
-  gap: 1px;
-}
-
-.toggle-row {
   display: flex;
   align-items: center;
-  justify-content: space-between;
-  width: 100%;
+  flex-wrap: wrap;
   gap: var(--space-4);
 }
 
-.brand h1 {
+.brand-heading h1 {
   color: var(--text-primary);
   font-size: 1rem;
   font-weight: 600;
   line-height: 1.5;
 }
 
-.brand h1 i {
+.brand-heading h1 i {
   font-weight: 400;
 }
 
-.brand h1 span,
-.brand h1 i {
+.brand-heading h1 span,
+.brand-heading h1 i {
   white-space: nowrap;
 }
 
-.brand h1 a {
+.brand-heading h1 a {
   color: inherit;
   text-decoration-color: var(--border-strong);
   text-decoration-thickness: 1px;
@@ -326,15 +316,18 @@ select {
   max-width: var(--content-max);
   margin: 0 auto;
   padding: 0 var(--page-padding) var(--space-4);
-  /* Always takes up its full height, open or closed, so toggling only
-     fades the controls in/out instead of resizing the header and pushing
-     the fretboard/piano below it up or down. */
-  opacity: 0;
-  transition: opacity 220ms var(--ease-default);
+  display: grid;
+  grid-template-rows: 0fr;
+  min-height: 0;
+  transition: grid-template-rows 260ms var(--ease-default);
 }
 
 .settings-panel.is-open {
-  opacity: 1;
+  grid-template-rows: 1fr;
+}
+
+.settings-panel > .control-grid {
+  overflow: hidden;
 }
 
 .control-grid {
@@ -1304,24 +1297,6 @@ select {
 
 @media (max-width: 63.999rem) {
   :root { --page-padding: 2rem; }
-
-  /* Below the tablet breakpoint the settings panel pushes the chord strip
-     down/up as it opens and closes, rather than only fading in place. */
-  .settings-panel {
-    display: grid;
-    grid-template-rows: 0fr;
-    min-height: 0;
-    opacity: 1;
-    transition: grid-template-rows 260ms var(--ease-default);
-  }
-
-  .settings-panel.is-open {
-    grid-template-rows: 1fr;
-  }
-
-  .settings-panel > .control-grid {
-    overflow: hidden;
-  }
 }
 
 @media (max-width: 67.999rem) {
@@ -1343,19 +1318,20 @@ select {
 
   .topbar {
     position: relative;
+    align-items: flex-start;
     padding-top: var(--space-5);
     padding-bottom: var(--space-5);
     background: var(--page-bg);
     backdrop-filter: none;
   }
 
-  .brand {
-    width: 100%;
-  }
-
   .brand-heading {
     width: 100%;
     align-items: flex-start;
+  }
+
+  .brand-toggle-stack {
+    width: 100%;
   }
 
   .control-grid {
