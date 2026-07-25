@@ -1,4 +1,5 @@
-import { useEffect } from "react";
+import { Check, Copy } from "lucide-react";
+import { useEffect, useState } from "react";
 
 declare global {
   interface Window {
@@ -14,6 +15,44 @@ type Props = {
   onPurchase: () => void;
   checkoutUrl?: string;
 };
+
+const PRICE_LABEL = "1990 ₽";
+const PAYMENT_LINK = "https://www.tbank.ru/cf/1XW3P6G3j2c";
+const CARD_NUMBER_RAW = "2200700432344546";
+const CARD_NUMBER_DISPLAY = "2200 7004 3234 4546";
+const CARD_HOLDER = "Т-Банк · Вениамин В.";
+const PHONE_RAW = "+381677679693";
+
+function CopyField({ label, value, copyValue }: { label: string; value: string; copyValue: string }) {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(copyValue);
+      setCopied(true);
+      window.setTimeout(() => setCopied(false), 1500);
+    } catch {
+      // Clipboard API unavailable — user can still select the text manually.
+    }
+  };
+
+  return (
+    <div className="paywall-field">
+      <span className="paywall-field-label">{label}</span>
+      <div className="paywall-field-row">
+        <span className="paywall-field-value">{value}</span>
+        <button
+          type="button"
+          className={`paywall-field-copy${copied ? " copied" : ""}`}
+          onClick={handleCopy}
+          aria-label={`Скопировать: ${label}`}
+        >
+          {copied ? <Check size={16} /> : <Copy size={16} />}
+        </button>
+      </div>
+    </div>
+  );
+}
 
 export function PaywallOverlay({ onDismiss, onPurchase, checkoutUrl }: Props) {
   useEffect(() => {
@@ -33,18 +72,35 @@ export function PaywallOverlay({ onDismiss, onPurchase, checkoutUrl }: Props) {
       <div className="paywall-hero">
         <span className="paywall-eyebrow">Демо-версия</span>
         <h2 id="paywall-title">Пробный период закончился</h2>
-        <p className="paywall-subtitle">Разовый платёж — 20€. Просто и навсегда.</p>
+        <p className="paywall-subtitle">Разовый платёж — {PRICE_LABEL}. Доступ навсегда.</p>
+
+        <a
+          href={PAYMENT_LINK}
+          target="_blank"
+          rel="noreferrer"
+          className="paywall-cta paywall-cta-primary paywall-cta-full"
+        >
+          Оплатить {PRICE_LABEL}
+        </a>
+
+        <div className="paywall-divider">или переведите вручную</div>
+
+        <div className="paywall-manual">
+          <CopyField label={`Карта · ${CARD_HOLDER}`} value={CARD_NUMBER_DISPLAY} copyValue={CARD_NUMBER_RAW} />
+          <CopyField label="Телефон · СБП" value={PHONE_RAW} copyValue={PHONE_RAW} />
+        </div>
+
+        {checkoutUrl && (
+          <a href={checkoutUrl} className="paywall-alt-link lemonsqueezy-button">
+            Оплатить картой другого банка
+          </a>
+        )}
+
         <div className="paywall-actions">
-          {checkoutUrl ? (
-            <a href={checkoutUrl} className="paywall-cta paywall-cta-primary lemonsqueezy-button">
-              Купить за 20€
-            </a>
-          ) : (
-            <button type="button" className="paywall-cta paywall-cta-primary" disabled>
-              Купить за 20€
-            </button>
-          )}
-          <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onDismiss}>Подробнее</button>
+          <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onPurchase}>
+            Я оплатил(а)
+          </button>
+          <button type="button" className="paywall-cta-text" onClick={onDismiss}>Подробнее</button>
         </div>
       </div>
     </div>
