@@ -21,6 +21,11 @@ export function RelationshipHint({ acknowledged, children, onAcknowledge }: Prop
         На&nbsp;грифе можно нажать на&nbsp;цифру лада — это как зажать капо. Тональность переключится вверх на&nbsp;этот лад. Нажми на&nbsp;тот&nbsp;же
         лад ещё раз, чтобы отпустить капо и&nbsp;вернуться к&nbsp;прежней тональности.
       </p>
+      <p>
+        Кнопка «Секвенсор» в&nbsp;шапке превращает блок аккордов в&nbsp;степ-секвенсор: нажимай на&nbsp;аккорды или их&nbsp;варианты, чтобы
+        добавить их&nbsp;в&nbsp;очередь — они выделятся синей обводкой. Задай количество шагов и&nbsp;BPM и&nbsp;нажми play — секвенсор проиграет
+        аккорды по&nbsp;кругу.
+      </p>
       <p className="relationship-reminder">Но&nbsp;помни: это лишь подсказки, ориентируйся на&nbsp;звук!</p>
       <button type="button" className="onboarding-acknowledge" onClick={onAcknowledge}>Понятно</button>
     </div>

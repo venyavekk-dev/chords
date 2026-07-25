@@ -21,6 +21,8 @@ describe("TopBar onboarding", () => {
         onToggleOnboarding={() => undefined}
         onTrialLinkClick={() => undefined}
         onVolume={() => undefined}
+        sequencerMode={false}
+        onToggleSequencer={() => undefined}
       />,
     );
 
