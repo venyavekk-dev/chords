@@ -1327,7 +1327,8 @@ select {
 
   .brand-heading {
     width: 100%;
-    align-items: flex-start;
+    align-items: center;
+    justify-content: center;
   }
 
   .brand-toggle-stack {
