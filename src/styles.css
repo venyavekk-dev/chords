@@ -167,6 +167,29 @@ select {
   padding-bottom: var(--space-8);
 }
 
+.language-switcher {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: var(--space-4) 0 var(--space-2);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+}
+
+.language-switcher button {
+  border: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-transform: lowercase;
+}
+
+.language-switcher button.active {
+  color: var(--text-primary);
+  font-weight: 600;
+}
+
 .topbar {
   position: sticky;
   top: 0;

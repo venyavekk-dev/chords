@@ -1,4 +1,4 @@
-import type { Instrument, ProgressionItem, ScaleMode, SoundPreset } from "../types/music";
+import type { Instrument, Language, ProgressionItem, ScaleMode, SoundPreset } from "../types/music";
 
 const KEY = "chord-workspace-state-v1";
 
@@ -10,6 +10,7 @@ export type StoredState = {
   volume?: number;
   sound?: SoundPreset;
   voicingMemory?: Record<string, string>;
+  language?: Language;
 };
 
 export function loadState(): Partial<StoredState> {

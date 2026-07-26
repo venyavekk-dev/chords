@@ -10,7 +10,7 @@ import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/mu
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { playChord, SOUND_PRESETS } from "./lib/audio";
-import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
+import type { DegreeChord, GuitarVoicing, Instrument, Language, ScaleMode, SoundPreset } from "./types/music";
 
 const initial = loadState();
 
@@ -72,6 +72,7 @@ export default function App() {
   const [dragStepIndex, setDragStepIndex] = useState<number | null>(null);
   const [presetIndex, setPresetIndex] = useState(0);
   const [presetRevealed, setPresetRevealed] = useState(false);
+  const [language, setLanguage] = useState<Language>(initial.language === "en" ? "en" : "ru");
   const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -98,8 +99,8 @@ export default function App() {
   }, [activeChord.symbol, voicings, voicingMemory]);
 
   useEffect(() => {
-    saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
-  }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
+    saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory, language });
+  }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory, language]);
 
   useEffect(() => {
     setSequence([]);
@@ -498,6 +499,25 @@ export default function App() {
           </RelationshipHint>
         )}
       </main>
+      <footer className="language-switcher">
+        <button
+          type="button"
+          className={language === "en" ? "active" : ""}
+          aria-pressed={language === "en"}
+          onClick={() => setLanguage("en")}
+        >
+          en
+        </button>
+        <span aria-hidden="true">/</span>
+        <button
+          type="button"
+          className={language === "ru" ? "active" : ""}
+          aria-pressed={language === "ru"}
+          onClick={() => setLanguage("ru")}
+        >
+          ru
+        </button>
+      </footer>
     </div>
   );
 }
