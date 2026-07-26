@@ -312,6 +312,16 @@ select {
   transition: color var(--transition-fast);
 }
 
+.app-footer {
+  display: flex;
+  justify-content: center;
+  padding: var(--space-6) 0 var(--space-4);
+}
+
+.app-footer-link {
+  text-decoration: none;
+}
+
 .trial-timer-link:hover {
   color: var(--text-primary);
 }

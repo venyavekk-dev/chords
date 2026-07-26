@@ -577,6 +577,16 @@ export default function App() {
           </RelationshipHint>
         )}
       </main>
+      <footer className="app-footer">
+        <a
+          href="https://venyavekk.com/chords/about"
+          target="_blank"
+          rel="noreferrer"
+          className="trial-timer-link app-footer-link"
+        >
+          О проекте
+        </a>
+      </footer>
     </div>
   );
 }
