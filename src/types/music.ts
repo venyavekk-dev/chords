@@ -1,3 +1,4 @@
+export type Language = "ru" | "en";
 export type ScaleMode = "Major" | "Minor";
 export type Instrument = "Guitar" | "Piano" | "Both";
 export type SoundPreset = "Velvet" | "Clean" | "Air";
