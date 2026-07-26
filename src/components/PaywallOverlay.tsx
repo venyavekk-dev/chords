@@ -83,9 +83,13 @@ export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkout
           </>
         ) : (
           <>
-            <span className="paywall-eyebrow">Донейт</span>
-            <h2 id="paywall-title">Поддержи Chord Tulza</h2>
-            <p className="paywall-subtitle">Разовый донейт — {PRICE_LABEL}. Открывает полный доступ навсегда.</p>
+            <span className="paywall-eyebrow">Оплата</span>
+            <h2 id="paywall-title">Надоедливый пейвол</h2>
+            <p className="paywall-subtitle">
+              Chord Tulza — бесплатная штука, но со своим приколом. В бесплатной версии каждые пять минут открывается
+              этот надоедливый пейвол. Ты можешь его просто скипать — это обновит таймер. А можешь оплатить и
+              получить Chord Tulza навсегда))
+            </p>
           </>
         )}
 
@@ -113,11 +117,10 @@ export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkout
 
         <div className="paywall-actions">
           <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onClaimPayment}>
-            Я задонатил(а)
+            Проверить оплату
           </button>
           <button type="button" className="paywall-cta-text" onClick={onDismiss}>Не сейчас</button>
         </div>
-        <p className="paywall-fineprint">Откроет доступ на час — пока Веня не подтвердит оплату в Telegram.</p>
       </div>
     </div>
   );
