@@ -68,9 +68,12 @@ export default function App() {
   const [now, setNow] = useState(() => Date.now());
   const [showTelegramConfirm, setShowTelegramConfirm] = useState(false);
   const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
+  const graceRemainingMs = trial.graceUntil !== undefined ? Math.max(0, trial.graceUntil - now) : 0;
   const inGrace = trial.graceUntil !== undefined && now < trial.graceUntil;
   const graceMissedConfirmation = trial.graceUntil !== undefined && !trial.purchased && now >= trial.graceUntil;
   const trialExpired = !trial.purchased && (trial.locked || (!inGrace && trialRemainingMs <= 0));
+  const headerTimerLabel = inGrace ? "Доступ" : "Пробный период";
+  const headerTimerRemainingMs = inGrace ? graceRemainingMs : trialRemainingMs;
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const [sequencerMode, setSequencerMode] = useState(false);
@@ -311,7 +314,8 @@ export default function App() {
         instrument={instrument}
         sound={sound}
         onboardingOpen={onboardingOpen}
-        trialRemainingMs={trialRemainingMs}
+        trialRemainingMs={headerTimerRemainingMs}
+        trialTimerLabel={headerTimerLabel}
         volume={volume}
         onKeyRoot={changeKeyRoot}
         onScaleMode={setScaleMode}

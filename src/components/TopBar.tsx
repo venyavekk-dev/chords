@@ -12,6 +12,7 @@ type Props = {
   sound: SoundPreset;
   onboardingOpen: boolean;
   trialRemainingMs: number;
+  trialTimerLabel: string;
   volume: number;
   onKeyRoot: (value: string) => void;
   onScaleMode: (value: ScaleMode) => void;
@@ -68,7 +69,7 @@ export function TopBar(props: Props) {
           </button>
           <h1 ref={nameRef}><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
           <button type="button" className="trial-timer-link" onClick={props.onTrialLinkClick}>
-            Пробный период {formatTrialRemaining(props.trialRemainingMs)}
+            {props.trialTimerLabel} {formatTrialRemaining(props.trialRemainingMs)}
           </button>
         </div>
         <div className="brand-toggle-stack">

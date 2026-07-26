@@ -12,6 +12,7 @@ describe("TopBar onboarding", () => {
         sound="Velvet"
         onboardingOpen={false}
         trialRemainingMs={5 * 60 * 1000}
+        trialTimerLabel="Пробный период"
         volume={0.72}
         onKeyRoot={() => undefined}
         onScaleMode={() => undefined}
