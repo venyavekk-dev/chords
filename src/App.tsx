@@ -2,13 +2,16 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
+import { PaywallOverlay } from "./components/PaywallOverlay";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
+import { TelegramConfirmOverlay } from "./components/TelegramConfirmOverlay";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
+import { GRACE_MS, loadTrial, saveTrial, TRIAL_MS } from "./lib/trial";
 import { playChord, SOUND_PRESETS } from "./lib/audio";
 import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
 
@@ -61,6 +64,16 @@ export default function App() {
   );
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
+  const [trial, setTrial] = useState(() => loadTrial());
+  const [now, setNow] = useState(() => Date.now());
+  const [showTelegramConfirm, setShowTelegramConfirm] = useState(false);
+  const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
+  const graceRemainingMs = trial.graceUntil !== undefined ? Math.max(0, trial.graceUntil - now) : 0;
+  const inGrace = trial.graceUntil !== undefined && now < trial.graceUntil;
+  const graceMissedConfirmation = trial.graceUntil !== undefined && !trial.purchased && now >= trial.graceUntil;
+  const trialExpired = !trial.purchased && (trial.locked || (!inGrace && trialRemainingMs <= 0));
+  const headerTimerLabel = inGrace ? "Доступ" : "Пробный период";
+  const headerTimerRemainingMs = inGrace ? graceRemainingMs : trialRemainingMs;
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const [sequencerMode, setSequencerMode] = useState(false);
@@ -100,6 +113,57 @@ export default function App() {
   useEffect(() => {
     saveState({ keyRoot: baseKeyRoot, scaleMode, instrument, progression: [], volume, sound, voicingMemory });
   }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
+
+  useEffect(() => {
+    if (trialExpired) return;
+    const interval = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(interval);
+  }, [trialExpired]);
+
+  useEffect(() => {
+    document.body.classList.toggle("paywall-locked", trialExpired || showTelegramConfirm);
+  }, [trialExpired, showTelegramConfirm]);
+
+  const openPaywall = () => {
+    const next = { ...trial, locked: true };
+    setTrial(next);
+    saveTrial(next);
+  };
+
+  const dismissPaywall = () => {
+    const next = (!inGrace && trialRemainingMs <= 0)
+      ? { startedAt: Date.now(), locked: false, purchased: false }
+      : { ...trial, locked: false };
+    setTrial(next);
+    saveTrial(next);
+  };
+
+  const claimGraceAccess = () => {
+    const next = { ...trial, locked: false, graceUntil: Date.now() + GRACE_MS };
+    setTrial(next);
+    saveTrial(next);
+    setShowTelegramConfirm(true);
+  };
+
+  const dismissTelegramConfirm = () => {
+    const next = { startedAt: Date.now(), locked: false, purchased: false };
+    setTrial(next);
+    saveTrial(next);
+    setShowTelegramConfirm(false);
+  };
+
+  const confirmTelegramMessage = () => {
+    const next = { ...trial, locked: false, graceUntil: Date.now() + GRACE_MS };
+    setTrial(next);
+    saveTrial(next);
+    setShowTelegramConfirm(false);
+  };
+
+  const markPurchased = () => {
+    const next = { ...trial, locked: false, purchased: true };
+    setTrial(next);
+    saveTrial(next);
+  };
 
   useEffect(() => {
     setSequence([]);
@@ -252,6 +316,8 @@ export default function App() {
         instrument={instrument}
         sound={sound}
         onboardingOpen={onboardingOpen}
+        trialRemainingMs={headerTimerRemainingMs}
+        trialTimerLabel={headerTimerLabel}
         volume={volume}
         onKeyRoot={changeKeyRoot}
         onScaleMode={setScaleMode}
@@ -259,10 +325,23 @@ export default function App() {
         onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound)}
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
+        onTrialLinkClick={openPaywall}
         onVolume={setVolume}
         sequencerMode={sequencerMode}
         onToggleSequencer={toggleSequencerMode}
       />
+      {trialExpired && (
+        <PaywallOverlay
+          onDismiss={dismissPaywall}
+          onClaimPayment={claimGraceAccess}
+          onPurchase={markPurchased}
+          checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
+          graceExpired={graceMissedConfirmation}
+        />
+      )}
+      {showTelegramConfirm && (
+        <TelegramConfirmOverlay onDismiss={dismissTelegramConfirm} onConfirmed={confirmTelegramMessage} />
+      )}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
           <MinimalFretboard
