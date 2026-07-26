@@ -1,18 +1,25 @@
 const KEY = "chord-trial-state-v1";
 
 export const TRIAL_MS = 5 * 60 * 1000;
+export const GRACE_MS = 60 * 60 * 1000;
 
 export type TrialState = {
   startedAt: number;
   locked: boolean;
   purchased: boolean;
+  graceUntil?: number;
 };
 
 export function loadTrial(): TrialState {
   try {
     const parsed = JSON.parse(localStorage.getItem(KEY) ?? "null") as Partial<TrialState> | null;
     if (parsed && typeof parsed.startedAt === "number") {
-      return { startedAt: parsed.startedAt, locked: Boolean(parsed.locked), purchased: Boolean(parsed.purchased) };
+      return {
+        startedAt: parsed.startedAt,
+        locked: Boolean(parsed.locked),
+        purchased: Boolean(parsed.purchased),
+        graceUntil: typeof parsed.graceUntil === "number" ? parsed.graceUntil : undefined,
+      };
     }
   } catch {
     // fall through to a fresh trial

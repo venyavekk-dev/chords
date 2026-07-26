@@ -5,12 +5,13 @@ import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PaywallOverlay } from "./components/PaywallOverlay";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
+import { TelegramConfirmOverlay } from "./components/TelegramConfirmOverlay";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
-import { loadTrial, saveTrial, TRIAL_MS } from "./lib/trial";
+import { GRACE_MS, loadTrial, saveTrial, TRIAL_MS } from "./lib/trial";
 import { playChord, SOUND_PRESETS } from "./lib/audio";
 import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
 
@@ -65,8 +66,11 @@ export default function App() {
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
   const [trial, setTrial] = useState(() => loadTrial());
   const [now, setNow] = useState(() => Date.now());
+  const [showTelegramConfirm, setShowTelegramConfirm] = useState(false);
   const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
-  const trialExpired = !trial.purchased && (trial.locked || trialRemainingMs <= 0);
+  const inGrace = trial.graceUntil !== undefined && now < trial.graceUntil;
+  const graceMissedConfirmation = trial.graceUntil !== undefined && !trial.purchased && now >= trial.graceUntil;
+  const trialExpired = !trial.purchased && (trial.locked || (!inGrace && trialRemainingMs <= 0));
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const [sequencerMode, setSequencerMode] = useState(false);
@@ -114,8 +118,8 @@ export default function App() {
   }, [trialExpired]);
 
   useEffect(() => {
-    document.body.classList.toggle("paywall-locked", trialExpired);
-  }, [trialExpired]);
+    document.body.classList.toggle("paywall-locked", trialExpired || showTelegramConfirm);
+  }, [trialExpired, showTelegramConfirm]);
 
   const openPaywall = () => {
     const next = { ...trial, locked: true };
@@ -127,6 +131,13 @@ export default function App() {
     const next = { startedAt: Date.now(), locked: false, purchased: false };
     setTrial(next);
     saveTrial(next);
+  };
+
+  const claimGraceAccess = () => {
+    const next = { ...trial, locked: false, graceUntil: Date.now() + GRACE_MS };
+    setTrial(next);
+    saveTrial(next);
+    setShowTelegramConfirm(true);
   };
 
   const markPurchased = () => {
@@ -302,9 +313,14 @@ export default function App() {
       {trialExpired && (
         <PaywallOverlay
           onDismiss={dismissPaywall}
+          onClaimPayment={claimGraceAccess}
           onPurchase={markPurchased}
           checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
+          graceExpired={graceMissedConfirmation}
         />
+      )}
+      {showTelegramConfirm && (
+        <TelegramConfirmOverlay onDismiss={() => setShowTelegramConfirm(false)} />
       )}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (

@@ -1443,6 +1443,73 @@ select {
   color: #34c759;
 }
 
+.paywall-fineprint {
+  margin: var(--space-3) 0 0;
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+  line-height: 1.4;
+}
+
+.telegram-message {
+  display: flex;
+  width: 100%;
+  align-items: flex-start;
+  gap: 10px;
+  margin: var(--space-5) 0;
+  text-align: left;
+}
+
+.telegram-avatar {
+  width: 40px;
+  height: 40px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.telegram-message-body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.telegram-sender {
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.75rem;
+  font-weight: 600;
+}
+
+.telegram-bubble {
+  position: relative;
+  padding: 10px 46px 16px 12px;
+  border-radius: 0.25rem 0.75rem 0.75rem 0.75rem;
+  background: #202b38;
+  color: #e9edf1;
+  font-size: 0.875rem;
+  line-height: 1.4;
+}
+
+.telegram-bubble-time {
+  position: absolute;
+  right: 10px;
+  bottom: 6px;
+  color: rgba(233, 237, 241, 0.45);
+  font-size: 0.6875rem;
+}
+
+.telegram-cta {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  background: #2aabee;
+}
+
+.telegram-cta:hover {
+  background: #32b8ff;
+}
+
 .voicing-mini {
   display: grid;
   grid-template-columns: 24px 1fr;

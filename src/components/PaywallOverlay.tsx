@@ -12,8 +12,10 @@ declare global {
 
 type Props = {
   onDismiss: () => void;
+  onClaimPayment: () => void;
   onPurchase: () => void;
   checkoutUrl?: string;
+  graceExpired?: boolean;
 };
 
 const PRICE_LABEL = "1990 ₽";
@@ -54,7 +56,7 @@ function CopyField({ label, value, copyValue }: { label: string; value: string; 
   );
 }
 
-export function PaywallOverlay({ onDismiss, onPurchase, checkoutUrl }: Props) {
+export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkoutUrl, graceExpired }: Props) {
   useEffect(() => {
     if (!checkoutUrl) return;
     window.createLemonSqueezy?.();
@@ -70,9 +72,22 @@ export function PaywallOverlay({ onDismiss, onPurchase, checkoutUrl }: Props) {
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
       <div className="paywall-hero">
-        <span className="paywall-eyebrow">Донейт</span>
-        <h2 id="paywall-title">Поддержи Chord Tulza</h2>
-        <p className="paywall-subtitle">Разовый донейт — {PRICE_LABEL}. Открывает полный доступ навсегда.</p>
+        {graceExpired ? (
+          <>
+            <span className="paywall-eyebrow">Упс</span>
+            <h2 id="paywall-title">Кажется, не оплатил?</h2>
+            <p className="paywall-subtitle">
+              Ты сказал, что оплатил — час прошёл, а подтверждения от Вени не было, так что доступ снова закрыт.
+              Если это ошибка, просто напиши в Telegram.
+            </p>
+          </>
+        ) : (
+          <>
+            <span className="paywall-eyebrow">Донейт</span>
+            <h2 id="paywall-title">Поддержи Chord Tulza</h2>
+            <p className="paywall-subtitle">Разовый донейт — {PRICE_LABEL}. Открывает полный доступ навсегда.</p>
+          </>
+        )}
 
         <a
           href={PAYMENT_LINK}
@@ -97,11 +112,12 @@ export function PaywallOverlay({ onDismiss, onPurchase, checkoutUrl }: Props) {
         )}
 
         <div className="paywall-actions">
-          <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onPurchase}>
+          <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onClaimPayment}>
             Я задонатил(а)
           </button>
           <button type="button" className="paywall-cta-text" onClick={onDismiss}>Не сейчас</button>
         </div>
+        <p className="paywall-fineprint">Откроет доступ на час — пока Веня не подтвердит оплату в Telegram.</p>
       </div>
     </div>
   );
