@@ -128,7 +128,9 @@ export default function App() {
   };
 
   const dismissPaywall = () => {
-    const next = { startedAt: Date.now(), locked: false, purchased: false };
+    const next = trialRemainingMs <= 0
+      ? { startedAt: Date.now(), locked: false, purchased: false }
+      : { ...trial, locked: false };
     setTrial(next);
     saveTrial(next);
   };
