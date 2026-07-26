@@ -1690,6 +1690,10 @@ select {
     row-gap: 4px;
   }
 
+  .trial-timer-link {
+    margin-left: auto;
+  }
+
   .brand-toggle-stack {
     width: 100%;
   }
