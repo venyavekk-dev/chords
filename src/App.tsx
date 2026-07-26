@@ -131,7 +131,7 @@ export default function App() {
   };
 
   const dismissPaywall = () => {
-    const next = trialRemainingMs <= 0
+    const next = (!inGrace && trialRemainingMs <= 0)
       ? { startedAt: Date.now(), locked: false, purchased: false }
       : { ...trial, locked: false };
     setTrial(next);
@@ -146,7 +146,9 @@ export default function App() {
   };
 
   const dismissTelegramConfirm = () => {
-    dismissPaywall();
+    const next = { startedAt: Date.now(), locked: false, purchased: false };
+    setTrial(next);
+    saveTrial(next);
     setShowTelegramConfirm(false);
   };
 
