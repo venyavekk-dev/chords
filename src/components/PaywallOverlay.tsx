@@ -28,7 +28,7 @@ const PRICE_OPTIONS = [299, 599, 999] as const;
 type PriceOption = (typeof PRICE_OPTIONS)[number];
 
 const MOOD_EMOJI: Record<PriceOption, string> = {
-  299: "😢",
+  299: "😅",
   599: "😄",
   999: "🤩",
 };

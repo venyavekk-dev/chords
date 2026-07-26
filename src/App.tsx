@@ -142,6 +142,11 @@ export default function App() {
     setShowTelegramConfirm(true);
   };
 
+  const dismissTelegramConfirm = () => {
+    dismissPaywall();
+    setShowTelegramConfirm(false);
+  };
+
   const markPurchased = () => {
     const next = { ...trial, locked: false, purchased: true };
     setTrial(next);
@@ -322,7 +327,7 @@ export default function App() {
         />
       )}
       {showTelegramConfirm && (
-        <TelegramConfirmOverlay onDismiss={() => setShowTelegramConfirm(false)} />
+        <TelegramConfirmOverlay onDismiss={dismissTelegramConfirm} />
       )}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
