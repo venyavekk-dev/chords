@@ -18,12 +18,20 @@ type Props = {
   graceExpired?: boolean;
 };
 
-const PRICE_LABEL = "1990 ₽";
 const PAYMENT_LINK = "https://www.tbank.ru/cf/1XW3P6G3j2c";
 const CARD_NUMBER_RAW = "2200700432344546";
 const CARD_NUMBER_DISPLAY = "2200 7004 3234 4546";
 const CARD_HOLDER = "Т-Банк · Вениамин В.";
 const PHONE_RAW = "+381677679693";
+
+const PRICE_OPTIONS = [299, 599, 999] as const;
+type PriceOption = (typeof PRICE_OPTIONS)[number];
+
+const MOOD_EMOJI: Record<PriceOption, string> = {
+  299: "😢",
+  599: "😄",
+  999: "🤩",
+};
 
 function CopyField({ label, value, copyValue }: { label: string; value: string; copyValue: string }) {
   const [copied, setCopied] = useState(false);
@@ -57,6 +65,9 @@ function CopyField({ label, value, copyValue }: { label: string; value: string; 
 }
 
 export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkoutUrl, graceExpired }: Props) {
+  const [selectedPrice, setSelectedPrice] = useState<PriceOption | null>(null);
+  const [bouncing, setBouncing] = useState(false);
+
   useEffect(() => {
     if (!checkoutUrl) return;
     window.createLemonSqueezy?.();
@@ -69,9 +80,15 @@ export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkout
     });
   }, [checkoutUrl, onPurchase]);
 
+  const choosePrice = (price: PriceOption) => {
+    setSelectedPrice(price);
+    setBouncing(true);
+    window.setTimeout(() => setBouncing(false), 380);
+  };
+
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
-      <div className="paywall-hero">
+      <div className={`paywall-hero${bouncing ? " paywall-bounce" : ""}`}>
         {graceExpired ? (
           <>
             <span className="paywall-eyebrow">Упс</span>
@@ -83,23 +100,39 @@ export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkout
           </>
         ) : (
           <>
-            <span className="paywall-eyebrow">Оплата</span>
+            <span className="paywall-emoji-badge" aria-hidden="true">{selectedPrice ? MOOD_EMOJI[selectedPrice] : "❓"}</span>
             <h2 id="paywall-title">Надоедливый пейвол</h2>
             <p className="paywall-subtitle">
-              Chord Tulza — бесплатная штука, но со своим приколом. В бесплатной версии каждые пять минут открывается
-              этот надоедливый пейвол. Ты можешь его просто скипать — это обновит таймер. А можешь оплатить и
-              получить Chord Tulza навсегда))
+              В бесплатной версии каждые пять минут открывается этот надоедливый пейвол. Чтобы это прекратилось —
+              оплати по-братски.
             </p>
           </>
         )}
+
+        <div className="price-picker" role="group" aria-label="Выбери сумму">
+          {PRICE_OPTIONS.map((price) => (
+            <button
+              key={price}
+              type="button"
+              className={`price-option ${selectedPrice === price ? "active" : ""}`}
+              onClick={() => choosePrice(price)}
+            >
+              {price} ₽
+            </button>
+          ))}
+        </div>
 
         <a
           href={PAYMENT_LINK}
           target="_blank"
           rel="noreferrer"
           className="paywall-cta paywall-cta-primary paywall-cta-full"
+          aria-disabled={!selectedPrice}
+          onClick={(event) => {
+            if (!selectedPrice) event.preventDefault();
+          }}
         >
-          Задонатить {PRICE_LABEL}
+          {selectedPrice ? `Задонатить ${selectedPrice} ₽` : "Выбери сумму"}
         </a>
 
         <div className="paywall-divider">или переведите вручную</div>
