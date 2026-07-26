@@ -92,10 +92,11 @@ export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkout
         {graceExpired ? (
           <>
             <span className="paywall-eyebrow">Упс</span>
-            <h2 id="paywall-title">Кажется, не оплатил?</h2>
+            <h2 id="paywall-title">Кажется, не{" "}оплатил?</h2>
             <p className="paywall-subtitle">
-              Ты сказал, что оплатил — час прошёл, а подтверждения от Вени не было, так что доступ снова закрыт.
-              Если это ошибка, просто напиши в Telegram.
+              Ты сказал, что{" "}оплатил — час прошёл, а{" "}подтверждения от{" "}Вени
+              не{" "}было, так что{" "}доступ снова закрыт. Если это ошибка, просто напиши
+              в{" "}Telegram.
             </p>
           </>
         ) : (
