@@ -147,6 +147,13 @@ export default function App() {
     setShowTelegramConfirm(false);
   };
 
+  const confirmTelegramMessage = () => {
+    const next = { ...trial, locked: false, graceUntil: Date.now() + GRACE_MS };
+    setTrial(next);
+    saveTrial(next);
+    setShowTelegramConfirm(false);
+  };
+
   const markPurchased = () => {
     const next = { ...trial, locked: false, purchased: true };
     setTrial(next);
@@ -327,7 +334,7 @@ export default function App() {
         />
       )}
       {showTelegramConfirm && (
-        <TelegramConfirmOverlay onDismiss={dismissTelegramConfirm} />
+        <TelegramConfirmOverlay onDismiss={dismissTelegramConfirm} onConfirmed={confirmTelegramMessage} />
       )}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (

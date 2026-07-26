@@ -1,18 +1,22 @@
-import { Send } from "lucide-react";
+import { Check, Send } from "lucide-react";
+import { useState } from "react";
 
 type Props = {
   onDismiss: () => void;
+  onConfirmed: () => void;
 };
 
 const TELEGRAM_LINK = "https://t.me/veqqa";
 const MESSAGE_TIME = "9:11";
 
-export function TelegramConfirmOverlay({ onDismiss }: Props) {
+export function TelegramConfirmOverlay({ onDismiss, onConfirmed }: Props) {
+  const [messaged, setMessaged] = useState(false);
+
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="telegram-confirm-title">
       <div className="paywall-hero">
         <span className="paywall-eyebrow">Почти всё</span>
-        <h2 id="telegram-confirm-title">Доступ открыт на{" "}час</h2>
+        <h2 id="telegram-confirm-title">Доступ будет открыт на{" "}час</h2>
 
         <div className="telegram-message">
           <img src="/venya-avatar.jpg" alt="Веня Векк" className="telegram-avatar" />
@@ -26,15 +30,27 @@ export function TelegramConfirmOverlay({ onDismiss }: Props) {
           </div>
         </div>
 
-        <a
-          href={TELEGRAM_LINK}
-          target="_blank"
-          rel="noreferrer"
-          className="paywall-cta paywall-cta-primary paywall-cta-full telegram-cta"
-        >
-          <Send size={16} />
-          Написать в Telegram
-        </a>
+        {messaged ? (
+          <button
+            type="button"
+            className="paywall-cta paywall-cta-primary paywall-cta-full telegram-cta"
+            onClick={onConfirmed}
+          >
+            <Check size={16} />
+            Написал
+          </button>
+        ) : (
+          <a
+            href={TELEGRAM_LINK}
+            target="_blank"
+            rel="noreferrer"
+            className="paywall-cta paywall-cta-primary paywall-cta-full telegram-cta"
+            onClick={() => setMessaged(true)}
+          >
+            <Send size={16} />
+            Написать в Telegram
+          </a>
+        )}
 
         <div className="paywall-actions">
           <button type="button" className="paywall-cta-text" onClick={onDismiss}>Не сейчас</button>
