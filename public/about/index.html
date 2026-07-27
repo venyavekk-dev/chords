@@ -224,21 +224,26 @@
         font-size: 0.95rem;
         font-weight: 600;
         text-decoration: none;
-        transition: opacity 160ms ease;
-      }
-
-      .btn:hover {
-        opacity: 0.85;
+        transition: background 160ms ease;
       }
 
       .btn-primary {
-        background: var(--card-active-bg);
-        color: var(--card-active-text);
+        border: 0;
+        background: #0071e3;
+        color: #fff;
+      }
+
+      .btn-primary:hover {
+        background: #0077ed;
       }
 
       .btn-secondary {
-        border: 1px solid var(--border-strong);
-        color: var(--text-primary);
+        border: 1px solid #2997ff;
+        color: #2997ff;
+      }
+
+      .btn-secondary:hover {
+        background: rgba(41, 151, 255, 0.1);
       }
 
       .layout {
