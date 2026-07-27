@@ -1324,6 +1324,7 @@ select {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 8px;
   min-height: 44px;
   padding: 0 24px;
   border-radius: var(--radius-pill);
@@ -1514,11 +1515,19 @@ select {
   color: #34c759;
 }
 
+.paywall-unlock-label {
+  display: block;
+  width: 100%;
+  margin-bottom: 6px;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8125rem;
+  text-align: left;
+}
+
 .paywall-unlock {
   display: flex;
   width: 100%;
   gap: var(--space-2);
-  margin-top: var(--space-4);
 }
 
 .paywall-unlock-input {
@@ -1563,6 +1572,28 @@ select {
 .paywall-unlock-submit:hover {
   background: rgba(255, 255, 255, 0.16);
   color: #fff;
+}
+
+.paywall-dismiss-link {
+  margin-top: var(--space-5);
+}
+
+.paywall-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  align-self: flex-start;
+  margin-bottom: var(--space-4);
+  border: 0;
+  background: none;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8125rem;
+  cursor: pointer;
+  transition: color var(--transition-fast);
+}
+
+.paywall-back:hover {
+  color: rgba(255, 255, 255, 0.78);
 }
 
 .paywall-unlock-error {

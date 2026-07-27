@@ -7,6 +7,7 @@ import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TelegramConfirmOverlay } from "./components/TelegramConfirmOverlay";
 import { TopBar } from "./components/TopBar";
+import { UnlockSuccessOverlay } from "./components/UnlockSuccessOverlay";
 import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
@@ -67,6 +68,7 @@ export default function App() {
   const [trial, setTrial] = useState(() => loadTrial());
   const [now, setNow] = useState(() => Date.now());
   const [showTelegramConfirm, setShowTelegramConfirm] = useState(false);
+  const [showUnlockSuccess, setShowUnlockSuccess] = useState(false);
   const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
   const graceRemainingMs = trial.graceUntil !== undefined ? Math.max(0, trial.graceUntil - now) : 0;
   const inGrace = trial.graceUntil !== undefined && now < trial.graceUntil;
@@ -121,8 +123,8 @@ export default function App() {
   }, [trialExpired]);
 
   useEffect(() => {
-    document.body.classList.toggle("paywall-locked", trialExpired || showTelegramConfirm);
-  }, [trialExpired, showTelegramConfirm]);
+    document.body.classList.toggle("paywall-locked", trialExpired || showTelegramConfirm || showUnlockSuccess);
+  }, [trialExpired, showTelegramConfirm, showUnlockSuccess]);
 
   const openPaywall = () => {
     const next = { ...trial, locked: true };
@@ -163,6 +165,11 @@ export default function App() {
     const next = { ...trial, locked: false, purchased: true };
     setTrial(next);
     saveTrial(next);
+  };
+
+  const unlockWithCode = () => {
+    markPurchased();
+    setShowUnlockSuccess(true);
   };
 
   useEffect(() => {
@@ -335,6 +342,7 @@ export default function App() {
           onDismiss={dismissPaywall}
           onClaimPayment={claimGraceAccess}
           onPurchase={markPurchased}
+          onUnlockCode={unlockWithCode}
           checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
           unlockCode={import.meta.env.VITE_UNLOCK_CODE}
           graceExpired={graceMissedConfirmation}
@@ -342,6 +350,9 @@ export default function App() {
       )}
       {showTelegramConfirm && (
         <TelegramConfirmOverlay onDismiss={dismissTelegramConfirm} onConfirmed={confirmTelegramMessage} />
+      )}
+      {showUnlockSuccess && (
+        <UnlockSuccessOverlay onClose={() => setShowUnlockSuccess(false)} />
       )}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
