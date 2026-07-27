@@ -1,0 +1,753 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#1c1c1c" />
+    <meta name="robots" content="index, follow" />
+    <meta name="author" content="Venya Vekk" />
+    <meta
+      name="description"
+      content="Chord Tulza — бесплатный конструктор аккордов, тональностей и прогрессий для гитары и пианино. Как работают 7 аккордов тональности, цифры ступеней, формы на грифе, капо, севентаккорды и секвенсор."
+    />
+    <link rel="canonical" href="https://chords.venyavekk.com/about" />
+    <link rel="icon" href="/favicon.svg" type="image/svg+xml" />
+    <link rel="apple-touch-icon" href="/favicon.svg" />
+    <title>Chord Tulza — конструктор аккордов и прогрессий — Veniamin Vekk</title>
+
+    <meta property="og:type" content="article" />
+    <meta property="og:site_name" content="Veniamin Vekk" />
+    <meta property="og:title" content="Chord Tulza — конструктор аккордов и прогрессий" />
+    <meta
+      property="og:description"
+      content="Chord Tulza — бесплатный конструктор аккордов, тональностей и прогрессий для гитары и пианино. Как работают 7 аккордов тональности, цифры ступеней, формы на грифе, капо, севентаккорды и секвенсор."
+    />
+    <meta property="og:url" content="https://chords.venyavekk.com/about" />
+    <meta property="og:image" content="https://chords.venyavekk.com/og-image.png" />
+    <meta property="og:image:width" content="1200" />
+    <meta property="og:image:height" content="568" />
+    <meta property="og:locale" content="ru_RU" />
+
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Chord Tulza — конструктор аккордов и прогрессий" />
+    <meta
+      name="twitter:description"
+      content="Chord Tulza — бесплатный конструктор аккордов, тональностей и прогрессий для гитары и пианино. Как работают 7 аккордов тональности, цифры ступеней, формы на грифе, капо, севентаккорды и секвенсор."
+    />
+    <meta name="twitter:image" content="https://chords.venyavekk.com/og-image.png" />
+
+    <script type="application/ld+json">
+      {
+        "@context": "https://schema.org",
+        "@graph": [
+          {
+            "@type": "BreadcrumbList",
+            "itemListElement": [
+              { "@type": "ListItem", "position": 1, "name": "Veniamin Vekk", "item": "https://venyavekk.com/" },
+              { "@type": "ListItem", "position": 2, "name": "Chord Tulza", "item": "https://chords.venyavekk.com/" },
+              { "@type": "ListItem", "position": 3, "name": "Как устроен Chord Tulza", "item": "https://chords.venyavekk.com/about" }
+            ]
+          },
+          {
+            "@type": "WebApplication",
+            "name": "Chord Tulza",
+            "url": "https://chords.venyavekk.com/",
+            "description": "Бесплатный конструктор аккордов, тональностей и прогрессий для гитары и пианино: диатонические аккорды тональности, аппликатуры, капо, севентаккорды и шаговый секвенсор.",
+            "applicationCategory": "MusicApplication",
+            "operatingSystem": "Web",
+            "author": { "@type": "Person", "name": "Veniamin Vekk", "url": "https://venyavekk.com/" }
+          },
+          {
+            "@type": "FAQPage",
+            "mainEntity": [
+              {
+                "@type": "Question",
+                "name": "Почему аккордов в тональности всегда ровно 7?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Тональность — это гамма из семи нот, выстроенных по шаблону тонов и полутонов (для мажора тон-тон-полутон-тон-тон-тон-полутон). На каждой из семи нот строится трезвучие, поэтому диатонических аккордов тональности всегда ровно семь — например, в до мажоре это C, Dm, Em, F, G, Am, Bdim."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Что означают римские цифры I—VII под аккордами?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Римская цифра — это номер ступени аккорда в гамме. Заглавная цифра (I, IV, V) означает мажорное трезвучие, строчная (ii, iii, vi) — минорное, строчная с кружком (vii°) — уменьшённое. Порядок фиксирован для лада: в мажоре I ii iii IV V vi vii°, в миноре i ii° III iv v VI VII."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Что означают функции дом, прогулка и напряжение в аккордах?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Это бытовое название трёх музыкальных функций ступеней: тоника (дом, самая устойчивая), субдоминанта (прогулка, уводит от тоники) и доминанта (напряжение, тянет обратно к тонике). Цветной индикатор между аккордами в Chord Tulza показывает, насколько естественен переход между этими ролями."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Как один аккорд превращается в несколько форм (аппликатур) на гитаре?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Chord Tulza сначала предлагает известные формы: открытую аппликатуру и подвижные баррэ-формы E-shape и A-shape из системы CAGED. Если готовых форм не хватает, инструмент перебирает весь гриф, оставляет только удобные варианты (не шире четырёх ладов) и показывает до десяти штук, от самых простых к сложным."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Что такое тональность и как она влияет на аккорды?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Тональность — это выбор главной ноты и лада (мажор или минор). Вместе они задают гамму из семи нот и, соответственно, весь набор диатонических аккордов, их ролей и допустимых sus- и севентаккорд-вариантов. Всего в инструменте 12 нот × 2 лада — 24 тональности."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Как капо (каподастр) меняет тональность и аппликатуры?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Капо укорачивает струны и поднимает их открытый звук на число полутонов, равное номеру лада. В Chord Tulza клик по ладу на грифе поднимает тональность на столько же полутонов и пересчитывает аппликатуры так, чтобы ни одна не требовала зажимать струну до капо."
+                }
+              },
+              {
+                "@type": "Question",
+                "name": "Что такое севентаккорды (септаккорды) и почему они разные на каждой ступени?",
+                "acceptedAnswer": {
+                  "@type": "Answer",
+                  "text": "Севентаккорд — это трезвучие плюс ещё одна нота из той же гаммы. Тип получившегося септаккорда зависит от ступени: на уменьшенной — полууменьшенный, на минорных — минорный, на доминанте — доминантсептаккорд, на остальных мажорных — большой мажорный (maj7). В до мажоре это Cmaj7, Dm7, Em7, Fmaj7, G7, Am7, Bm7♭5."
+                }
+              }
+            ]
+          }
+        ]
+      }
+    </script>
+
+    <style>
+      @font-face {
+        font-family: "Ibarra Real Nova";
+        src: url("/fonts/ibarra-semibold.woff2") format("woff2");
+        font-style: normal;
+        font-weight: 400;
+        font-display: swap;
+      }
+      @font-face {
+        font-family: "Ibarra Real Nova";
+        src: url("/fonts/ibarra-semibold.woff2") format("woff2");
+        font-style: normal;
+        font-weight: 600;
+        font-display: swap;
+      }
+
+      :root {
+        color-scheme: dark;
+        --page-bg: #1c1c1c;
+        --text-primary: #a8a8a8;
+        --text-secondary: #7d7d7d;
+        --text-strong: #f3f1ed;
+        --surface-primary: #252525;
+        --card-active-bg: #a8a8a8;
+        --card-active-text: #1c1c1c;
+        --border-default: rgba(168, 168, 168, 0.2);
+        --border-strong: rgba(168, 168, 168, 0.44);
+        --radius-card: 0.75rem;
+        --radius-pill: 999px;
+        --content-max: 46rem;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        background: var(--page-bg);
+        color: var(--text-primary);
+        font-family: "Ibarra Real Nova", Georgia, "Times New Roman", serif;
+        line-height: 1.6;
+        padding: 3.5rem 1.25rem 5rem;
+      }
+
+      a {
+        color: inherit;
+      }
+
+      .hero {
+        max-width: 42rem;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        text-align: center;
+      }
+
+      .eyebrow {
+        display: inline-flex;
+        border: 1px solid var(--border-strong);
+        border-radius: var(--radius-pill);
+        padding: 0.3rem 0.9rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--text-secondary);
+      }
+
+      h1 {
+        font-size: clamp(2rem, 6vw, 2.75rem);
+        line-height: 1.15;
+        margin: 0;
+        color: var(--text-strong);
+        font-weight: 600;
+      }
+
+      .lede {
+        max-width: 46ch;
+        margin: 0;
+        font-size: clamp(1rem, 2vw, 1.125rem);
+      }
+
+      .cta-row {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 1rem;
+        margin-top: 0.25rem;
+      }
+
+      .btn {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 44px;
+        padding: 0 1.5rem;
+        border-radius: var(--radius-pill);
+        font-size: 0.95rem;
+        font-weight: 600;
+        text-decoration: none;
+        transition: opacity 160ms ease;
+      }
+
+      .btn:hover {
+        opacity: 0.85;
+      }
+
+      .btn-primary {
+        background: var(--card-active-bg);
+        color: var(--card-active-text);
+      }
+
+      .btn-secondary {
+        border: 1px solid var(--border-strong);
+        color: var(--text-primary);
+      }
+
+      .layout {
+        max-width: 62rem;
+        margin: 3.5rem auto 0;
+        display: flex;
+        gap: 3rem;
+        align-items: flex-start;
+      }
+
+      .toc {
+        flex-shrink: 0;
+        width: 14rem;
+        position: sticky;
+        top: 2.5rem;
+        display: flex;
+        flex-direction: column;
+        gap: 1.5rem;
+      }
+
+      .toc-group-label {
+        margin: 0 0 0.5rem;
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        color: var(--text-secondary);
+      }
+
+      .toc-list {
+        list-style: none;
+        margin: 0;
+        padding: 0 0 0 0.75rem;
+        border-left: 1px solid var(--border-default);
+        display: flex;
+        flex-direction: column;
+        gap: 0.4rem;
+      }
+
+      .toc-list a {
+        text-decoration: none;
+        font-size: 0.9rem;
+        color: var(--text-primary);
+      }
+
+      .toc-list a:hover {
+        color: var(--text-strong);
+      }
+
+      article {
+        flex: 1;
+        min-width: 0;
+        max-width: 42rem;
+        display: flex;
+        flex-direction: column;
+        gap: 2rem;
+      }
+
+      .card {
+        scroll-margin-top: 2.5rem;
+        border: 1px solid var(--border-default);
+        background: var(--surface-primary);
+        border-radius: var(--radius-card);
+        padding: 2rem;
+      }
+
+      .card h2 {
+        margin: 0 0 1rem;
+        font-size: clamp(1.375rem, 3vw, 1.75rem);
+        color: var(--text-strong);
+        font-weight: 600;
+      }
+
+      .card p {
+        margin: 0 0 1rem;
+      }
+
+      .card p:last-child {
+        margin-bottom: 0;
+      }
+
+      .card ul {
+        margin: 0 0 1rem;
+        padding-left: 1.25rem;
+      }
+
+      .card ul:last-child {
+        margin-bottom: 0;
+      }
+
+      .card li {
+        margin-bottom: 0.4rem;
+      }
+
+      .feature-grid {
+        display: grid;
+        grid-template-columns: 1fr;
+        gap: 0.75rem;
+      }
+
+      .feature {
+        border: 1px solid var(--border-default);
+        border-radius: var(--radius-card);
+        padding: 1rem 1.25rem;
+      }
+
+      .feature h3 {
+        margin: 0 0 0.35rem;
+        font-size: 1.05rem;
+        color: var(--text-strong);
+        font-weight: 600;
+      }
+
+      .feature p {
+        margin: 0;
+        font-size: 0.925rem;
+        color: var(--text-primary);
+      }
+
+      .outro {
+        text-align: center;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.25rem;
+        padding-top: 1rem;
+      }
+
+      .outro h2 {
+        margin: 0;
+        font-size: clamp(1.375rem, 3vw, 1.75rem);
+        color: var(--text-strong);
+        font-weight: 600;
+      }
+
+      .outro p {
+        margin: 0;
+        max-width: 46ch;
+      }
+
+      @media (min-width: 40rem) {
+        .feature-grid {
+          grid-template-columns: 1fr 1fr;
+        }
+      }
+
+      @media (max-width: 60rem) {
+        .layout {
+          flex-direction: column;
+        }
+        .toc {
+          position: static;
+          width: 100%;
+          flex-direction: row;
+          flex-wrap: wrap;
+          gap: 1.5rem 2.5rem;
+        }
+        article {
+          max-width: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <header class="hero">
+      <span class="eyebrow">О проекте</span>
+      <h1>Chord&nbsp;Tulza — конструктор аккордов и&nbsp;прогрессий для&nbsp;гитары и&nbsp;пианино</h1>
+      <p class="lede">
+        Бесплатный инструмент для&nbsp;музыкантов: показывает все аккорды тональности, их&nbsp;формы
+        на&nbsp;грифе и&nbsp;клавишах и&nbsp;помогает на&nbsp;слух собирать прогрессии.
+      </p>
+      <div class="cta-row">
+        <a class="btn btn-primary" href="/">Открыть Chord&nbsp;Tulza</a>
+        <a class="btn btn-secondary" href="https://venyavekk.com/">На&nbsp;сайт Вени</a>
+      </div>
+    </header>
+
+    <div class="layout">
+      <nav class="toc" aria-label="Разделы страницы">
+        <div>
+          <p class="toc-group-label">Коротко</p>
+          <ul class="toc-list">
+            <li><a href="#made-by">Кто это сделал</a></li>
+            <li><a href="#how-it-works">Как это работает</a></li>
+            <li><a href="#why">Зачем он нужен</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="toc-group-label">Подробно</p>
+          <ul class="toc-list">
+            <li><a href="#degrees-seven">Почему всегда 7 аккордов</a></li>
+            <li><a href="#roman-numerals">Цифры I—VII</a></li>
+            <li><a href="#functions">Дом, прогулка, напряжение</a></li>
+            <li><a href="#voicings">Формы аккордов</a></li>
+            <li><a href="#tonality">Тональность</a></li>
+            <li><a href="#capo">Капо</a></li>
+            <li><a href="#sevenths">Севентаккорды</a></li>
+          </ul>
+        </div>
+        <div>
+          <p class="toc-group-label">Секвенсор и звук</p>
+          <ul class="toc-list">
+            <li><a href="#sequencer-build">Как собрать прогрессию</a></li>
+            <li><a href="#sequencer-playback">Шаги и темп</a></li>
+            <li><a href="#sequencer-presets">Примеры песен и экспорт</a></li>
+            <li><a href="#sound">Звук и громкость</a></li>
+          </ul>
+        </div>
+      </nav>
+
+      <article>
+        <section class="card" id="made-by">
+          <h2>Кто это сделал</h2>
+          <p>
+            Chord&nbsp;Tulza придумал и&nbsp;собрал Вениамин Векк — дизайнер и&nbsp;музыкант, а&nbsp;не&nbsp;программист.
+            Весь код инструмента написан «вайбкодингом»: с&nbsp;помощью ИИ-агентов (Claude и&nbsp;Codex), которым он
+            ставил задачи, показывал скриншоты и&nbsp;просил переделать то, что звучало или выглядело не&nbsp;так. Сам
+            он не&nbsp;написал ни&nbsp;строчки кода руками — зато отвечал за&nbsp;каждое музыкальное и&nbsp;дизайнерское
+            решение и&nbsp;проверял всё на&nbsp;слух.
+          </p>
+          <p>
+            Это значит, что инструмент — живой и&nbsp;постоянно меняется: что-то доделывается, что-то ломается
+            и&nbsp;чинится заново. Если найдёшь баг — это, скорее всего, не&nbsp;задумка, а&nbsp;огрех вайбкодинга.
+          </p>
+        </section>
+
+        <section class="card" id="how-it-works">
+          <h2>Как это работает</h2>
+          <p>
+            Открываешь инструмент, выбираешь тональность и&nbsp;лад — дальше всё остальное подстраивается само:
+            аккорды, их&nbsp;формы, звук.
+          </p>
+          <div class="feature-grid">
+            <div class="feature">
+              <h3>Тональность и лад</h3>
+              <p>Выбери ноту и&nbsp;мажор/минор — весь набор аккордов, их&nbsp;роли и&nbsp;формы пересчитаются сами.</p>
+            </div>
+            <div class="feature">
+              <h3>7 аккордов ступени</h3>
+              <p>Весь диатонический набор тональности одним рядом, с&nbsp;римской цифрой ступени над каждым.</p>
+            </div>
+            <div class="feature">
+              <h3>Sus- и севентаккорды</h3>
+              <p>У&nbsp;каждой ступени есть sus2-, sus4- и&nbsp;септаккорд-вариант — но&nbsp;только если он остаётся в&nbsp;тональности.</p>
+            </div>
+            <div class="feature">
+              <h3>Аппликатуры на гитаре</h3>
+              <p>Несколько способов взять один и&nbsp;тот&nbsp;же аккорд: от&nbsp;открытых до&nbsp;баррэ-форм.</p>
+            </div>
+            <div class="feature">
+              <h3>Капо</h3>
+              <p>Клик по&nbsp;ладу на&nbsp;грифе моделирует каподастр: тональность и&nbsp;аппликатуры пересчитываются.</p>
+            </div>
+            <div class="feature">
+              <h3>Секвенсор</h3>
+              <p>Превращает ряд аккордов в&nbsp;шаговый секвенсор с&nbsp;BPM, шаффлом и&nbsp;пресетами настоящих песен.</p>
+            </div>
+            <div class="feature">
+              <h3>Подсказки о переходах</h3>
+              <p>Цветные индикаторы показывают, насколько «естественно» звучит переход к&nbsp;следующему аккорду.</p>
+            </div>
+            <div class="feature">
+              <h3>Гитара, пианино или оба</h3>
+              <p>Переключение инструмента, три пресета звука и&nbsp;громкость.</p>
+            </div>
+          </div>
+        </section>
+
+        <section class="card" id="why">
+          <h2>Зачем он нужен</h2>
+          <p>
+            Chord&nbsp;Tulza — не&nbsp;тюнер и&nbsp;не&nbsp;табулатурник, а&nbsp;помощник для&nbsp;тех, кто сочиняет
+            или подбирает музыку. Он пригодится, если ты:
+          </p>
+          <ul>
+            <li>сочиняешь песню и&nbsp;ищешь, какие аккорды вообще сочетаются в&nbsp;выбранной тональности;</li>
+            <li>подбираешь чужую песню на&nbsp;слух и&nbsp;хочешь быстро проверить прогрессию или найти удобную аппликатуру;</li>
+            <li>учишь теорию и&nbsp;хочешь видеть, как ступени и&nbsp;их&nbsp;роли работают в&nbsp;реальном времени, а&nbsp;не&nbsp;по учебнику;</li>
+            <li>поёшь и&nbsp;тебе нужно быстро пересчитать капо под&nbsp;удобную высоту голоса.</li>
+          </ul>
+          <p>
+            Инструмент рассчитан на&nbsp;то, чтобы пробовать и&nbsp;слышать, а&nbsp;не&nbsp;запоминать теорию
+            наизусть — он всё равно постоянно подсказывает по&nbsp;ходу дела.
+          </p>
+        </section>
+
+        <section class="card" id="degrees-seven">
+          <h2>Почему аккордов всегда ровно 7?</h2>
+          <p>
+            Тональность — это не&nbsp;просто одна нота, а&nbsp;целая гамма из&nbsp;семи нот, выстроенных
+            по&nbsp;определённому шаблону расстояний между ними. Для мажора это тон-тон-полутон-тон-тон-тон-полутон,
+            для минора — тон-полутон-тон-тон-полутон-тон-тон. От&nbsp;выбранной ноты этот шаблон всегда даёт ровно
+            семь нот гаммы — не&nbsp;больше и&nbsp;не&nbsp;меньше.
+          </p>
+          <p>
+            На&nbsp;каждой из&nbsp;этих семи нот можно построить трезвучие — аккорд из&nbsp;трёх нот, взятых через одну
+            по&nbsp;этой же гамме. Семь нот — семь трезвучий, отсюда и&nbsp;семь аккордов на&nbsp;экране. Это
+            и&nbsp;есть «диатонические» аккорды тональности — те, что не&nbsp;выходят за&nbsp;её пределы и&nbsp;поэтому
+            звучат «дома», в&nbsp;отличие от&nbsp;аккорда, взятого наугад.
+          </p>
+          <p>
+            Например, гамма до&nbsp;мажор — это до, ре, ми, фа, соль, ля, си (C&nbsp;D&nbsp;E&nbsp;F&nbsp;G&nbsp;A&nbsp;B).
+            Ровно семь нот — и,&nbsp;значит, ровно семь трезвучий: C, Dm, Em, F, G, Am, Bdim. Это и&nbsp;есть весь
+            набор аккордов, который Chord&nbsp;Tulza покажет для&nbsp;тональности до&nbsp;мажор.
+          </p>
+        </section>
+
+        <section class="card" id="roman-numerals">
+          <h2>Что означают цифры I—VII?</h2>
+          <p>
+            Римская цифра под каждым аккордом — это его ступень: место в&nbsp;гамме, от&nbsp;первой ноты тональности
+            (I) до&nbsp;седьмой (VII). Регистр цифры сразу говорит, какой это аккорд:
+          </p>
+          <ul>
+            <li>ЗАГЛАВНАЯ (I, IV, V) — мажорное трезвучие;</li>
+            <li>строчная (ii, iii, vi) — минорное;</li>
+            <li>строчная с&nbsp;кружком (vii°) — уменьшенное, самое неустойчивое из&nbsp;семи.</li>
+          </ul>
+          <p>
+            В&nbsp;мажорной тональности порядок фиксирован: I&nbsp;ii&nbsp;iii&nbsp;IV&nbsp;V&nbsp;vi&nbsp;vii°.
+            В&nbsp;миноре — свой: i&nbsp;ii°&nbsp;III&nbsp;iv&nbsp;v&nbsp;VI&nbsp;VII. На&nbsp;примере до&nbsp;мажор это
+            выглядит так: I&nbsp;=&nbsp;C, ii&nbsp;=&nbsp;Dm, iii&nbsp;=&nbsp;Em, IV&nbsp;=&nbsp;F, V&nbsp;=&nbsp;G,
+            vi&nbsp;=&nbsp;Am, vii°&nbsp;=&nbsp;Bdim.
+          </p>
+          <p>
+            Смени тональность с&nbsp;до-мажор на&nbsp;ре-мажор — ноты аккордов изменятся, а&nbsp;последовательность
+            заглавных и&nbsp;строчных цифр останется той&nbsp;же. Поэтому про песню можно говорить «I-V-vi-IV»,
+            не&nbsp;привязываясь к&nbsp;конкретной тональности.
+          </p>
+        </section>
+
+        <section class="card" id="functions">
+          <h2>Дом, прогулка, напряжение: зачем нужны цветные точки?</h2>
+          <p>Каждая ступень тяготеет к&nbsp;одной из&nbsp;трёх ролей:</p>
+          <ul>
+            <li>тоника (I, iii, vi в&nbsp;мажоре) — самая устойчивая, «дом»;</li>
+            <li>субдоминанта (ii, IV) — уводит от&nbsp;дома, «прогулка»;</li>
+            <li>доминанта (V, vii°) — создаёт напряжение, которое тянет обратно к&nbsp;тонике.</li>
+          </ul>
+          <p>
+            Возьмём знакомую прогрессию I-IV-V-I (в&nbsp;до&nbsp;мажоре — C-F-G-C): I&nbsp;— стоишь дома, IV&nbsp;—
+            вышел прогуляться, V&nbsp;— прогулка обернулась напряжением, I&nbsp;— напряжение снимается возвращением
+            домой. Отсюда и&nbsp;ощущение завершённости у&nbsp;такой последовательности.
+          </p>
+          <p>
+            Цветной индикатор между аккордами в&nbsp;Chord&nbsp;Tulza — подсказка о&nbsp;том, куда мысленно ведёт
+            нынешний аккорд: зелёный — переход между ролями естественный (например, из&nbsp;напряжения обратно домой),
+            жёлтый — рабочая, но&nbsp;менее очевидная связка, красный — аккорды одной роли просто меняют цвет,
+            не&nbsp;создавая движения. Это ориентир, а&nbsp;не&nbsp;правило — многие хорошие песни специально его
+            нарушают.
+          </p>
+        </section>
+
+        <section class="card" id="voicings">
+          <h2>Как один аккорд превращается в несколько форм на грифе?</h2>
+          <p>
+            Один и&nbsp;тот&nbsp;же аккорд можно взять на&nbsp;гитаре десятком разных способов — просто зажимая
+            разные струны в&nbsp;разных ладах. Chord&nbsp;Tulza сначала предлагает знакомые формы: открытую
+            аппликатуру, если она существует для&nbsp;этого аккорда, и&nbsp;подвижные баррэ-формы, «выросшие»
+            из&nbsp;открытых E&nbsp;и&nbsp;A (те самые «E-shape» и&nbsp;«A-shape» из&nbsp;системы CAGED), плюс
+            компактное трезвучие на&nbsp;четырёх верхних струнах.
+          </p>
+          <p>
+            Если знакомых форм не&nbsp;хватает — например, у&nbsp;sus2, sus4 и&nbsp;септаккордов своих готовых
+            шаблонов нет, — инструмент перебирает гриф целиком: пробует комбинации ладов на&nbsp;всех шести струнах,
+            оставляет только те, где действительно звучат все ноты аккорда, и&nbsp;отбрасывает слишком растянутые
+            (больше четырёх ладов между крайними пальцами) или с&nbsp;более чем одной заглушённой струной внутри
+            аккорда. Из&nbsp;оставшегося показывает до&nbsp;десяти вариантов — сначала самые удобные (низкие лады,
+            открытые струны, знакомые формы), сложные — в&nbsp;конце.
+          </p>
+          <p>
+            Выбор запоминается отдельно для&nbsp;каждого аккорда: если для&nbsp;G ты предпочитаешь баррэ на&nbsp;
+            третьем ладу, а&nbsp;не&nbsp;открытую форму, в&nbsp;следующий раз инструмент сразу предложит именно её.
+          </p>
+        </section>
+
+        <section class="card" id="tonality">
+          <h2>Тональность: что это и как она всё меняет?</h2>
+          <p>
+            Тональность — это выбор двух вещей: главной ноты (например, ля) и&nbsp;лада (мажор или минор). Вместе они
+            задают ту&nbsp;самую гамму из&nbsp;семи нот и,&nbsp;значит, все семь диатонических аккордов, их&nbsp;роли
+            и&nbsp;то, какие sus- и&nbsp;севентаккорд-варианты у&nbsp;них вообще могут быть — Chord&nbsp;Tulza
+            показывает только те, чьи ноты не&nbsp;выходят за&nbsp;пределы тональности. Всего в&nbsp;инструменте
+            12&nbsp;нот × 2&nbsp;лада — 24&nbsp;тональности, и&nbsp;для каждой этот расчёт происходит заново.
+          </p>
+          <p>
+            Смена тональности не&nbsp;меняет форму песни — прогрессия «I-V-vi-IV» остаётся собой что&nbsp;в&nbsp;до,
+            что&nbsp;в&nbsp;ре, — но&nbsp;целиком меняет высоту звучания и,&nbsp;на&nbsp;гитаре, набор удобных
+            аппликатур.
+          </p>
+        </section>
+
+        <section class="card" id="capo">
+          <h2>Как капо сдвигает тональность?</h2>
+          <p>
+            Каподастр — механическая «зажимка» на&nbsp;грифе, которая укорачивает все струны разом и&nbsp;поднимает
+            их&nbsp;открытый звук на&nbsp;нужное число полутонов. Играя привычную форму ре, но&nbsp;с&nbsp;капо
+            на&nbsp;пятом ладу, ты&nbsp;на&nbsp;самом деле звучишь в&nbsp;соль — форма та&nbsp;же, а&nbsp;реальная
+            тональность другая.
+          </p>
+          <p>
+            В&nbsp;Chord&nbsp;Tulza это смоделировано буквально: клик по&nbsp;номеру лада на&nbsp;грифе поднимает
+            тональность на&nbsp;столько&nbsp;же полутонов и&nbsp;пересчитывает набор аппликатур так, чтобы ни&nbsp;одна
+            не&nbsp;требовала прижимать струну до&nbsp;капо — это физически невозможно, там уже играет капо. Повторный
+            клик по&nbsp;тому&nbsp;же ладу снимает капо и&nbsp;возвращает исходную тональность.
+          </p>
+        </section>
+
+        <section class="card" id="sevenths">
+          <h2>Севентаккорды (sevenths): почему они разные на каждой ступени?</h2>
+          <p>
+            Севентаккорд, он же септаккорд, — это трезвучие плюс ещё одна нота, через ступень выше третьей. Если
+            брать эту дополнительную ноту строго из&nbsp;той&nbsp;же гаммы, ничего не&nbsp;повышая и&nbsp;не&nbsp;понижая,
+            на&nbsp;разных ступенях получаются разные типы септаккордов — и&nbsp;это не&nbsp;случайность, а&nbsp;прямое
+            следствие того, как в&nbsp;гамме расставлены тона и&nbsp;полутона:
+          </p>
+          <ul>
+            <li>на&nbsp;уменьшенной ступени (vii° в&nbsp;мажоре, ii° в&nbsp;миноре) — полууменьшенный септаккорд;</li>
+            <li>на&nbsp;минорных ступенях — минорный септаккорд;</li>
+            <li>на&nbsp;доминанте (V в&nbsp;мажоре, VII в&nbsp;миноре) — доминантсептаккорд, тот самый «блюзовый» аккорд с&nbsp;пониженной седьмой, который сильнее всего тянет к&nbsp;тонике;</li>
+            <li>на&nbsp;остальных мажорных ступенях — большой мажорный септаккорд (maj7).</li>
+          </ul>
+          <p>
+            На&nbsp;примере до&nbsp;мажор получится: Cmaj7, Dm7, Em7, Fmaj7, G7, Am7, Bm7♭5 — семь разных типов
+            септаккорда, и&nbsp;ни&nbsp;один не&nbsp;добавлен наугад. Chord&nbsp;Tulza показывает такой вариант
+            для&nbsp;каждой ступени по&nbsp;этому&nbsp;же принципу, так что все предложенные севентаккорды остаются
+            внутри тональности.
+          </p>
+        </section>
+
+        <section class="card" id="sequencer-build">
+          <h2>Секвенсор: как собрать прогрессию</h2>
+          <p>
+            Кнопка «Секвенсор» в&nbsp;шапке превращает ряд аккордов ступени в&nbsp;пошаговый секвенсор. Дальше клик
+            по&nbsp;аккорду (или по&nbsp;любому его sus- или севентаккорд-варианту) работает как обычно — проигрывает
+            его и&nbsp;делает активным, — но&nbsp;вдобавок добавляет его в&nbsp;очередь шагов. Повторы разрешены: один
+            и&nbsp;тот&nbsp;же аккорд можно добавить подряд сколько угодно раз.
+          </p>
+          <p>
+            Сама очередь видна отдельно — в&nbsp;ряду шагов под грифом или клавишами. На&nbsp;кнопках аккордов
+            никакой подсветки нет специально, чтобы не&nbsp;путать «добавлено в&nbsp;секвенсор» с&nbsp;обычным
+            выбором активного аккорда.
+          </p>
+          <p>
+            Готовую очередь можно перетасовать одной кнопкой — шаффл заполняет все шаги случайными диатоническими
+            аккордами текущей тональности. Шаги внутри очереди переставляются перетаскиванием прямо в&nbsp;ряду
+            слотов, а&nbsp;клик по&nbsp;заполненному слоту убирает именно этот шаг, не&nbsp;трогая остальные. Число
+            шагов настраивается отдельно, от&nbsp;двух до&nbsp;восьми, — если уменьшить его, лишние шаги с&nbsp;конца
+            просто обрежутся.
+          </p>
+        </section>
+
+        <section class="card" id="sequencer-playback">
+          <h2>Секвенсор: шаги и темп</h2>
+          <p>
+            Play запускает зацикленное воспроизведение — секвенсор проигрывает шаги по&nbsp;кругу, подсвечивая
+            текущий, пока не&nbsp;нажмёшь паузу.
+          </p>
+          <p>
+            Темп задаётся в&nbsp;BPM (ударах в&nbsp;минуту), от&nbsp;40 до&nbsp;220: можно крутить плюс/минус
+            по&nbsp;пять либо вписать число прямо в&nbsp;поле — значение подрежется до&nbsp;допустимого диапазона
+            только когда убираешь фокус с&nbsp;поля, так что печатать промежуточные цифры не&nbsp;мешает. Интервал
+            между шагами инструмент считает из&nbsp;BPM сам.
+          </p>
+          <p>
+            Смена тональности или лада останавливает воспроизведение и&nbsp;полностью очищает очередь: старые
+            аккорды не&nbsp;переносятся в&nbsp;новую тональность, потому что в&nbsp;общем случае для&nbsp;них
+            попросту нет прямого соответствия среди новых семи ступеней.
+          </p>
+        </section>
+
+        <section class="card" id="sequencer-presets">
+          <h2>Секвенсор: примеры песен и экспорт</h2>
+          <p>
+            Кнопка «Эксплор» открывает готовые прогрессии реальных песен, подобранные по&nbsp;цифрам ступеней
+            (например, I-V-vi-IV), а&nbsp;не&nbsp;по конкретным нотам — поэтому один и&nbsp;тот&nbsp;же пример
+            правильно подставляется в&nbsp;любой тональности. Стрелками листаешь список; в&nbsp;приоритете — песни,
+            чья настоящая тональность совпадает с&nbsp;выбранной сейчас, дальше — остальные примеры того&nbsp;же
+            лада. Выбор сразу подставляет аккорды примера в&nbsp;очередь шагов вместе с&nbsp;его собственным BPM.
+          </p>
+          <p>
+            Кнопка копирования переносит текущую последовательность в&nbsp;буфер обмена простым текстом вида
+            «C&nbsp;-&nbsp;G&nbsp;-&nbsp;Am&nbsp;-&nbsp;F, 96&nbsp;BPM» — удобно вставить в&nbsp;заметки или
+            показать другому музыканту. Корзина удаляет всю очередь разом и&nbsp;специально стоит последней
+            в&nbsp;панели, подальше от&nbsp;play, чтобы не&nbsp;смахнуть прогрессию случайно.
+          </p>
+        </section>
+
+        <section class="card" id="sound">
+          <h2>Звук и громкость</h2>
+          <p>
+            Три пресета — Velvet, Clean и&nbsp;Air — это разные тембры синтезированного звука аккорда,
+            переключаются одной кнопкой в&nbsp;шапке по&nbsp;кругу. Velvet звучит мягче всего: у&nbsp;него самая
+            плавная атака и&nbsp;заметный хвост из&nbsp;реверба и&nbsp;дилея. Clean, наоборот, атакует почти
+            мгновенно и&nbsp;суше — больше похоже на&nbsp;чёткий щипок струны. Air даёт самый просторный
+            и&nbsp;гулкий звук: чистый синусоидальный тон с&nbsp;наибольшим ревербом из&nbsp;трёх пресетов.
+          </p>
+          <p>
+            Громкость — обычный слайдер в&nbsp;настройках, применяется сразу и&nbsp;запоминается в&nbsp;браузере
+            между визитами. Кнопка play в&nbsp;шапке проигрывает текущий аккорд выбранным пресетом
+            и&nbsp;громкостью в&nbsp;любой момент, не&nbsp;заставляя заново кликать по&nbsp;аккорду на&nbsp;грифе.
+          </p>
+        </section>
+
+        <section class="outro">
+          <h2>Попробуй сам</h2>
+          <p>Проще один раз покликать по&nbsp;тональностям и&nbsp;аккордам, чем читать про них.</p>
+          <a class="btn btn-primary" href="/">Открыть Chord&nbsp;Tulza</a>
+        </section>
+      </article>
+    </div>
+  </body>
+</html>
