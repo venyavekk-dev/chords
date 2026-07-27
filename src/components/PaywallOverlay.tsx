@@ -15,6 +15,7 @@ type Props = {
   onClaimPayment: () => void;
   onPurchase: () => void;
   checkoutUrl?: string;
+  unlockCode?: string;
   graceExpired?: boolean;
 };
 
@@ -64,9 +65,11 @@ function CopyField({ label, value, copyValue }: { label: string; value: string; 
   );
 }
 
-export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkoutUrl, graceExpired }: Props) {
+export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkoutUrl, unlockCode, graceExpired }: Props) {
   const [selectedPrice, setSelectedPrice] = useState<PriceOption | null>(null);
   const [bouncing, setBouncing] = useState(false);
+  const [codeInput, setCodeInput] = useState("");
+  const [codeInvalid, setCodeInvalid] = useState(false);
 
   useEffect(() => {
     if (!checkoutUrl) return;
@@ -84,6 +87,14 @@ export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkout
     setSelectedPrice(price);
     setBouncing(true);
     window.setTimeout(() => setBouncing(false), 380);
+  };
+
+  const submitCode = () => {
+    if (unlockCode && codeInput.trim().toLowerCase() === unlockCode.trim().toLowerCase()) {
+      onPurchase();
+      return;
+    }
+    setCodeInvalid(true);
   };
 
   return (
@@ -155,6 +166,29 @@ export function PaywallOverlay({ onDismiss, onClaimPayment, onPurchase, checkout
           </button>
           <button type="button" className="paywall-cta-text" onClick={onDismiss}>Не сейчас</button>
         </div>
+
+        <div className="paywall-unlock">
+          <input
+            type="text"
+            autoComplete="off"
+            spellCheck={false}
+            className={`paywall-unlock-input${codeInvalid ? " invalid" : ""}`}
+            placeholder="Код доступа"
+            value={codeInput}
+            onChange={(event) => {
+              setCodeInput(event.target.value);
+              setCodeInvalid(false);
+            }}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") submitCode();
+            }}
+            aria-label="Код доступа"
+          />
+          <button type="button" className="paywall-unlock-submit" onClick={submitCode}>
+            Ввести
+          </button>
+        </div>
+        {codeInvalid && <span className="paywall-unlock-error">Неверный код</span>}
       </div>
     </div>
   );

@@ -336,6 +336,7 @@ export default function App() {
           onClaimPayment={claimGraceAccess}
           onPurchase={markPurchased}
           checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
+          unlockCode={import.meta.env.VITE_UNLOCK_CODE}
           graceExpired={graceMissedConfirmation}
         />
       )}

@@ -1248,7 +1248,8 @@ select {
 
 .paywall-hero {
   display: flex;
-  max-width: 30rem;
+  max-width: 33rem;
+  max-height: 90vh;
   flex-direction: column;
   align-items: center;
   padding: var(--space-12) var(--space-8);
@@ -1257,6 +1258,7 @@ select {
   background: #0a0a0a;
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
   text-align: center;
+  overflow-y: auto;
 }
 
 @keyframes paywall-bounce {
@@ -1428,7 +1430,8 @@ select {
 .paywall-manual {
   display: flex;
   width: 100%;
-  flex-direction: column;
+  flex-direction: row;
+  flex-wrap: wrap;
   gap: var(--space-3);
 }
 
@@ -1446,7 +1449,8 @@ select {
 }
 
 .paywall-field {
-  width: 100%;
+  flex: 1 1 12rem;
+  min-width: 0;
   text-align: left;
 }
 
@@ -1479,7 +1483,7 @@ select {
   overflow: hidden;
   color: #fff;
   font-family: ui-monospace, "SF Mono", "Menlo", monospace;
-  font-size: 1rem;
+  font-size: 0.9375rem;
   letter-spacing: 0.02em;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -1508,6 +1512,63 @@ select {
 .paywall-field-copy.copied {
   background: rgba(52, 199, 89, 0.18);
   color: #34c759;
+}
+
+.paywall-unlock {
+  display: flex;
+  width: 100%;
+  gap: var(--space-2);
+  margin-top: var(--space-4);
+}
+
+.paywall-unlock-input {
+  flex: 1;
+  min-width: 0;
+  padding: 10px 16px;
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.05);
+  color: #fff;
+  font-size: 0.875rem;
+  transition: border-color var(--transition-fast), background var(--transition-fast);
+}
+
+.paywall-unlock-input::placeholder {
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.paywall-unlock-input:focus {
+  border-color: rgba(255, 255, 255, 0.32);
+  background: rgba(255, 255, 255, 0.08);
+  outline: none;
+}
+
+.paywall-unlock-input.invalid {
+  border-color: rgba(255, 69, 58, 0.6);
+}
+
+.paywall-unlock-submit {
+  flex-shrink: 0;
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: rgba(255, 255, 255, 0.08);
+  color: rgba(255, 255, 255, 0.78);
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background var(--transition-fast), color var(--transition-fast);
+}
+
+.paywall-unlock-submit:hover {
+  background: rgba(255, 255, 255, 0.16);
+  color: #fff;
+}
+
+.paywall-unlock-error {
+  margin-top: var(--space-2);
+  color: rgba(255, 69, 58, 0.85);
+  font-size: 0.8125rem;
 }
 
 .telegram-message {
@@ -1835,10 +1896,44 @@ select {
     width: 100%;
   }
 
+  .paywall-manual {
+    flex-direction: column;
+  }
+
   .paywall-field-value {
     font-size: 0.9375rem;
   }
 
+  .paywall-unlock {
+    flex-direction: column;
+  }
+
+  .paywall-unlock-submit {
+    width: 100%;
+  }
+
+}
+
+@media (max-height: 54rem) {
+  .paywall-hero {
+    padding: var(--space-8) var(--space-6);
+  }
+
+  .paywall-subtitle {
+    margin-bottom: var(--space-4);
+  }
+
+  .price-picker {
+    margin-bottom: var(--space-3);
+  }
+
+  .paywall-divider {
+    margin: var(--space-4) 0 var(--space-3);
+  }
+
+  .paywall-actions {
+    margin-top: var(--space-4);
+  }
 }
 
 @media (max-width: 22rem) {
