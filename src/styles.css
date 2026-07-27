@@ -899,6 +899,61 @@ select {
   color: var(--card-active-muted);
 }
 
+.capo-real-name {
+  color: var(--text-secondary);
+  font-size: 0.7rem;
+  font-style: normal;
+  font-weight: 400;
+  opacity: 0.75;
+}
+
+.open-chords-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  gap: var(--space-2);
+  min-width: 0;
+  margin-top: var(--space-8);
+}
+
+.open-chord-chip {
+  position: relative;
+  display: grid;
+  justify-items: start;
+  gap: 2px;
+  min-width: 0;
+  padding: 12px 12px 14px;
+  border: 1px solid transparent;
+  border-radius: var(--radius-card);
+  background: var(--surface-primary);
+  color: var(--text-primary);
+  text-align: left;
+  opacity: 1;
+  transition: background var(--transition-fast), color var(--transition-fast), opacity var(--transition-fast);
+}
+
+.open-chord-chip.out-of-key {
+  opacity: 0.45;
+}
+
+.open-chord-chip.active {
+  border-color: hsl(var(--root-hue) 70% 50%);
+  background: var(--card-active-bg);
+  color: var(--card-active-text);
+}
+
+.open-chord-chip .root-dot {
+  width: 10px;
+  height: 10px;
+  border-radius: var(--radius-pill);
+  background: hsl(var(--root-hue) 70% 50%);
+}
+
+.open-chord-chip strong {
+  font-size: clamp(1.1rem, 2vw, 1.35rem);
+  font-weight: 600;
+  line-height: 1.1;
+}
+
 .variant-row {
   position: relative;
   z-index: 2;

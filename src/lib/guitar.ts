@@ -73,7 +73,7 @@ export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD
 
   const usable = capoFret > 0 ? deduped.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret)) : deduped;
   const pool = usable.length > 0 ? usable : deduped;
-  return pool.slice(0, 10);
+  return pool.slice(0, 10).sort((a, b) => a.startFret - b.startFret);
 }
 
 function scoreVoicing(voicing: GuitarVoicing, root: string, tuning: string[]): number {
@@ -171,3 +171,32 @@ const openShapes: Record<string, Array<number | "x">> = {
   E7: [0, 2, 0, 1, 0, 0],
   B7: ["x", 2, 1, 2, 0, 2],
 };
+
+export const OPEN_CHORD_SYMBOLS = Object.keys(openShapes);
+
+/**
+ * Standalone from generateVoicings/capo filtering: always returns the exact
+ * open-position shape, shifted up by capoFret frets (an open string becomes
+ * capoFret, a fretted note becomes fret+capoFret) so the diagram stays the
+ * familiar hand shape and just rides the capo.
+ */
+export function getOpenShapeVoicing(symbol: string, capoFret = 0, tuning = STANDARD_TUNING): GuitarVoicing | undefined {
+  const shape = openShapes[symbol];
+  if (!shape) return undefined;
+  const frets = shape.map((fret) => (fret === "x" ? "x" : fret + capoFret));
+  const chord = parseChord(symbol);
+  const notes = frets
+    .map((fret, index) => (fret === "x" ? null : transpose(tuning[index], fret)))
+    .filter((note): note is string => Boolean(note));
+  const pressed = frets.filter((fret): fret is number => typeof fret === "number" && fret > 0);
+  const min = pressed.length ? Math.min(...pressed) : 0;
+  const max = pressed.length ? Math.max(...pressed) : 0;
+  return {
+    name: `Open ${symbol} shape`,
+    frets,
+    notes,
+    root: chord.root,
+    startFret: min,
+    difficulty: max - min <= 2 ? "easy" : "medium",
+  };
+}

@@ -24,6 +24,8 @@ describe("TopBar onboarding", () => {
         onVolume={() => undefined}
         sequencerMode={false}
         onToggleSequencer={() => undefined}
+        openChordsMode={false}
+        onToggleOpenChords={() => undefined}
       />,
     );
 

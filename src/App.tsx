@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import type { CSSProperties, ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
@@ -8,8 +8,8 @@ import { RelationshipHint } from "./components/RelationshipHint";
 import { TelegramConfirmOverlay } from "./components/TelegramConfirmOverlay";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
-import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
-import { generateVoicings } from "./lib/guitar";
+import { buildDiatonicChords, buildScale, NOTES, parseChord, transpose, transposeSymbol } from "./lib/musicTheory";
+import { generateVoicings, getOpenShapeVoicing, OPEN_CHORD_SYMBOLS } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { GRACE_MS, loadTrial, saveTrial, TRIAL_MS } from "./lib/trial";
 import { playChord, SOUND_PRESETS } from "./lib/audio";
@@ -76,6 +76,8 @@ export default function App() {
   const headerTimerRemainingMs = inGrace ? graceRemainingMs : trialRemainingMs;
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
+  const [openChordsMode, setOpenChordsMode] = useState(false);
+  const [openChordSymbol, setOpenChordSymbol] = useState<string>(OPEN_CHORD_SYMBOLS[0]);
   const [sequencerMode, setSequencerMode] = useState(false);
   const [sequence, setSequence] = useState<DegreeChord[]>([]);
   const [stepCount, setStepCount] = useState(4);
@@ -100,6 +102,9 @@ export default function App() {
   const relationText = previewChord
     ? transitionExplanation(activeChord, previewChord, scaleMode)
     : defaultTransitionAdvice(activeChord);
+  const openChordVoicing = useMemo(() => getOpenShapeVoicing(openChordSymbol, capoFret), [openChordSymbol, capoFret]);
+  const openChordSoundingSymbol = transposeSymbol(openChordSymbol, capoFret);
+  const keyHighlightSet = useMemo(() => keyHighlightSymbols(baseKeyRoot, scaleMode), [baseKeyRoot, scaleMode]);
 
   useEffect(() => {
     setActiveChord(chords[0]);
@@ -308,6 +313,15 @@ export default function App() {
     setCapoFret((current) => (current === fret ? 0 : fret));
   };
 
+  const toggleOpenChordsMode = () => {
+    setOpenChordsMode((open) => !open);
+  };
+
+  const selectOpenChord = (symbol: string) => {
+    setOpenChordSymbol(symbol);
+    playChord(transposeSymbol(symbol, capoFret), volume, getOpenShapeVoicing(symbol, capoFret), sound);
+  };
+
   return (
     <div className="app">
       <TopBar
@@ -329,6 +343,8 @@ export default function App() {
         onVolume={setVolume}
         sequencerMode={sequencerMode}
         onToggleSequencer={toggleSequencerMode}
+        openChordsMode={openChordsMode}
+        onToggleOpenChords={toggleOpenChordsMode}
       />
       {trialExpired && (
         <PaywallOverlay
@@ -345,14 +361,17 @@ export default function App() {
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
           <MinimalFretboard
-            chordSymbol={visibleChord.symbol}
-            voicing={visibleVoicing}
+            chordSymbol={openChordsMode ? openChordSoundingSymbol : visibleChord.symbol}
+            voicing={openChordsMode ? openChordVoicing : visibleVoicing}
             capoFret={capoFret}
             onCapoChange={toggleCapo}
           />
         )}
         {(instrument === "Piano" || instrument === "Both") && (
-          <PianoKeyboard chordSymbol={visibleChord.symbol} voicing={visibleVoicing} />
+          <PianoKeyboard
+            chordSymbol={openChordsMode ? openChordSoundingSymbol : visibleChord.symbol}
+            voicing={openChordsMode ? openChordVoicing : visibleVoicing}
+          />
         )}
         {sequencerMode && (
           <div className="sequencer-toolbar">
@@ -508,70 +527,95 @@ export default function App() {
             </button>
           </div>
         )}
-        <section
-          className="chord-strip"
-          onMouseLeave={() => {
-            setPreviewChord(undefined);
-            setPreviewVoicing(undefined);
-          }}
-        >
-          {chords.map((chord, index) => (
-            <div
-              className={`strip-chord ${activeChord.degree === chord.degree ? "active" : ""}`}
-              key={chord.degree}
-              onMouseEnter={() => {
-                setPreviewVoicing(undefined);
-                setPreviewChord(chord);
-              }}
-            >
-              <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
-              <button
-                className="strip-main"
-                onClick={() => {
-                  selectChord(chord);
-                  if (sequencerMode) addSequenceChord(chord);
+        {openChordsMode ? (
+          <section className="open-chords-grid" aria-label="Открытые аккорды">
+            {OPEN_CHORD_SYMBOLS.map((symbol) => {
+              const root = parseChord(symbol).root;
+              const hue = NOTES.indexOf(root as (typeof NOTES)[number]) * 30;
+              const inKey = keyHighlightSet.has(symbol);
+              return (
+                <button
+                  type="button"
+                  key={symbol}
+                  className={`open-chord-chip ${openChordSymbol === symbol ? "active" : ""} ${inKey ? "" : "out-of-key"}`}
+                  style={{ "--root-hue": hue } as CSSProperties}
+                  onClick={() => selectOpenChord(symbol)}
+                >
+                  <i className="root-dot" />
+                  <strong>{symbol}</strong>
+                  {capoFret > 0 && <em className="capo-real-name">→ {transposeSymbol(symbol, capoFret)}</em>}
+                </button>
+              );
+            })}
+          </section>
+        ) : (
+          <section
+            className="chord-strip"
+            onMouseLeave={() => {
+              setPreviewChord(undefined);
+              setPreviewVoicing(undefined);
+            }}
+          >
+            {chords.map((chord, index) => (
+              <div
+                className={`strip-chord ${activeChord.degree === chord.degree ? "active" : ""}`}
+                key={chord.degree}
+                onMouseEnter={() => {
+                  setPreviewVoicing(undefined);
+                  setPreviewChord(chord);
                 }}
               >
-                <span>{chord.degree}</span>
-                <strong>{chord.symbol}</strong>
-              </button>
-              <div className="variant-row">
-                {chordVariants[index].map((variant) => (
-                  <button
-                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""}`}
-                    key={variant.symbol}
-                    onClick={() => {
-                      selectChord(variant);
-                      if (sequencerMode) addSequenceChord(variant);
-                    }}
-                    onMouseEnter={() => {
-                      setPreviewVoicing(undefined);
-                      setPreviewChord(variant);
-                    }}
-                  >
-                    {variantLabel(variant)}
-                  </button>
-                ))}
+                <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
+                <button
+                  className="strip-main"
+                  onClick={() => {
+                    selectChord(chord);
+                    if (sequencerMode) addSequenceChord(chord);
+                  }}
+                >
+                  <span>{chord.degree}</span>
+                  <strong>{chord.symbol}</strong>
+                </button>
+                <div className="variant-row">
+                  {chordVariants[index].map((variant) => (
+                    <button
+                      className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""}`}
+                      key={variant.symbol}
+                      onClick={() => {
+                        selectChord(variant);
+                        if (sequencerMode) addSequenceChord(variant);
+                      }}
+                      onMouseEnter={() => {
+                        setPreviewVoicing(undefined);
+                        setPreviewChord(variant);
+                      }}
+                    >
+                      {variantLabel(variant)}
+                    </button>
+                  ))}
+                </div>
               </div>
-            </div>
-          ))}
-        </section>
-        <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
-          {voicings.map((voicing) => (
-            <button
-              className={`position-button ${selectedVoicing?.frets.join("") === voicing.frets.join("") ? "active" : ""}`}
-              key={voicing.frets.join("-")}
-              onClick={() => selectVoicing(voicing)}
-              onMouseEnter={() => {
-                setPreviewChord(undefined);
-                setPreviewVoicing(voicing);
-              }}
-            >
-              <VoicingMini voicing={voicing} />
-            </button>
-          ))}
-        </section>
-        {onboardingOpen && (
+            ))}
+          </section>
+        )}
+        {!openChordsMode && (
+          <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
+            {voicings.map((voicing) => (
+              <button
+                className={`position-button ${selectedVoicing?.frets.join("") === voicing.frets.join("") ? "active" : ""}`}
+                key={voicing.frets.join("-")}
+                onClick={() => selectVoicing(voicing)}
+                onMouseEnter={() => {
+                  setPreviewChord(undefined);
+                  setPreviewVoicing(voicing);
+                }}
+              >
+                <VoicingMini voicing={voicing} />
+              </button>
+            ))}
+          </section>
+        )}
+        {!openChordsMode && onboardingOpen && (
           <RelationshipHint acknowledged={onboardingAcknowledged} onAcknowledge={() => setOnboardingAcknowledged(true)}>
             {relationText}
           </RelationshipHint>
@@ -593,6 +637,13 @@ export default function App() {
 
 function pickVoicing(voicings: GuitarVoicing[], memorizedKey?: string): GuitarVoicing | undefined {
   return voicings.find((voicing) => voicing.frets.join("") === memorizedKey) ?? voicings[0];
+}
+
+function keyHighlightSymbols(keyRoot: string, mode: ScaleMode): Set<string> {
+  const diatonic = buildDiatonicChords(keyRoot, mode).map((chord) => chord.symbol);
+  const scale = buildScale(keyRoot, mode);
+  const dominantRoot = mode === "Major" ? scale[4] : scale[6];
+  return new Set([...diatonic, `${dominantRoot}7`]);
 }
 
 function variantsForChord(chord: DegreeChord, keyRoot: string, mode: ScaleMode): DegreeChord[] {
