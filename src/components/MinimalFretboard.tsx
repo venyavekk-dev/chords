@@ -1,7 +1,7 @@
 import { Fragment } from "react";
 import type { GuitarVoicing } from "../types/music";
 import { buildFretboard, STANDARD_TUNING } from "../lib/guitar";
-import { parseChord } from "../lib/musicTheory";
+import { parseChord, transpose } from "../lib/musicTheory";
 
 type Props = {
   chordSymbol: string;
@@ -15,7 +15,8 @@ const MARKERS = new Set([3, 5, 7, 9, 12, 15, 17, 19]);
 
 export function MinimalFretboard({ chordSymbol, voicing, capoFret = 0, onCapoChange }: Props) {
   const board = buildFretboard(STANDARD_TUNING, 19);
-  const root = parseChord(chordSymbol).root;
+  const baseRoot = parseChord(chordSymbol).root;
+  const root = capoFret > 0 ? transpose(baseRoot, capoFret) : baseRoot;
 
   return (
     <section className="minimal-fretboard" aria-label="Guitar fretboard">

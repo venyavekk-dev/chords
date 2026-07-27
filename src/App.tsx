@@ -85,7 +85,7 @@ export default function App() {
   const [dragStepIndex, setDragStepIndex] = useState<number | null>(null);
   const [presetIndex, setPresetIndex] = useState(0);
   const [presetRevealed, setPresetRevealed] = useState(false);
-  const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
+  const keyRoot = baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
   const [activeChord, setActiveChord] = useState<DegreeChord>(chords[0]);
@@ -352,7 +352,7 @@ export default function App() {
           />
         )}
         {(instrument === "Piano" || instrument === "Both") && (
-          <PianoKeyboard chordSymbol={visibleChord.symbol} voicing={visibleVoicing} />
+          <PianoKeyboard chordSymbol={soundingSymbol(visibleChord.symbol, capoFret)} voicing={visibleVoicing} />
         )}
         {sequencerMode && (
           <div className="sequencer-toolbar">
@@ -534,6 +534,7 @@ export default function App() {
               >
                 <span>{chord.degree}</span>
                 <strong>{chord.symbol}</strong>
+                {capoFret > 0 && <em className="capo-real-name">→ {soundingSymbol(chord.symbol, capoFret)}</em>}
               </button>
               <div className="variant-row">
                 {chordVariants[index].map((variant) => (
@@ -593,6 +594,12 @@ export default function App() {
 
 function pickVoicing(voicings: GuitarVoicing[], memorizedKey?: string): GuitarVoicing | undefined {
   return voicings.find((voicing) => voicing.frets.join("") === memorizedKey) ?? voicings[0];
+}
+
+function soundingSymbol(symbol: string, capoFret: number): string {
+  if (capoFret <= 0) return symbol;
+  const chord = parseChord(symbol);
+  return `${transpose(chord.root, capoFret)}${chord.suffix}`;
 }
 
 function variantsForChord(chord: DegreeChord, keyRoot: string, mode: ScaleMode): DegreeChord[] {
