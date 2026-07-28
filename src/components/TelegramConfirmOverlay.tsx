@@ -5,17 +5,18 @@ type Props = {
   onDismiss: () => void;
   onConfirmed: () => void;
   onBack: () => void;
+  entering?: boolean;
 };
 
 const TELEGRAM_LINK = "https://t.me/veqqa";
 const MESSAGE_TIME = "9:11";
 
-export function TelegramConfirmOverlay({ onDismiss, onConfirmed, onBack }: Props) {
+export function TelegramConfirmOverlay({ onDismiss, onConfirmed, onBack, entering }: Props) {
   const [messaged, setMessaged] = useState(false);
 
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="telegram-confirm-title">
-      <div className="paywall-hero">
+      <div className={`paywall-hero${entering ? " sheet-entering" : ""}`}>
         <button type="button" className="paywall-back" onClick={onBack}>
           <ArrowLeft size={14} />
           Назад

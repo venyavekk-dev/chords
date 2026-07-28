@@ -25,6 +25,7 @@ type Props = {
   checkoutUrl?: string;
   unlockCode?: string;
   graceExpired?: boolean;
+  entering?: boolean;
 };
 
 const PAYMENT_LINK = "https://www.tbank.ru/cf/1XW3P6G3j2c";
@@ -63,6 +64,7 @@ export function PaywallOverlay({
   checkoutUrl,
   unlockCode,
   graceExpired,
+  entering,
 }: Props) {
   const [codeInput, setCodeInput] = useState("");
   const [codeInvalid, setCodeInvalid] = useState(false);
@@ -121,7 +123,7 @@ export function PaywallOverlay({
 
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
-      <div className="paywall-hero">
+      <div className={`paywall-hero${entering ? " sheet-entering" : ""}`}>
         {graceExpired ? (
           <>
             <span className="paywall-eyebrow">Упс</span>

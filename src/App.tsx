@@ -77,6 +77,12 @@ export default function App() {
   const inGrace = trial.graceUntil !== undefined && now < trial.graceUntil;
   const graceMissedConfirmation = trial.graceUntil !== undefined && !trial.purchased && now >= trial.graceUntil;
   const trialExpired = !trial.purchased && (trial.locked || (!inGrace && trialRemainingMs <= 0));
+  const paywallSheetVisible = trialExpired || showTelegramConfirm || showUnlockSuccess;
+  const paywallSheetWasVisibleRef = useRef(false);
+  const paywallSheetEntering = paywallSheetVisible && !paywallSheetWasVisibleRef.current;
+  useEffect(() => {
+    paywallSheetWasVisibleRef.current = paywallSheetVisible;
+  });
   const headerTimerLabel = inGrace ? "Доступ" : "Пробный период";
   const headerTimerRemainingMs = inGrace ? graceRemainingMs : trialRemainingMs;
   const [capoFret, setCapoFret] = useState(0);
@@ -365,6 +371,7 @@ export default function App() {
           checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
           unlockCode={import.meta.env.VITE_UNLOCK_CODE}
           graceExpired={graceMissedConfirmation}
+          entering={paywallSheetEntering}
         />
       )}
       {showTelegramConfirm && (
@@ -372,10 +379,11 @@ export default function App() {
           onDismiss={dismissTelegramConfirm}
           onConfirmed={confirmTelegramMessage}
           onBack={backToPaymentMethods}
+          entering={paywallSheetEntering}
         />
       )}
       {showUnlockSuccess && (
-        <UnlockSuccessOverlay onClose={() => setShowUnlockSuccess(false)} />
+        <UnlockSuccessOverlay onClose={() => setShowUnlockSuccess(false)} entering={paywallSheetEntering} />
       )}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
