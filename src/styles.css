@@ -1269,6 +1269,11 @@ select {
   100% { transform: scale(1); }
 }
 
+@keyframes sheet-slide-up {
+  from { transform: translateY(100%); }
+  to { transform: translateY(0); }
+}
+
 .paywall-hero.paywall-bounce {
   animation: paywall-bounce 380ms ease-out;
 }
@@ -1948,8 +1953,30 @@ select {
     flex: 0 0 auto;
   }
 
+  .paywall-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+
   .paywall-hero {
-    padding: var(--space-8) var(--space-5);
+    width: 100%;
+    max-width: 100%;
+    padding: calc(var(--space-6) + 14px) var(--space-5) calc(var(--space-6) + env(safe-area-inset-bottom));
+    border-width: 1px 0 0;
+    border-radius: 1.25rem 1.25rem 0 0;
+    animation: sheet-slide-up 320ms var(--ease-default);
+  }
+
+  .paywall-hero::before {
+    content: "";
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    width: 36px;
+    height: 5px;
+    border-radius: 999px;
+    background: rgba(255, 255, 255, 0.28);
+    transform: translateX(-50%);
   }
 
   .paywall-actions {
