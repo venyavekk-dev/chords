@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, Copy } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, QrCode, Smartphone } from "lucide-react";
 import { useEffect, useState } from "react";
 
 declare global {
@@ -36,6 +36,7 @@ const MOOD_EMOJI: Record<PriceOption, string> = {
 };
 
 type Step = "choose" | "pay";
+type PaymentMethod = "card" | "sbp" | "qr" | "link";
 
 function TBankIcon() {
   return (
@@ -43,37 +44,6 @@ function TBankIcon() {
       <rect width="20" height="20" rx="5" fill="#FFDD2D" />
       <path d="M5 6.3h10v2.3h-3.9V15H8.9V8.6H5V6.3Z" fill="#111111" />
     </svg>
-  );
-}
-
-function CopyField({ label, value, copyValue }: { label: string; value: string; copyValue: string }) {
-  const [copied, setCopied] = useState(false);
-
-  const handleCopy = async () => {
-    try {
-      await navigator.clipboard.writeText(copyValue);
-      setCopied(true);
-      window.setTimeout(() => setCopied(false), 1500);
-    } catch {
-      // Clipboard API unavailable — user can still select the text manually.
-    }
-  };
-
-  return (
-    <div className="paywall-field">
-      <span className="paywall-field-label">{label}</span>
-      <div className="paywall-field-row">
-        <span className="paywall-field-value">{value}</span>
-        <button
-          type="button"
-          className={`paywall-field-copy${copied ? " copied" : ""}`}
-          onClick={handleCopy}
-          aria-label={`Скопировать: ${label}`}
-        >
-          {copied ? <Check size={16} /> : <Copy size={16} />}
-        </button>
-      </div>
-    </div>
   );
 }
 
@@ -91,6 +61,8 @@ export function PaywallOverlay({
   const [bouncing, setBouncing] = useState(false);
   const [codeInput, setCodeInput] = useState("");
   const [codeInvalid, setCodeInvalid] = useState(false);
+  const [qrOpen, setQrOpen] = useState(false);
+  const [copiedMethod, setCopiedMethod] = useState<"card" | "sbp" | null>(null);
 
   useEffect(() => {
     if (!checkoutUrl) return;
@@ -116,6 +88,32 @@ export function PaywallOverlay({
       return;
     }
     setCodeInvalid(true);
+  };
+
+  const copyAndProceed = async (method: "card" | "sbp", value: string) => {
+    try {
+      await navigator.clipboard.writeText(value);
+      setCopiedMethod(method);
+    } catch {
+      // Clipboard API unavailable — proceed anyway, the number is still visible on the tile.
+    }
+    window.setTimeout(() => onClaimPayment(), 500);
+  };
+
+  const selectMethod = (method: PaymentMethod) => {
+    if (method === "qr") {
+      setQrOpen((open) => !open);
+      return;
+    }
+    if (method === "card") {
+      copyAndProceed("card", CARD_NUMBER_RAW);
+      return;
+    }
+    if (method === "sbp") {
+      copyAndProceed("sbp", PHONE_RAW);
+      return;
+    }
+    onClaimPayment();
   };
 
   return (
@@ -207,27 +205,70 @@ export function PaywallOverlay({
 
             <span className="paywall-eyebrow">К оплате</span>
             <h2 id="paywall-title">{selectedPrice} ₽</h2>
-            <p className="paywall-subtitle">Выбери способ — переведи и нажми «Проверить оплату».</p>
+            <p className="paywall-subtitle">Выбери способ — как только выберешь, перейдём к проверке оплаты.</p>
 
-            <div className="paywall-manual">
-              <CopyField label={`Карта · ${CARD_HOLDER}`} value={CARD_NUMBER_DISPLAY} copyValue={CARD_NUMBER_RAW} />
-              <CopyField label="Телефон · СБП" value={PHONE_RAW} copyValue={PHONE_RAW} />
+            <div className="payment-methods">
+              <button type="button" className="payment-tile" onClick={() => selectMethod("card")}>
+                <span className="payment-tile-icon"><CreditCard size={18} /></span>
+                <span className="payment-tile-body">
+                  <span className="payment-tile-title">Банковской картой</span>
+                  <span className="payment-tile-value">
+                    {copiedMethod === "card" ? (
+                      <><Check size={14} /> Скопировано</>
+                    ) : (
+                      CARD_NUMBER_DISPLAY
+                    )}
+                  </span>
+                  <span className="payment-tile-hint">{CARD_HOLDER}</span>
+                </span>
+              </button>
+
+              <button type="button" className="payment-tile" onClick={() => selectMethod("sbp")}>
+                <span className="payment-tile-icon"><Smartphone size={18} /></span>
+                <span className="payment-tile-body">
+                  <span className="payment-tile-title">По СБП</span>
+                  <span className="payment-tile-value">
+                    {copiedMethod === "sbp" ? (
+                      <><Check size={14} /> Скопировано</>
+                    ) : (
+                      PHONE_RAW
+                    )}
+                  </span>
+                </span>
+              </button>
+
+              <div className={`payment-tile payment-tile-qr${qrOpen ? " expanded" : ""}`}>
+                <button type="button" className="payment-tile-header" onClick={() => selectMethod("qr")}>
+                  <span className="payment-tile-icon"><QrCode size={18} /></span>
+                  <span className="payment-tile-body">
+                    <span className="payment-tile-title">QR-кодом</span>
+                    <span className="payment-tile-value">{qrOpen ? "Скрыть" : "Показать QR"}</span>
+                  </span>
+                </button>
+                {qrOpen && (
+                  <div className="payment-tile-qr-content">
+                    <img src="/paywall-qr.jpg" alt="QR-код для оплаты по СБП" className="payment-qr-image" />
+                    <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onClaimPayment}>
+                      Оплатил — проверить оплату
+                    </button>
+                  </div>
+                )}
+              </div>
+
+              <a
+                href={PAYMENT_LINK}
+                target="_blank"
+                rel="noreferrer"
+                className="payment-tile"
+                onClick={() => selectMethod("link")}
+              >
+                <span className="payment-tile-icon"><TBankIcon /></span>
+                <span className="payment-tile-body">
+                  <span className="payment-tile-title">По ссылке</span>
+                  <span className="payment-tile-value">Откроется форма Т-Банка</span>
+                </span>
+              </a>
             </div>
-
-            <div className="paywall-qr">
-              <img src="/paywall-qr.jpg" alt="QR-код для оплаты по СБП" className="paywall-qr-image" />
-              <span className="paywall-qr-label">или отсканируй QR</span>
-            </div>
-
-            <a
-              href={PAYMENT_LINK}
-              target="_blank"
-              rel="noreferrer"
-              className="paywall-cta paywall-cta-primary paywall-cta-full paywall-tbank-link"
-            >
-              <TBankIcon />
-              Оплатить по ссылке
-            </a>
 
             {checkoutUrl && (
               <a href={checkoutUrl} className="paywall-alt-link lemonsqueezy-button">
@@ -235,12 +276,9 @@ export function PaywallOverlay({
               </a>
             )}
 
-            <div className="paywall-actions">
-              <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onClaimPayment}>
-                Проверить оплату
-              </button>
-              <button type="button" className="paywall-cta-text" onClick={onDismiss}>Не сейчас</button>
-            </div>
+            <button type="button" className="paywall-cta-text paywall-dismiss-link" onClick={onDismiss}>
+              Не сейчас
+            </button>
           </>
         )}
       </div>

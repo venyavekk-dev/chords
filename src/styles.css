@@ -1429,34 +1429,6 @@ select {
   content: "";
 }
 
-.paywall-manual {
-  display: flex;
-  width: 100%;
-  flex-direction: row;
-  gap: var(--space-3);
-  margin-bottom: var(--space-5);
-}
-
-.paywall-qr {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  gap: var(--space-2);
-  margin-bottom: var(--space-5);
-}
-
-.paywall-qr-image {
-  width: 6.5rem;
-  height: 6.5rem;
-  border-radius: 0.75rem;
-  object-fit: cover;
-}
-
-.paywall-qr-label {
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.8125rem;
-}
-
 .paywall-alt-link {
   margin-top: var(--space-4);
   color: rgba(255, 255, 255, 0.5);
@@ -1470,70 +1442,111 @@ select {
   color: rgba(255, 255, 255, 0.78);
 }
 
-.paywall-field {
-  flex: 1 1 0;
-  min-width: 0;
-  text-align: left;
-}
-
-.paywall-field-label {
-  display: block;
-  margin-bottom: 6px;
-  color: rgba(255, 255, 255, 0.5);
-  font-size: 0.75rem;
-  letter-spacing: 0.02em;
-}
-
-.paywall-field-row {
+.payment-methods {
   display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+}
+
+.payment-tile {
+  display: flex;
+  width: 100%;
   align-items: center;
-  gap: var(--space-2);
-  padding: 10px 10px 10px 16px;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
   border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 0.75rem;
+  border-radius: 1rem;
   background: rgba(255, 255, 255, 0.05);
+  color: inherit;
+  text-align: left;
+  text-decoration: none;
   transition: border-color var(--transition-fast), background var(--transition-fast);
 }
 
-.paywall-field-row:hover {
+.payment-tile:hover {
   border-color: rgba(255, 255, 255, 0.28);
   background: rgba(255, 255, 255, 0.08);
 }
 
-.paywall-field-value {
-  flex: 1;
-  overflow: hidden;
-  color: #fff;
-  font-family: ui-monospace, "SF Mono", "Menlo", monospace;
-  font-size: 0.9375rem;
-  letter-spacing: 0.02em;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-}
-
-.paywall-field-copy {
-  display: inline-flex;
+.payment-tile-icon {
+  display: flex;
   flex-shrink: 0;
   align-items: center;
   justify-content: center;
   width: 36px;
   height: 36px;
-  border: 0;
-  border-radius: 0.5rem;
+  border-radius: 0.625rem;
   background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.7);
-  cursor: pointer;
-  transition: background var(--transition-fast), color var(--transition-fast);
+  color: rgba(255, 255, 255, 0.78);
 }
 
-.paywall-field-copy:hover {
-  background: rgba(255, 255, 255, 0.16);
+.payment-tile-body {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.payment-tile-title {
   color: #fff;
+  font-size: 0.9375rem;
+  font-weight: 500;
 }
 
-.paywall-field-copy.copied {
-  background: rgba(52, 199, 89, 0.18);
-  color: #34c759;
+.payment-tile-value {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  overflow: hidden;
+  color: rgba(255, 255, 255, 0.6);
+  font-size: 0.8125rem;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.payment-tile-hint {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 0.75rem;
+}
+
+.payment-tile-qr {
+  flex-direction: column;
+  align-items: stretch;
+  padding: 0;
+  overflow: hidden;
+}
+
+.payment-tile-qr.expanded {
+  border-color: rgba(255, 255, 255, 0.28);
+}
+
+.payment-tile-header {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  padding: var(--space-3) var(--space-4);
+  border: 0;
+  background: none;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.payment-tile-qr-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-3);
+  padding: 0 var(--space-4) var(--space-4);
+}
+
+.payment-qr-image {
+  width: 11rem;
+  height: 11rem;
+  border-radius: 0.75rem;
+  object-fit: cover;
 }
 
 .paywall-unlock-label {
@@ -1948,14 +1961,6 @@ select {
 
   .paywall-cta {
     width: 100%;
-  }
-
-  .paywall-manual {
-    flex-direction: column;
-  }
-
-  .paywall-field-value {
-    font-size: 0.9375rem;
   }
 
   .paywall-unlock {
