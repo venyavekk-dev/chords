@@ -1247,6 +1247,7 @@ select {
 }
 
 .paywall-hero {
+  position: relative;
   display: flex;
   max-width: 33rem;
   max-height: 90vh;
@@ -1432,8 +1433,8 @@ select {
   display: flex;
   width: 100%;
   flex-direction: row;
-  flex-wrap: wrap;
   gap: var(--space-3);
+  margin-bottom: var(--space-5);
 }
 
 .paywall-alt-link {
@@ -1450,7 +1451,7 @@ select {
 }
 
 .paywall-field {
-  flex: 1 1 12rem;
+  flex: 1 1 0;
   min-width: 0;
   text-align: left;
 }
@@ -1532,6 +1533,7 @@ select {
 
 .paywall-unlock-input {
   flex: 1;
+  width: 100%;
   min-width: 0;
   padding: 10px 16px;
   border: 1px solid rgba(255, 255, 255, 0.14);
@@ -1579,11 +1581,12 @@ select {
 }
 
 .paywall-back {
+  position: absolute;
+  top: var(--space-6);
+  left: var(--space-6);
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  align-self: flex-start;
-  margin-bottom: var(--space-4);
   border: 0;
   background: none;
   color: rgba(255, 255, 255, 0.5);
