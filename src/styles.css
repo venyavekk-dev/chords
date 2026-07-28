@@ -1965,6 +1965,12 @@ select {
     border-width: 1px 0 0;
     border-radius: 1.25rem 1.25rem 0 0;
     animation: sheet-slide-up 320ms var(--ease-default);
+    transition: transform 160ms var(--ease-default);
+  }
+
+  .paywall-hero.paywall-bounce {
+    animation: none;
+    transform: translateY(10px);
   }
 
   .paywall-hero::before {
