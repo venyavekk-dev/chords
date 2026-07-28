@@ -72,8 +72,7 @@ export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD
   });
 
   const usable = capoFret > 0 ? deduped.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret)) : deduped;
-  const pool = usable.length > 0 ? usable : deduped;
-  return pool.slice(0, 10).sort((a, b) => a.startFret - b.startFret);
+  return usable.slice(0, 10).sort((a, b) => a.startFret - b.startFret);
 }
 
 function scoreVoicing(voicing: GuitarVoicing, root: string, tuning: string[]): number {
