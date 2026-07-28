@@ -214,6 +214,11 @@ export function PaywallOverlay({
               <CopyField label="Телефон · СБП" value={PHONE_RAW} copyValue={PHONE_RAW} />
             </div>
 
+            <div className="paywall-qr">
+              <img src="/paywall-qr.jpg" alt="QR-код для оплаты по СБП" className="paywall-qr-image" />
+              <span className="paywall-qr-label">или отсканируй QR</span>
+            </div>
+
             <a
               href={PAYMENT_LINK}
               target="_blank"
