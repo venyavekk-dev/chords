@@ -64,7 +64,6 @@ export function PaywallOverlay({
   unlockCode,
   graceExpired,
 }: Props) {
-  const [bouncing, setBouncing] = useState(false);
   const [codeInput, setCodeInput] = useState("");
   const [codeInvalid, setCodeInvalid] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
@@ -84,8 +83,6 @@ export function PaywallOverlay({
 
   const choosePrice = (price: PriceOption) => {
     onSelectedPriceChange(price);
-    setBouncing(true);
-    window.setTimeout(() => setBouncing(false), 380);
   };
 
   const submitCode = () => {
@@ -124,7 +121,7 @@ export function PaywallOverlay({
 
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
-      <div className={`paywall-hero${bouncing ? " paywall-bounce" : ""}`}>
+      <div className="paywall-hero">
         {graceExpired ? (
           <>
             <span className="paywall-eyebrow">Упс</span>
