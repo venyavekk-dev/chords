@@ -1443,103 +1443,101 @@ select {
 }
 
 .payment-methods {
-  display: flex;
+  display: grid;
   width: 100%;
-  flex-direction: column;
+  grid-template-columns: repeat(2, 1fr);
   gap: var(--space-3);
-  margin-bottom: var(--space-2);
+  margin-bottom: var(--space-4);
 }
 
 .payment-tile {
   display: flex;
-  width: 100%;
+  flex-direction: column;
   align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 1px solid rgba(255, 255, 255, 0.14);
-  border-radius: 1rem;
-  background: rgba(255, 255, 255, 0.05);
+  gap: 6px;
+  padding: var(--space-5) var(--space-3);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.04);
   color: inherit;
-  text-align: left;
+  text-align: center;
   text-decoration: none;
-  transition: border-color var(--transition-fast), background var(--transition-fast);
+  cursor: pointer;
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform var(--transition-fast);
 }
 
 .payment-tile:hover {
-  border-color: rgba(255, 255, 255, 0.28);
-  background: rgba(255, 255, 255, 0.08);
+  border-color: rgba(255, 255, 255, 0.26);
+  background: rgba(255, 255, 255, 0.07);
+}
+
+.payment-tile:active {
+  transform: scale(0.97);
+}
+
+.payment-tile.selected {
+  border-color: #0071e3;
+  background: rgba(0, 113, 227, 0.12);
 }
 
 .payment-tile-icon {
   display: flex;
-  flex-shrink: 0;
   align-items: center;
   justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 0.625rem;
-  background: rgba(255, 255, 255, 0.08);
-  color: rgba(255, 255, 255, 0.78);
+  width: 44px;
+  height: 44px;
+  border-radius: 0.875rem;
+  color: #fff;
 }
 
-.payment-tile-body {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
+.payment-tile-icon-card {
+  background: #0071e3;
+}
+
+.payment-tile-icon-qr {
+  background: #34c759;
+}
+
+.payment-tile-icon-sbp {
+  padding: 8px;
+  background: #fff;
+}
+
+.payment-tile-icon-img {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
 }
 
 .payment-tile-title {
   color: #fff;
-  font-size: 0.9375rem;
-  font-weight: 500;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .payment-tile-value {
   display: flex;
   align-items: center;
   gap: 4px;
+  max-width: 100%;
   overflow: hidden;
-  color: rgba(255, 255, 255, 0.6);
-  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.55);
+  font-size: 0.75rem;
   text-overflow: ellipsis;
   white-space: nowrap;
 }
 
-.payment-tile-hint {
-  color: rgba(255, 255, 255, 0.4);
-  font-size: 0.75rem;
-}
-
-.payment-tile-qr {
-  flex-direction: column;
-  align-items: stretch;
-  padding: 0;
-  overflow: hidden;
-}
-
-.payment-tile-qr.expanded {
-  border-color: rgba(255, 255, 255, 0.28);
-}
-
-.payment-tile-header {
+.payment-qr-panel {
   display: flex;
-  align-items: center;
-  gap: var(--space-3);
-  padding: var(--space-3) var(--space-4);
-  border: 0;
-  background: none;
-  color: inherit;
-  text-align: left;
-  cursor: pointer;
-}
-
-.payment-tile-qr-content {
-  display: flex;
+  width: 100%;
   flex-direction: column;
   align-items: center;
   gap: var(--space-3);
-  padding: 0 var(--space-4) var(--space-4);
+  margin-bottom: var(--space-4);
+  padding: var(--space-4);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 1.25rem;
+  background: rgba(255, 255, 255, 0.03);
 }
 
 .payment-qr-image {

@@ -3,6 +3,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PaywallOverlay } from "./components/PaywallOverlay";
+import type { PriceOption, Step as PaywallStep } from "./components/PaywallOverlay";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TelegramConfirmOverlay } from "./components/TelegramConfirmOverlay";
@@ -69,6 +70,8 @@ export default function App() {
   const [now, setNow] = useState(() => Date.now());
   const [showTelegramConfirm, setShowTelegramConfirm] = useState(false);
   const [showUnlockSuccess, setShowUnlockSuccess] = useState(false);
+  const [paywallStep, setPaywallStep] = useState<PaywallStep>("choose");
+  const [selectedPrice, setSelectedPrice] = useState<PriceOption | null>(null);
   const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
   const graceRemainingMs = trial.graceUntil !== undefined ? Math.max(0, trial.graceUntil - now) : 0;
   const inGrace = trial.graceUntil !== undefined && now < trial.graceUntil;
@@ -138,6 +141,8 @@ export default function App() {
       : { ...trial, locked: false };
     setTrial(next);
     saveTrial(next);
+    setPaywallStep("choose");
+    setSelectedPrice(null);
   };
 
   const claimGraceAccess = () => {
@@ -147,11 +152,21 @@ export default function App() {
     setShowTelegramConfirm(true);
   };
 
+  const backToPaymentMethods = () => {
+    const next = { ...trial, locked: true, graceUntil: undefined };
+    setTrial(next);
+    saveTrial(next);
+    setShowTelegramConfirm(false);
+    setPaywallStep("pay");
+  };
+
   const dismissTelegramConfirm = () => {
     const next = { startedAt: Date.now(), locked: false, purchased: false };
     setTrial(next);
     saveTrial(next);
     setShowTelegramConfirm(false);
+    setPaywallStep("choose");
+    setSelectedPrice(null);
   };
 
   const confirmTelegramMessage = () => {
@@ -339,6 +354,10 @@ export default function App() {
       />
       {trialExpired && (
         <PaywallOverlay
+          step={paywallStep}
+          onStepChange={setPaywallStep}
+          selectedPrice={selectedPrice}
+          onSelectedPriceChange={setSelectedPrice}
           onDismiss={dismissPaywall}
           onClaimPayment={claimGraceAccess}
           onPurchase={markPurchased}
@@ -349,7 +368,11 @@ export default function App() {
         />
       )}
       {showTelegramConfirm && (
-        <TelegramConfirmOverlay onDismiss={dismissTelegramConfirm} onConfirmed={confirmTelegramMessage} />
+        <TelegramConfirmOverlay
+          onDismiss={dismissTelegramConfirm}
+          onConfirmed={confirmTelegramMessage}
+          onBack={backToPaymentMethods}
+        />
       )}
       {showUnlockSuccess && (
         <UnlockSuccessOverlay onClose={() => setShowUnlockSuccess(false)} />

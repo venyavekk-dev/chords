@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, CreditCard, QrCode, Smartphone } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, QrCode } from "lucide-react";
 import { useEffect, useState } from "react";
 
 declare global {
@@ -10,7 +10,14 @@ declare global {
   }
 }
 
+export type Step = "choose" | "pay";
+export type PriceOption = 299 | 599 | 999;
+
 type Props = {
+  step: Step;
+  onStepChange: (step: Step) => void;
+  selectedPrice: PriceOption | null;
+  onSelectedPriceChange: (price: PriceOption) => void;
   onDismiss: () => void;
   onClaimPayment: () => void;
   onPurchase: () => void;
@@ -23,11 +30,9 @@ type Props = {
 const PAYMENT_LINK = "https://www.tbank.ru/cf/1XW3P6G3j2c";
 const CARD_NUMBER_RAW = "2200700432344546";
 const CARD_NUMBER_DISPLAY = "2200 7004 3234 4546";
-const CARD_HOLDER = "Т-Банк · Вениамин В.";
 const PHONE_RAW = "+381677679693";
 
-const PRICE_OPTIONS = [299, 599, 999] as const;
-type PriceOption = (typeof PRICE_OPTIONS)[number];
+const PRICE_OPTIONS: readonly PriceOption[] = [299, 599, 999];
 
 const MOOD_EMOJI: Record<PriceOption, string> = {
   299: "😅",
@@ -35,12 +40,11 @@ const MOOD_EMOJI: Record<PriceOption, string> = {
   999: "🤩",
 };
 
-type Step = "choose" | "pay";
 type PaymentMethod = "card" | "sbp" | "qr" | "link";
 
-function TBankIcon() {
+function TBankIcon({ size = 18 }: { size?: number }) {
   return (
-    <svg width="18" height="18" viewBox="0 0 20 20" aria-hidden="true" focusable="false">
+    <svg width={size} height={size} viewBox="0 0 20 20" aria-hidden="true" focusable="false">
       <rect width="20" height="20" rx="5" fill="#FFDD2D" />
       <path d="M5 6.3h10v2.3h-3.9V15H8.9V8.6H5V6.3Z" fill="#111111" />
     </svg>
@@ -48,6 +52,10 @@ function TBankIcon() {
 }
 
 export function PaywallOverlay({
+  step,
+  onStepChange,
+  selectedPrice,
+  onSelectedPriceChange,
   onDismiss,
   onClaimPayment,
   onPurchase,
@@ -56,8 +64,6 @@ export function PaywallOverlay({
   unlockCode,
   graceExpired,
 }: Props) {
-  const [step, setStep] = useState<Step>("choose");
-  const [selectedPrice, setSelectedPrice] = useState<PriceOption | null>(null);
   const [bouncing, setBouncing] = useState(false);
   const [codeInput, setCodeInput] = useState("");
   const [codeInvalid, setCodeInvalid] = useState(false);
@@ -77,7 +83,7 @@ export function PaywallOverlay({
   }, [checkoutUrl, onPurchase]);
 
   const choosePrice = (price: PriceOption) => {
-    setSelectedPrice(price);
+    onSelectedPriceChange(price);
     setBouncing(true);
     window.setTimeout(() => setBouncing(false), 380);
   };
@@ -161,7 +167,7 @@ export function PaywallOverlay({
               type="button"
               className="paywall-cta paywall-cta-primary paywall-cta-full"
               disabled={!selectedPrice}
-              onClick={() => setStep("pay")}
+              onClick={() => onStepChange("pay")}
             >
               {selectedPrice ? `Далее · ${selectedPrice} ₽` : "Выбери сумму"}
             </button>
@@ -198,7 +204,7 @@ export function PaywallOverlay({
           </>
         ) : (
           <>
-            <button type="button" className="paywall-back" onClick={() => setStep("choose")}>
+            <button type="button" className="paywall-back" onClick={() => onStepChange("choose")}>
               <ArrowLeft size={14} />
               Назад
             </button>
@@ -209,51 +215,40 @@ export function PaywallOverlay({
 
             <div className="payment-methods">
               <button type="button" className="payment-tile" onClick={() => selectMethod("card")}>
-                <span className="payment-tile-icon"><CreditCard size={18} /></span>
-                <span className="payment-tile-body">
-                  <span className="payment-tile-title">Банковской картой</span>
-                  <span className="payment-tile-value">
-                    {copiedMethod === "card" ? (
-                      <><Check size={14} /> Скопировано</>
-                    ) : (
-                      CARD_NUMBER_DISPLAY
-                    )}
-                  </span>
-                  <span className="payment-tile-hint">{CARD_HOLDER}</span>
+                <span className="payment-tile-icon payment-tile-icon-card"><CreditCard size={20} /></span>
+                <span className="payment-tile-title">Картой</span>
+                <span className="payment-tile-value">
+                  {copiedMethod === "card" ? (
+                    <><Check size={13} /> Скопировано</>
+                  ) : (
+                    CARD_NUMBER_DISPLAY
+                  )}
                 </span>
               </button>
 
               <button type="button" className="payment-tile" onClick={() => selectMethod("sbp")}>
-                <span className="payment-tile-icon"><Smartphone size={18} /></span>
-                <span className="payment-tile-body">
-                  <span className="payment-tile-title">По СБП</span>
-                  <span className="payment-tile-value">
-                    {copiedMethod === "sbp" ? (
-                      <><Check size={14} /> Скопировано</>
-                    ) : (
-                      PHONE_RAW
-                    )}
-                  </span>
+                <span className="payment-tile-icon payment-tile-icon-sbp">
+                  <img src="/sbp-icon.svg" alt="" className="payment-tile-icon-img" />
+                </span>
+                <span className="payment-tile-title">По СБП</span>
+                <span className="payment-tile-value">
+                  {copiedMethod === "sbp" ? (
+                    <><Check size={13} /> Скопировано</>
+                  ) : (
+                    PHONE_RAW
+                  )}
                 </span>
               </button>
 
-              <div className={`payment-tile payment-tile-qr${qrOpen ? " expanded" : ""}`}>
-                <button type="button" className="payment-tile-header" onClick={() => selectMethod("qr")}>
-                  <span className="payment-tile-icon"><QrCode size={18} /></span>
-                  <span className="payment-tile-body">
-                    <span className="payment-tile-title">QR-кодом</span>
-                    <span className="payment-tile-value">{qrOpen ? "Скрыть" : "Показать QR"}</span>
-                  </span>
-                </button>
-                {qrOpen && (
-                  <div className="payment-tile-qr-content">
-                    <img src="/paywall-qr.jpg" alt="QR-код для оплаты по СБП" className="payment-qr-image" />
-                    <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onClaimPayment}>
-                      Оплатил — проверить оплату
-                    </button>
-                  </div>
-                )}
-              </div>
+              <button
+                type="button"
+                className={`payment-tile${qrOpen ? " selected" : ""}`}
+                onClick={() => selectMethod("qr")}
+              >
+                <span className="payment-tile-icon payment-tile-icon-qr"><QrCode size={20} /></span>
+                <span className="payment-tile-title">QR-кодом</span>
+                <span className="payment-tile-value">{qrOpen ? "Скрыть" : "Показать"}</span>
+              </button>
 
               <a
                 href={PAYMENT_LINK}
@@ -262,13 +257,20 @@ export function PaywallOverlay({
                 className="payment-tile"
                 onClick={() => selectMethod("link")}
               >
-                <span className="payment-tile-icon"><TBankIcon /></span>
-                <span className="payment-tile-body">
-                  <span className="payment-tile-title">По ссылке</span>
-                  <span className="payment-tile-value">Откроется форма Т-Банка</span>
-                </span>
+                <span className="payment-tile-icon payment-tile-icon-link"><TBankIcon size={40} /></span>
+                <span className="payment-tile-title">По ссылке</span>
+                <span className="payment-tile-value">Т-Банк</span>
               </a>
             </div>
+
+            {qrOpen && (
+              <div className="payment-qr-panel">
+                <img src="/paywall-qr.jpg" alt="QR-код для оплаты по СБП" className="payment-qr-image" />
+                <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onClaimPayment}>
+                  Оплатил — проверить оплату
+                </button>
+              </div>
+            )}
 
             {checkoutUrl && (
               <a href={checkoutUrl} className="paywall-alt-link lemonsqueezy-button">

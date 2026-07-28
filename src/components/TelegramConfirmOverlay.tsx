@@ -1,20 +1,26 @@
-import { Check, Send } from "lucide-react";
+import { ArrowLeft, Check, Send } from "lucide-react";
 import { useState } from "react";
 
 type Props = {
   onDismiss: () => void;
   onConfirmed: () => void;
+  onBack: () => void;
 };
 
 const TELEGRAM_LINK = "https://t.me/veqqa";
 const MESSAGE_TIME = "9:11";
 
-export function TelegramConfirmOverlay({ onDismiss, onConfirmed }: Props) {
+export function TelegramConfirmOverlay({ onDismiss, onConfirmed, onBack }: Props) {
   const [messaged, setMessaged] = useState(false);
 
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="telegram-confirm-title">
       <div className="paywall-hero">
+        <button type="button" className="paywall-back" onClick={onBack}>
+          <ArrowLeft size={14} />
+          Назад
+        </button>
+
         <span className="paywall-eyebrow">Почти всё</span>
         <h2 id="telegram-confirm-title">Доступ будет открыт на{" "}час</h2>
 
