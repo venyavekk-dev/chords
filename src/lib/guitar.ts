@@ -43,8 +43,9 @@ export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD
       const sounding = current.map((fret, index) => (fret === "x" ? null : transpose(tuning[index], fret))).filter((note): note is string => Boolean(note));
       if (!chord.tones.every((tone) => sounding.includes(tone))) return;
       const pressed = fretted.filter((fret) => fret > 0);
-      const min = pressed.length ? Math.min(...pressed) : 0;
-      const max = pressed.length ? Math.max(...pressed) : 0;
+      if (pressed.length === 0) return;
+      const min = Math.min(...pressed);
+      const max = Math.max(...pressed);
       if (max - min > 4) return;
       const mutedInside = current.slice(current.findIndex((fret) => fret !== "x")).filter((fret) => fret === "x").length;
       if (mutedInside > 1) return;
