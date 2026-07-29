@@ -1,5 +1,6 @@
-import { ArrowLeft, Check, CreditCard, QrCode } from "lucide-react";
-import { useEffect, useState } from "react";
+import { ArrowLeft, Check, CreditCard, QrCode, Send } from "lucide-react";
+import type { ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 declare global {
   interface Window {
@@ -12,26 +13,31 @@ declare global {
 
 export type Step = "choose" | "pay";
 export type PriceOption = 299 | 599 | 999;
+export type SheetPhase = "choose" | "pay" | "confirm" | "success" | "grace-expired";
 
 type Props = {
-  step: Step;
-  onStepChange: (step: Step) => void;
+  phase: SheetPhase;
+  entering?: boolean;
   selectedPrice: PriceOption | null;
   onSelectedPriceChange: (price: PriceOption) => void;
+  onStepChange: (step: Step) => void;
   onDismiss: () => void;
   onClaimPayment: () => void;
   onPurchase: () => void;
   onUnlockCode: () => void;
+  onConfirmed: () => void;
+  onBackToPayment: () => void;
+  onCloseSuccess: () => void;
   checkoutUrl?: string;
   unlockCode?: string;
-  graceExpired?: boolean;
-  entering?: boolean;
 };
 
 const PAYMENT_LINK = "https://www.tbank.ru/cf/1XW3P6G3j2c";
 const CARD_NUMBER_RAW = "2200700432344546";
 const CARD_NUMBER_DISPLAY = "2200 7004 3234 4546";
 const PHONE_RAW = "+381677679693";
+const TELEGRAM_LINK = "https://t.me/veqqa";
+const MESSAGE_TIME = "9:11";
 
 const PRICE_OPTIONS: readonly PriceOption[] = [299, 599, 999];
 
@@ -52,24 +58,60 @@ function TBankIcon({ size = 18 }: { size?: number }) {
   );
 }
 
-export function PaywallOverlay({
-  step,
-  onStepChange,
+function CopyableTile({
+  label,
+  value,
+  copied,
+  icon,
+  onClick,
+}: {
+  label: string;
+  value: string;
+  copied: boolean;
+  icon: ReactNode;
+  onClick: () => void;
+}) {
+  return (
+    <button type="button" className="payment-tile" onClick={onClick}>
+      {icon}
+      <span className="payment-tile-title">{label}</span>
+      <span className="payment-tile-value">
+        {copied ? (<><Check size={13} /> Скопировано</>) : value}
+      </span>
+    </button>
+  );
+}
+
+export function PaywallSheet({
+  phase,
+  entering,
   selectedPrice,
   onSelectedPriceChange,
+  onStepChange,
   onDismiss,
   onClaimPayment,
   onPurchase,
   onUnlockCode,
+  onConfirmed,
+  onBackToPayment,
+  onCloseSuccess,
   checkoutUrl,
   unlockCode,
-  graceExpired,
-  entering,
 }: Props) {
   const [codeInput, setCodeInput] = useState("");
   const [codeInvalid, setCodeInvalid] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [copiedMethod, setCopiedMethod] = useState<"card" | "sbp" | null>(null);
+  const [messaged, setMessaged] = useState(false);
+
+  useEffect(() => {
+    if (phase !== "pay") setQrOpen(false);
+    if (phase !== "confirm") setMessaged(false);
+    if (phase !== "choose") {
+      setCodeInput("");
+      setCodeInvalid(false);
+    }
+  }, [phase]);
 
   useEffect(() => {
     if (!checkoutUrl) return;
@@ -121,10 +163,31 @@ export function PaywallOverlay({
     onClaimPayment();
   };
 
+  const heroRef = useRef<HTMLDivElement>(null);
+  const previousHeightRef = useRef<number | null>(null);
+
+  useLayoutEffect(() => {
+    const el = heroRef.current;
+    if (!el) return;
+    const previousHeight = previousHeightRef.current;
+    el.style.height = "auto";
+    const naturalHeight = el.scrollHeight;
+    if (previousHeight !== null) {
+      el.style.height = `${previousHeight}px`;
+      void el.offsetHeight;
+      requestAnimationFrame(() => {
+        el.style.height = `${naturalHeight}px`;
+      });
+    } else {
+      el.style.height = `${naturalHeight}px`;
+    }
+    previousHeightRef.current = naturalHeight;
+  }, [phase, selectedPrice, qrOpen, copiedMethod, codeInvalid, messaged]);
+
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
-      <div className={`paywall-hero${entering ? " sheet-entering" : ""}`}>
-        {graceExpired ? (
+      <div ref={heroRef} className={`paywall-hero${entering ? " sheet-entering" : ""}`}>
+        {phase === "grace-expired" && (
           <>
             <span className="paywall-eyebrow">Упс</span>
             <h2 id="paywall-title">Кажется, не{" "}оплатил?</h2>
@@ -140,7 +203,9 @@ export function PaywallOverlay({
               <button type="button" className="paywall-cta-text" onClick={onDismiss}>Не сейчас</button>
             </div>
           </>
-        ) : step === "choose" ? (
+        )}
+
+        {phase === "choose" && (
           <>
             <span className="paywall-emoji-badge" aria-hidden="true">{selectedPrice ? MOOD_EMOJI[selectedPrice] : "❓"}</span>
             <h2 id="paywall-title">Надоедливый пейвол</h2>
@@ -201,7 +266,9 @@ export function PaywallOverlay({
               Не сейчас
             </button>
           </>
-        ) : (
+        )}
+
+        {phase === "pay" && (
           <>
             <button type="button" className="paywall-back" onClick={() => onStepChange("choose")}>
               <ArrowLeft size={14} />
@@ -213,31 +280,25 @@ export function PaywallOverlay({
             <p className="paywall-subtitle">Выбери способ — как только выберешь, перейдём к проверке оплаты.</p>
 
             <div className="payment-methods">
-              <button type="button" className="payment-tile" onClick={() => selectMethod("card")}>
-                <span className="payment-tile-icon payment-tile-icon-card"><CreditCard size={20} /></span>
-                <span className="payment-tile-title">Картой</span>
-                <span className="payment-tile-value">
-                  {copiedMethod === "card" ? (
-                    <><Check size={13} /> Скопировано</>
-                  ) : (
-                    CARD_NUMBER_DISPLAY
-                  )}
-                </span>
-              </button>
+              <CopyableTile
+                label="Картой"
+                value={CARD_NUMBER_DISPLAY}
+                copied={copiedMethod === "card"}
+                icon={<span className="payment-tile-icon payment-tile-icon-card"><CreditCard size={20} /></span>}
+                onClick={() => selectMethod("card")}
+              />
 
-              <button type="button" className="payment-tile" onClick={() => selectMethod("sbp")}>
-                <span className="payment-tile-icon payment-tile-icon-sbp">
-                  <img src="/sbp-icon.svg" alt="" className="payment-tile-icon-img" />
-                </span>
-                <span className="payment-tile-title">По СБП</span>
-                <span className="payment-tile-value">
-                  {copiedMethod === "sbp" ? (
-                    <><Check size={13} /> Скопировано</>
-                  ) : (
-                    PHONE_RAW
-                  )}
-                </span>
-              </button>
+              <CopyableTile
+                label="По СБП"
+                value={PHONE_RAW}
+                copied={copiedMethod === "sbp"}
+                icon={
+                  <span className="payment-tile-icon payment-tile-icon-sbp">
+                    <img src="/sbp-icon.svg" alt="" className="payment-tile-icon-img" />
+                  </span>
+                }
+                onClick={() => selectMethod("sbp")}
+              />
 
               <button
                 type="button"
@@ -279,6 +340,69 @@ export function PaywallOverlay({
 
             <button type="button" className="paywall-cta-text paywall-dismiss-link" onClick={onDismiss}>
               Не сейчас
+            </button>
+          </>
+        )}
+
+        {phase === "confirm" && (
+          <>
+            <button type="button" className="paywall-back" onClick={onBackToPayment}>
+              <ArrowLeft size={14} />
+              Назад
+            </button>
+
+            <span className="paywall-eyebrow">Почти всё</span>
+            <h2 id="paywall-title">Доступ будет открыт на{" "}час</h2>
+
+            <div className="telegram-message">
+              <img src="/venya-avatar.jpg" alt="Веня Векк" className="telegram-avatar" />
+              <div className="telegram-message-body">
+                <span className="telegram-sender">Веня Векк</span>
+                <div className="telegram-bubble">
+                  Супер! Напиши Вене, что{" "}ты оплатил и{" "}больше не{" "}хочешь видеть это дурацкое
+                  окно каждые пять минут. И{" "}он тебе вышлет.
+                  <span className="telegram-bubble-time">{MESSAGE_TIME}</span>
+                </div>
+              </div>
+            </div>
+
+            {messaged ? (
+              <button
+                type="button"
+                className="paywall-cta paywall-cta-primary paywall-cta-full telegram-cta"
+                onClick={onConfirmed}
+              >
+                <Check size={16} />
+                Написал
+              </button>
+            ) : (
+              <a
+                href={TELEGRAM_LINK}
+                target="_blank"
+                rel="noreferrer"
+                className="paywall-cta paywall-cta-primary paywall-cta-full telegram-cta"
+                onClick={() => setMessaged(true)}
+              >
+                <Send size={16} />
+                Написать в Telegram
+              </a>
+            )}
+
+            <div className="paywall-actions">
+              <button type="button" className="paywall-cta-text" onClick={onDismiss}>Не сейчас</button>
+            </div>
+          </>
+        )}
+
+        {phase === "success" && (
+          <>
+            <span className="paywall-emoji-badge" aria-hidden="true">✅</span>
+            <h2 id="paywall-title">Готово, доступ открыт</h2>
+            <p className="paywall-subtitle">
+              Код принят — пейвол больше не{" "}появится на этом устройстве.
+            </p>
+            <button type="button" className="paywall-cta paywall-cta-primary paywall-cta-full" onClick={onCloseSuccess}>
+              Продолжить
             </button>
           </>
         )}

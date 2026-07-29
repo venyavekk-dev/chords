@@ -1260,6 +1260,7 @@ select {
   box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5);
   text-align: center;
   overflow-y: auto;
+  transition: height 280ms var(--ease-default);
 }
 
 @keyframes sheet-slide-up {

@@ -2,13 +2,11 @@ import type { ReactNode } from "react";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
-import { PaywallOverlay } from "./components/PaywallOverlay";
-import type { PriceOption, Step as PaywallStep } from "./components/PaywallOverlay";
+import { PaywallSheet } from "./components/PaywallSheet";
+import type { PriceOption, SheetPhase, Step as PaywallStep } from "./components/PaywallSheet";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
-import { TelegramConfirmOverlay } from "./components/TelegramConfirmOverlay";
 import { TopBar } from "./components/TopBar";
-import { UnlockSuccessOverlay } from "./components/UnlockSuccessOverlay";
 import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
@@ -77,7 +75,14 @@ export default function App() {
   const inGrace = trial.graceUntil !== undefined && now < trial.graceUntil;
   const graceMissedConfirmation = trial.graceUntil !== undefined && !trial.purchased && now >= trial.graceUntil;
   const trialExpired = !trial.purchased && (trial.locked || (!inGrace && trialRemainingMs <= 0));
-  const paywallSheetVisible = trialExpired || showTelegramConfirm || showUnlockSuccess;
+  const paywallSheetPhase: SheetPhase | null = showUnlockSuccess
+    ? "success"
+    : showTelegramConfirm
+    ? "confirm"
+    : trialExpired
+    ? (graceMissedConfirmation ? "grace-expired" : paywallStep)
+    : null;
+  const paywallSheetVisible = paywallSheetPhase !== null;
   const paywallSheetWasVisibleRef = useRef(false);
   const paywallSheetEntering = paywallSheetVisible && !paywallSheetWasVisibleRef.current;
   useEffect(() => {
@@ -132,8 +137,8 @@ export default function App() {
   }, [trialExpired]);
 
   useEffect(() => {
-    document.body.classList.toggle("paywall-locked", trialExpired || showTelegramConfirm || showUnlockSuccess);
-  }, [trialExpired, showTelegramConfirm, showUnlockSuccess]);
+    document.body.classList.toggle("paywall-locked", paywallSheetVisible);
+  }, [paywallSheetVisible]);
 
   const openPaywall = () => {
     const next = { ...trial, locked: true };
@@ -173,6 +178,14 @@ export default function App() {
     setShowTelegramConfirm(false);
     setPaywallStep("choose");
     setSelectedPrice(null);
+  };
+
+  const dismissSheet = () => {
+    if (paywallSheetPhase === "confirm") {
+      dismissTelegramConfirm();
+    } else {
+      dismissPaywall();
+    }
   };
 
   const confirmTelegramMessage = () => {
@@ -358,32 +371,23 @@ export default function App() {
         sequencerMode={sequencerMode}
         onToggleSequencer={toggleSequencerMode}
       />
-      {trialExpired && (
-        <PaywallOverlay
-          step={paywallStep}
-          onStepChange={setPaywallStep}
+      {paywallSheetPhase && (
+        <PaywallSheet
+          phase={paywallSheetPhase}
+          entering={paywallSheetEntering}
           selectedPrice={selectedPrice}
           onSelectedPriceChange={setSelectedPrice}
-          onDismiss={dismissPaywall}
+          onStepChange={setPaywallStep}
+          onDismiss={dismissSheet}
           onClaimPayment={claimGraceAccess}
           onPurchase={markPurchased}
           onUnlockCode={unlockWithCode}
+          onConfirmed={confirmTelegramMessage}
+          onBackToPayment={backToPaymentMethods}
+          onCloseSuccess={() => setShowUnlockSuccess(false)}
           checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
           unlockCode={import.meta.env.VITE_UNLOCK_CODE}
-          graceExpired={graceMissedConfirmation}
-          entering={paywallSheetEntering}
         />
-      )}
-      {showTelegramConfirm && (
-        <TelegramConfirmOverlay
-          onDismiss={dismissTelegramConfirm}
-          onConfirmed={confirmTelegramMessage}
-          onBack={backToPaymentMethods}
-          entering={paywallSheetEntering}
-        />
-      )}
-      {showUnlockSuccess && (
-        <UnlockSuccessOverlay onClose={() => setShowUnlockSuccess(false)} entering={paywallSheetEntering} />
       )}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
