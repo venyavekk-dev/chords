@@ -103,14 +103,20 @@ export function PaywallSheet({
   const [qrOpen, setQrOpen] = useState(false);
   const [copiedMethod, setCopiedMethod] = useState<"card" | "sbp" | null>(null);
   const [messaged, setMessaged] = useState(false);
+  const heroRef = useRef<HTMLDivElement>(null);
+  const previousHeightRef = useRef<number | null>(null);
 
   useEffect(() => {
-    if (phase !== "pay") setQrOpen(false);
+    if (phase !== "pay") {
+      setQrOpen(false);
+      setCopiedMethod(null);
+    }
     if (phase !== "confirm") setMessaged(false);
     if (phase !== "choose") {
       setCodeInput("");
       setCodeInvalid(false);
     }
+    heroRef.current?.scrollTo({ top: 0 });
   }, [phase]);
 
   useEffect(() => {
@@ -163,26 +169,40 @@ export function PaywallSheet({
     onClaimPayment();
   };
 
-  const heroRef = useRef<HTMLDivElement>(null);
-  const previousHeightRef = useRef<number | null>(null);
-
   useLayoutEffect(() => {
     const el = heroRef.current;
     if (!el) return;
     const previousHeight = previousHeightRef.current;
     el.style.height = "auto";
     const naturalHeight = el.scrollHeight;
-    if (previousHeight !== null) {
+    const settle = (event: TransitionEvent) => {
+      if (event.propertyName === "height") {
+        el.style.height = "auto";
+      }
+    };
+    if (previousHeight !== null && previousHeight !== naturalHeight) {
       el.style.height = `${previousHeight}px`;
       void el.offsetHeight;
       requestAnimationFrame(() => {
         el.style.height = `${naturalHeight}px`;
       });
+      el.addEventListener("transitionend", settle);
     } else {
       el.style.height = `${naturalHeight}px`;
     }
     previousHeightRef.current = naturalHeight;
+    return () => el.removeEventListener("transitionend", settle);
   }, [phase, selectedPrice, qrOpen, copiedMethod, codeInvalid, messaged]);
+
+  useEffect(() => {
+    const handleResize = () => {
+      const el = heroRef.current;
+      if (!el) return;
+      previousHeightRef.current = el.scrollHeight;
+    };
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
+  }, []);
 
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
@@ -270,10 +290,12 @@ export function PaywallSheet({
 
         {phase === "pay" && (
           <>
-            <button type="button" className="paywall-back" onClick={() => onStepChange("choose")}>
-              <ArrowLeft size={14} />
-              Назад
-            </button>
+            <div className="paywall-back-wrap">
+              <button type="button" className="paywall-back" onClick={() => onStepChange("choose")}>
+                <ArrowLeft size={14} />
+                Назад
+              </button>
+            </div>
 
             <span className="paywall-eyebrow">К оплате</span>
             <h2 id="paywall-title">{selectedPrice} ₽</h2>
@@ -346,10 +368,12 @@ export function PaywallSheet({
 
         {phase === "confirm" && (
           <>
-            <button type="button" className="paywall-back" onClick={onBackToPayment}>
-              <ArrowLeft size={14} />
-              Назад
-            </button>
+            <div className="paywall-back-wrap">
+              <button type="button" className="paywall-back" onClick={onBackToPayment}>
+                <ArrowLeft size={14} />
+                Назад
+              </button>
+            </div>
 
             <span className="paywall-eyebrow">Почти всё</span>
             <h2 id="paywall-title">Доступ будет открыт на{" "}час</h2>

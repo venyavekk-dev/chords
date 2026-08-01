@@ -1,5 +1,5 @@
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PaywallSheet } from "./components/PaywallSheet";
@@ -195,16 +195,14 @@ export default function App() {
     setShowTelegramConfirm(false);
   };
 
-  const markPurchased = () => {
-    const next = { ...trial, locked: false, purchased: true };
-    setTrial(next);
-    saveTrial(next);
-  };
-
-  const unlockWithCode = () => {
-    markPurchased();
+  const markPurchased = useCallback(() => {
+    setTrial((current) => {
+      const next = { ...current, locked: false, purchased: true };
+      saveTrial(next);
+      return next;
+    });
     setShowUnlockSuccess(true);
-  };
+  }, []);
 
   useEffect(() => {
     setSequence([]);
@@ -381,7 +379,7 @@ export default function App() {
           onDismiss={dismissSheet}
           onClaimPayment={claimGraceAccess}
           onPurchase={markPurchased}
-          onUnlockCode={unlockWithCode}
+          onUnlockCode={markPurchased}
           onConfirmed={confirmTelegramMessage}
           onBackToPayment={backToPaymentMethods}
           onCloseSuccess={() => setShowUnlockSuccess(false)}

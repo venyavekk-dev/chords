@@ -1606,6 +1606,14 @@ select {
   margin-top: var(--space-5);
 }
 
+.paywall-back-wrap {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  height: 0;
+  overflow: visible;
+}
+
 .paywall-back {
   position: absolute;
   top: var(--space-6);
