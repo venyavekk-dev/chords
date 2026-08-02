@@ -290,12 +290,10 @@ export function PaywallSheet({
 
         {phase === "pay" && (
           <>
-            <div className="paywall-back-wrap">
-              <button type="button" className="paywall-back" onClick={() => onStepChange("choose")}>
-                <ArrowLeft size={14} />
-                Назад
-              </button>
-            </div>
+            <button type="button" className="paywall-back" onClick={() => onStepChange("choose")}>
+              <ArrowLeft size={14} />
+              Назад
+            </button>
 
             <span className="paywall-eyebrow">К оплате</span>
             <h2 id="paywall-title">{selectedPrice} ₽</h2>
@@ -368,12 +366,10 @@ export function PaywallSheet({
 
         {phase === "confirm" && (
           <>
-            <div className="paywall-back-wrap">
-              <button type="button" className="paywall-back" onClick={onBackToPayment}>
-                <ArrowLeft size={14} />
-                Назад
-              </button>
-            </div>
+            <button type="button" className="paywall-back" onClick={onBackToPayment}>
+              <ArrowLeft size={14} />
+              Назад
+            </button>
 
             <span className="paywall-eyebrow">Почти всё</span>
             <h2 id="paywall-title">Доступ будет открыт на{" "}час</h2>
