@@ -1607,14 +1607,13 @@ select {
 }
 
 .paywall-back {
-  position: sticky;
+  position: absolute;
   top: var(--space-6);
+  left: var(--space-6);
   z-index: 2;
-  align-self: flex-start;
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  margin: 0 0 -1rem var(--space-6);
   border: 0;
   background: none;
   color: rgba(255, 255, 255, 0.5);
