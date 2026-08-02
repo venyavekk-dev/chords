@@ -74,7 +74,7 @@ export default function App() {
   const graceRemainingMs = trial.graceUntil !== undefined ? Math.max(0, trial.graceUntil - now) : 0;
   const inGrace = trial.graceUntil !== undefined && now < trial.graceUntil;
   const graceMissedConfirmation = trial.graceUntil !== undefined && !trial.purchased && now >= trial.graceUntil;
-  const trialExpired = !trial.purchased && (trial.locked || (!inGrace && trialRemainingMs <= 0));
+  const trialExpired = trial.locked || (!trial.purchased && !inGrace && trialRemainingMs <= 0);
   const paywallSheetPhase: SheetPhase | null = showUnlockSuccess
     ? "success"
     : showTelegramConfirm
@@ -147,7 +147,7 @@ export default function App() {
   };
 
   const dismissPaywall = () => {
-    const next = (!inGrace && trialRemainingMs <= 0)
+    const next = (!trial.purchased && !inGrace && trialRemainingMs <= 0)
       ? { startedAt: Date.now(), locked: false, purchased: false }
       : { ...trial, locked: false };
     setTrial(next);
@@ -172,7 +172,9 @@ export default function App() {
   };
 
   const dismissTelegramConfirm = () => {
-    const next = { startedAt: Date.now(), locked: false, purchased: false };
+    const next = trial.purchased
+      ? { ...trial, locked: false, graceUntil: undefined }
+      : { startedAt: Date.now(), locked: false, purchased: false };
     setTrial(next);
     saveTrial(next);
     setShowTelegramConfirm(false);
