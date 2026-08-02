@@ -1,11 +1,11 @@
 import type { ReactNode } from "react";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
-import { PaywallOverlay } from "./components/PaywallOverlay";
+import { PaywallSheet } from "./components/PaywallSheet";
+import type { PriceOption, SheetPhase, Step as PaywallStep } from "./components/PaywallSheet";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
-import { TelegramConfirmOverlay } from "./components/TelegramConfirmOverlay";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
@@ -67,11 +67,27 @@ export default function App() {
   const [trial, setTrial] = useState(() => loadTrial());
   const [now, setNow] = useState(() => Date.now());
   const [showTelegramConfirm, setShowTelegramConfirm] = useState(false);
+  const [showUnlockSuccess, setShowUnlockSuccess] = useState(false);
+  const [paywallStep, setPaywallStep] = useState<PaywallStep>("choose");
+  const [selectedPrice, setSelectedPrice] = useState<PriceOption | null>(null);
   const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
   const graceRemainingMs = trial.graceUntil !== undefined ? Math.max(0, trial.graceUntil - now) : 0;
   const inGrace = trial.graceUntil !== undefined && now < trial.graceUntil;
   const graceMissedConfirmation = trial.graceUntil !== undefined && !trial.purchased && now >= trial.graceUntil;
-  const trialExpired = !trial.purchased && (trial.locked || (!inGrace && trialRemainingMs <= 0));
+  const trialExpired = trial.locked || (!trial.purchased && !inGrace && trialRemainingMs <= 0);
+  const paywallSheetPhase: SheetPhase | null = showUnlockSuccess
+    ? "success"
+    : showTelegramConfirm
+    ? "confirm"
+    : trialExpired
+    ? (graceMissedConfirmation ? "grace-expired" : paywallStep)
+    : null;
+  const paywallSheetVisible = paywallSheetPhase !== null;
+  const paywallSheetWasVisibleRef = useRef(false);
+  const paywallSheetEntering = paywallSheetVisible && !paywallSheetWasVisibleRef.current;
+  useEffect(() => {
+    paywallSheetWasVisibleRef.current = paywallSheetVisible;
+  });
   const headerTimerLabel = inGrace ? "Доступ" : "Пробный период";
   const headerTimerRemainingMs = inGrace ? graceRemainingMs : trialRemainingMs;
   const [capoFret, setCapoFret] = useState(0);
@@ -121,8 +137,8 @@ export default function App() {
   }, [trialExpired]);
 
   useEffect(() => {
-    document.body.classList.toggle("paywall-locked", trialExpired || showTelegramConfirm);
-  }, [trialExpired, showTelegramConfirm]);
+    document.body.classList.toggle("paywall-locked", paywallSheetVisible);
+  }, [paywallSheetVisible]);
 
   const openPaywall = () => {
     const next = { ...trial, locked: true };
@@ -131,11 +147,13 @@ export default function App() {
   };
 
   const dismissPaywall = () => {
-    const next = (!inGrace && trialRemainingMs <= 0)
+    const next = (!trial.purchased && !inGrace && trialRemainingMs <= 0)
       ? { startedAt: Date.now(), locked: false, purchased: false }
       : { ...trial, locked: false };
     setTrial(next);
     saveTrial(next);
+    setPaywallStep("choose");
+    setSelectedPrice(null);
   };
 
   const claimGraceAccess = () => {
@@ -145,11 +163,31 @@ export default function App() {
     setShowTelegramConfirm(true);
   };
 
-  const dismissTelegramConfirm = () => {
-    const next = { startedAt: Date.now(), locked: false, purchased: false };
+  const backToPaymentMethods = () => {
+    const next = { ...trial, locked: true, graceUntil: undefined };
     setTrial(next);
     saveTrial(next);
     setShowTelegramConfirm(false);
+    setPaywallStep("pay");
+  };
+
+  const dismissTelegramConfirm = () => {
+    const next = trial.purchased
+      ? { ...trial, locked: false, graceUntil: undefined }
+      : { startedAt: Date.now(), locked: false, purchased: false };
+    setTrial(next);
+    saveTrial(next);
+    setShowTelegramConfirm(false);
+    setPaywallStep("choose");
+    setSelectedPrice(null);
+  };
+
+  const dismissSheet = () => {
+    if (paywallSheetPhase === "confirm") {
+      dismissTelegramConfirm();
+    } else {
+      dismissPaywall();
+    }
   };
 
   const confirmTelegramMessage = () => {
@@ -159,11 +197,14 @@ export default function App() {
     setShowTelegramConfirm(false);
   };
 
-  const markPurchased = () => {
-    const next = { ...trial, locked: false, purchased: true };
-    setTrial(next);
-    saveTrial(next);
-  };
+  const markPurchased = useCallback(() => {
+    setTrial((current) => {
+      const next = { ...current, locked: false, purchased: true };
+      saveTrial(next);
+      return next;
+    });
+    setShowUnlockSuccess(true);
+  }, []);
 
   useEffect(() => {
     setSequence([]);
@@ -330,17 +371,23 @@ export default function App() {
         sequencerMode={sequencerMode}
         onToggleSequencer={toggleSequencerMode}
       />
-      {trialExpired && (
-        <PaywallOverlay
-          onDismiss={dismissPaywall}
+      {paywallSheetPhase && (
+        <PaywallSheet
+          phase={paywallSheetPhase}
+          entering={paywallSheetEntering}
+          selectedPrice={selectedPrice}
+          onSelectedPriceChange={setSelectedPrice}
+          onStepChange={setPaywallStep}
+          onDismiss={dismissSheet}
           onClaimPayment={claimGraceAccess}
           onPurchase={markPurchased}
+          onUnlockCode={markPurchased}
+          onConfirmed={confirmTelegramMessage}
+          onBackToPayment={backToPaymentMethods}
+          onCloseSuccess={() => setShowUnlockSuccess(false)}
           checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
-          graceExpired={graceMissedConfirmation}
+          unlockCode={import.meta.env.VITE_UNLOCK_CODE}
         />
-      )}
-      {showTelegramConfirm && (
-        <TelegramConfirmOverlay onDismiss={dismissTelegramConfirm} onConfirmed={confirmTelegramMessage} />
       )}
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
