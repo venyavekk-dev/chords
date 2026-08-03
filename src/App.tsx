@@ -8,7 +8,7 @@ import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
-import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
+import { buildDiatonicChords, buildScale, parseChord } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { GRACE_MS, loadTrial, saveTrial, TRIAL_MS } from "./lib/trial";
@@ -101,7 +101,7 @@ export default function App() {
   const [dragStepIndex, setDragStepIndex] = useState<number | null>(null);
   const [presetIndex, setPresetIndex] = useState(0);
   const [presetRevealed, setPresetRevealed] = useState(false);
-  const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
+  const keyRoot = baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
   const [activeChord, setActiveChord] = useState<DegreeChord>(chords[0]);
@@ -232,7 +232,7 @@ export default function App() {
       const { volume: currentVolume, sound: currentSound, capoFret: currentCapo, voicingMemory: currentMemory } = playbackSettings.current;
       const stepVoicings = generateVoicings(chord.symbol, currentCapo);
       const voicing = pickVoicing(stepVoicings, currentMemory[chord.symbol]);
-      playChord(chord.symbol, currentVolume, voicing, currentSound);
+      if (voicing) playChord(chord.symbol, currentVolume, voicing, currentSound);
       setCurrentStep(position);
       index += 1;
     };
@@ -325,7 +325,7 @@ export default function App() {
     const nextVoicings = generateVoicings(chord.symbol, capoFret);
     const memorized = voicingMemory[chord.symbol];
     const nextVoicing = pickVoicing(nextVoicings, memorized);
-    playChord(chord.symbol, volume, nextVoicing, sound);
+    if (nextVoicing) playChord(chord.symbol, volume, nextVoicing, sound);
   };
 
   const selectVoicing = (voicing: GuitarVoicing) => {
@@ -337,12 +337,11 @@ export default function App() {
 
   const selectSound = (nextSound: SoundPreset) => {
     setSound(nextSound);
-    playChord(activeChord.symbol, volume, selectedVoicing, nextSound);
+    if (selectedVoicing) playChord(activeChord.symbol, volume, selectedVoicing, nextSound);
   };
 
   const changeKeyRoot = (value: string) => {
     setBaseKeyRoot(value);
-    setCapoFret(0);
   };
 
   const toggleCapo = (fret: number) => {
@@ -363,7 +362,7 @@ export default function App() {
         onKeyRoot={changeKeyRoot}
         onScaleMode={setScaleMode}
         onInstrument={setInstrument}
-        onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound)}
+        onPlayChord={() => selectedVoicing && playChord(activeChord.symbol, volume, selectedVoicing, sound)}
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
         onTrialLinkClick={openPaywall}
@@ -603,21 +602,29 @@ export default function App() {
             </div>
           ))}
         </section>
-        <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
-          {voicings.map((voicing) => (
-            <button
-              className={`position-button ${selectedVoicing?.frets.join("") === voicing.frets.join("") ? "active" : ""}`}
-              key={voicing.frets.join("-")}
-              onClick={() => selectVoicing(voicing)}
-              onMouseEnter={() => {
-                setPreviewChord(undefined);
-                setPreviewVoicing(voicing);
-              }}
-            >
-              <VoicingMini voicing={voicing} />
-            </button>
-          ))}
-        </section>
+        {voicings.length === 0 ? (
+          <p className="no-voicing-message">
+            {capoFret > 0
+              ? `Нет доступной аппликатуры для ${activeChord.symbol} с капо на ${capoFret} ладу.`
+              : `Нет доступной аппликатуры для ${activeChord.symbol}.`}
+          </p>
+        ) : (
+          <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
+            {voicings.map((voicing) => (
+              <button
+                className={`position-button ${selectedVoicing?.frets.join("") === voicing.frets.join("") ? "active" : ""}`}
+                key={voicing.frets.join("-")}
+                onClick={() => selectVoicing(voicing)}
+                onMouseEnter={() => {
+                  setPreviewChord(undefined);
+                  setPreviewVoicing(voicing);
+                }}
+              >
+                <VoicingMini voicing={voicing} />
+              </button>
+            ))}
+          </section>
+        )}
         {onboardingOpen && (
           <RelationshipHint acknowledged={onboardingAcknowledged} onAcknowledge={() => setOnboardingAcknowledged(true)}>
             {relationText}
