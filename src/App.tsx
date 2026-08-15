@@ -1,9 +1,9 @@
 import type { ReactNode } from "react";
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { ChevronLeft, ChevronRight, Copy, Minus, Pause, Play, Plus, Shuffle, Trash2 } from "lucide-react";
 import { MinimalFretboard } from "./components/MinimalFretboard";
 import { PaywallSheet } from "./components/PaywallSheet";
-import type { PriceOption, SheetPhase, Step as PaywallStep } from "./components/PaywallSheet";
+import type { PriceOption, Step as PaywallStep } from "./components/PaywallSheet";
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
@@ -11,7 +11,6 @@ import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
-import { GRACE_MS, loadTrial, saveTrial, TRIAL_MS } from "./lib/trial";
 import { playChord, SOUND_PRESETS } from "./lib/audio";
 import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
 
@@ -64,32 +63,16 @@ export default function App() {
   );
   const [onboardingOpen, setOnboardingOpen] = useState(false);
   const [onboardingAcknowledged, setOnboardingAcknowledged] = useState(false);
-  const [trial, setTrial] = useState(() => loadTrial());
-  const [now, setNow] = useState(() => Date.now());
-  const [showTelegramConfirm, setShowTelegramConfirm] = useState(false);
-  const [showUnlockSuccess, setShowUnlockSuccess] = useState(false);
+  const [donationOpen, setDonationOpen] = useState(false);
   const [paywallStep, setPaywallStep] = useState<PaywallStep>("choose");
   const [selectedPrice, setSelectedPrice] = useState<PriceOption | null>(null);
-  const trialRemainingMs = Math.max(0, TRIAL_MS - (now - trial.startedAt));
-  const graceRemainingMs = trial.graceUntil !== undefined ? Math.max(0, trial.graceUntil - now) : 0;
-  const inGrace = trial.graceUntil !== undefined && now < trial.graceUntil;
-  const graceMissedConfirmation = trial.graceUntil !== undefined && !trial.purchased && now >= trial.graceUntil;
-  const trialExpired = trial.locked || (!trial.purchased && !inGrace && trialRemainingMs <= 0);
-  const paywallSheetPhase: SheetPhase | null = showUnlockSuccess
-    ? "success"
-    : showTelegramConfirm
-    ? "confirm"
-    : trialExpired
-    ? (graceMissedConfirmation ? "grace-expired" : paywallStep)
-    : null;
+  const paywallSheetPhase = donationOpen ? paywallStep : null;
   const paywallSheetVisible = paywallSheetPhase !== null;
   const paywallSheetWasVisibleRef = useRef(false);
   const paywallSheetEntering = paywallSheetVisible && !paywallSheetWasVisibleRef.current;
   useEffect(() => {
     paywallSheetWasVisibleRef.current = paywallSheetVisible;
   });
-  const headerTimerLabel = inGrace ? "Доступ" : "Пробный период";
-  const headerTimerRemainingMs = inGrace ? graceRemainingMs : trialRemainingMs;
   const [capoFret, setCapoFret] = useState(0);
   const [voicingMemory, setVoicingMemory] = useState<Record<string, string>>(initial.voicingMemory ?? {});
   const [sequencerMode, setSequencerMode] = useState(false);
@@ -131,80 +114,18 @@ export default function App() {
   }, [baseKeyRoot, scaleMode, instrument, volume, sound, voicingMemory]);
 
   useEffect(() => {
-    if (trialExpired) return;
-    const interval = setInterval(() => setNow(Date.now()), 1000);
-    return () => clearInterval(interval);
-  }, [trialExpired]);
-
-  useEffect(() => {
     document.body.classList.toggle("paywall-locked", paywallSheetVisible);
   }, [paywallSheetVisible]);
 
   const openPaywall = () => {
-    const next = { ...trial, locked: true };
-    setTrial(next);
-    saveTrial(next);
+    setDonationOpen(true);
   };
 
   const dismissPaywall = () => {
-    const next = (!trial.purchased && !inGrace && trialRemainingMs <= 0)
-      ? { startedAt: Date.now(), locked: false, purchased: false }
-      : { ...trial, locked: false };
-    setTrial(next);
-    saveTrial(next);
+    setDonationOpen(false);
     setPaywallStep("choose");
     setSelectedPrice(null);
   };
-
-  const claimGraceAccess = () => {
-    const next = { ...trial, locked: false, graceUntil: Date.now() + GRACE_MS };
-    setTrial(next);
-    saveTrial(next);
-    setShowTelegramConfirm(true);
-  };
-
-  const backToPaymentMethods = () => {
-    const next = { ...trial, locked: true, graceUntil: undefined };
-    setTrial(next);
-    saveTrial(next);
-    setShowTelegramConfirm(false);
-    setPaywallStep("pay");
-  };
-
-  const dismissTelegramConfirm = () => {
-    const next = trial.purchased
-      ? { ...trial, locked: false, graceUntil: undefined }
-      : { startedAt: Date.now(), locked: false, purchased: false };
-    setTrial(next);
-    saveTrial(next);
-    setShowTelegramConfirm(false);
-    setPaywallStep("choose");
-    setSelectedPrice(null);
-  };
-
-  const dismissSheet = () => {
-    if (paywallSheetPhase === "confirm") {
-      dismissTelegramConfirm();
-    } else {
-      dismissPaywall();
-    }
-  };
-
-  const confirmTelegramMessage = () => {
-    const next = { ...trial, locked: false, graceUntil: Date.now() + GRACE_MS };
-    setTrial(next);
-    saveTrial(next);
-    setShowTelegramConfirm(false);
-  };
-
-  const markPurchased = useCallback(() => {
-    setTrial((current) => {
-      const next = { ...current, locked: false, purchased: true };
-      saveTrial(next);
-      return next;
-    });
-    setShowUnlockSuccess(true);
-  }, []);
 
   useEffect(() => {
     setSequence([]);
@@ -357,8 +278,6 @@ export default function App() {
         instrument={instrument}
         sound={sound}
         onboardingOpen={onboardingOpen}
-        trialRemainingMs={headerTimerRemainingMs}
-        trialTimerLabel={headerTimerLabel}
         volume={volume}
         onKeyRoot={changeKeyRoot}
         onScaleMode={setScaleMode}
@@ -366,7 +285,7 @@ export default function App() {
         onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound)}
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
-        onTrialLinkClick={openPaywall}
+        onDonationClick={openPaywall}
         onVolume={setVolume}
         sequencerMode={sequencerMode}
         onToggleSequencer={toggleSequencerMode}
@@ -378,15 +297,8 @@ export default function App() {
           selectedPrice={selectedPrice}
           onSelectedPriceChange={setSelectedPrice}
           onStepChange={setPaywallStep}
-          onDismiss={dismissSheet}
-          onClaimPayment={claimGraceAccess}
-          onPurchase={markPurchased}
-          onUnlockCode={markPurchased}
-          onConfirmed={confirmTelegramMessage}
-          onBackToPayment={backToPaymentMethods}
-          onCloseSuccess={() => setShowUnlockSuccess(false)}
+          onDismiss={dismissPaywall}
           checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
-          unlockCode={import.meta.env.VITE_UNLOCK_CODE}
         />
       )}
       <main className="minimal-workspace">
@@ -629,7 +541,7 @@ export default function App() {
           href="https://venyavekk.com/chords/about"
           target="_blank"
           rel="noreferrer"
-          className="trial-timer-link app-footer-link"
+          className="support-link app-footer-link"
         >
           О проекте
         </a>

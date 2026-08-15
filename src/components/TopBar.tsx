@@ -3,7 +3,6 @@ import { useEffect, useRef, useState } from "react";
 import type { Instrument, ScaleMode, SoundPreset } from "../types/music";
 import { NOTES } from "../lib/musicTheory";
 import { SOUND_PRESETS } from "../lib/audio";
-import { formatTrialRemaining } from "../lib/trial";
 
 type Props = {
   keyRoot: string;
@@ -11,8 +10,6 @@ type Props = {
   instrument: Instrument;
   sound: SoundPreset;
   onboardingOpen: boolean;
-  trialRemainingMs: number;
-  trialTimerLabel: string;
   volume: number;
   onKeyRoot: (value: string) => void;
   onScaleMode: (value: ScaleMode) => void;
@@ -20,7 +17,7 @@ type Props = {
   onSound: (value: SoundPreset) => void;
   onPlayChord: () => void;
   onToggleOnboarding: () => void;
-  onTrialLinkClick: () => void;
+  onDonationClick: () => void;
   onVolume: (value: number) => void;
   sequencerMode: boolean;
   onToggleSequencer: () => void;
@@ -68,8 +65,8 @@ export function TopBar(props: Props) {
             <img src="/logo.svg" alt="" style={{ height: logoSize, width: "auto" }} />
           </button>
           <h1 ref={nameRef}><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
-          <button type="button" className="trial-timer-link" onClick={props.onTrialLinkClick}>
-            {props.trialTimerLabel} {formatTrialRemaining(props.trialRemainingMs)}
+          <button type="button" className="support-link" onClick={props.onDonationClick}>
+            Поддержать автора
           </button>
         </div>
         <div className="brand-toggle-stack">

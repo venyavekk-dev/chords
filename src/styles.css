@@ -298,7 +298,7 @@ select {
   transform: translateX(12px);
 }
 
-.trial-timer-link {
+.support-link {
   display: inline-flex;
   align-items: center;
   min-height: 24px;
@@ -322,7 +322,7 @@ select {
   text-decoration: none;
 }
 
-.trial-timer-link:hover {
+.support-link:hover {
   color: var(--text-primary);
 }
 
@@ -1822,7 +1822,7 @@ select {
     row-gap: 4px;
   }
 
-  .trial-timer-link {
+  .support-link {
     margin-left: auto;
   }
 
