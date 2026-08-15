@@ -163,10 +163,10 @@ export function PaywallSheet({
         {phase === "choose" && (
           <>
             <span className="paywall-emoji-badge" aria-hidden="true">{selectedPrice ? MOOD_EMOJI[selectedPrice] : "💛"}</span>
-            <h2 id="paywall-title">Поддержите автора</h2>
+            <h2 id="paywall-title">Донат</h2>
             <p className="paywall-subtitle">
-              Автор делал этот инструмент целый месяц, каждый день с{" "}утра до{" "}вечера.
-              Если Chord Tulza вам помогает — поддержите его добровольным донатом.
+              Поддержите автора — он делал этот инструмент целый месяц, каждый день
+              с{" "}утра до{" "}вечера. Если Chord Tulza вам помогает, любой донат будет очень кстати.
             </p>
 
             <div className="price-picker" role="group" aria-label="Выбери сумму">
