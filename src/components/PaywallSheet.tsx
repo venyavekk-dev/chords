@@ -1,44 +1,30 @@
-import { ArrowLeft, Check, CreditCard, QrCode, Send } from "lucide-react";
+import { ArrowLeft, Check, CreditCard, QrCode } from "lucide-react";
 import type { ReactNode } from "react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 
 declare global {
   interface Window {
     createLemonSqueezy?: () => void;
-    LemonSqueezy?: {
-      Setup: (options: { eventHandler: (event: { event: string }) => void }) => void;
-    };
   }
 }
 
 export type Step = "choose" | "pay";
 export type PriceOption = 299 | 599 | 999;
-export type SheetPhase = "choose" | "pay" | "confirm" | "success" | "grace-expired";
 
 type Props = {
-  phase: SheetPhase;
+  phase: Step;
   entering?: boolean;
   selectedPrice: PriceOption | null;
   onSelectedPriceChange: (price: PriceOption) => void;
   onStepChange: (step: Step) => void;
   onDismiss: () => void;
-  onClaimPayment: () => void;
-  onPurchase: () => void;
-  onUnlockCode: () => void;
-  onConfirmed: () => void;
-  onBackToPayment: () => void;
-  onCloseSuccess: () => void;
   checkoutUrl?: string;
-  unlockCode?: string;
 };
 
 const PAYMENT_LINK = "https://www.tbank.ru/cf/1XW3P6G3j2c";
 const CARD_NUMBER_RAW = "2200700432344546";
 const CARD_NUMBER_DISPLAY = "2200 7004 3234 4546";
 const PHONE_RAW = "+381677679693";
-const TELEGRAM_LINK = "https://t.me/veqqa";
-const MESSAGE_TIME = "9:11";
-
 const PRICE_OPTIONS: readonly PriceOption[] = [299, 599, 999];
 
 const MOOD_EMOJI: Record<PriceOption, string> = {
@@ -89,20 +75,10 @@ export function PaywallSheet({
   onSelectedPriceChange,
   onStepChange,
   onDismiss,
-  onClaimPayment,
-  onPurchase,
-  onUnlockCode,
-  onConfirmed,
-  onBackToPayment,
-  onCloseSuccess,
   checkoutUrl,
-  unlockCode,
 }: Props) {
-  const [codeInput, setCodeInput] = useState("");
-  const [codeInvalid, setCodeInvalid] = useState(false);
   const [qrOpen, setQrOpen] = useState(false);
   const [copiedMethod, setCopiedMethod] = useState<"card" | "sbp" | null>(null);
-  const [messaged, setMessaged] = useState(false);
   const heroRef = useRef<HTMLDivElement>(null);
   const previousHeightRef = useRef<number | null>(null);
 
@@ -111,46 +87,25 @@ export function PaywallSheet({
       setQrOpen(false);
       setCopiedMethod(null);
     }
-    if (phase !== "confirm") setMessaged(false);
-    if (phase !== "choose") {
-      setCodeInput("");
-      setCodeInvalid(false);
-    }
     heroRef.current?.scrollTo({ top: 0 });
   }, [phase]);
 
   useEffect(() => {
     if (!checkoutUrl) return;
     window.createLemonSqueezy?.();
-    window.LemonSqueezy?.Setup({
-      eventHandler: (event) => {
-        if (event.event === "Checkout.Success") {
-          onPurchase();
-        }
-      },
-    });
-  }, [checkoutUrl, onPurchase]);
+  }, [checkoutUrl]);
 
   const choosePrice = (price: PriceOption) => {
     onSelectedPriceChange(price);
   };
 
-  const submitCode = () => {
-    if (unlockCode && codeInput.trim().toLowerCase() === unlockCode.trim().toLowerCase()) {
-      onUnlockCode();
-      return;
-    }
-    setCodeInvalid(true);
-  };
-
-  const copyAndProceed = async (method: "card" | "sbp", value: string) => {
+  const copyPaymentDetails = async (method: "card" | "sbp", value: string) => {
     try {
       await navigator.clipboard.writeText(value);
       setCopiedMethod(method);
     } catch {
-      // Clipboard API unavailable — proceed anyway, the number is still visible on the tile.
+      // Clipboard API unavailable — the number is still visible on the tile.
     }
-    window.setTimeout(() => onClaimPayment(), 500);
   };
 
   const selectMethod = (method: PaymentMethod) => {
@@ -159,14 +114,12 @@ export function PaywallSheet({
       return;
     }
     if (method === "card") {
-      copyAndProceed("card", CARD_NUMBER_RAW);
+      copyPaymentDetails("card", CARD_NUMBER_RAW);
       return;
     }
     if (method === "sbp") {
-      copyAndProceed("sbp", PHONE_RAW);
-      return;
+      copyPaymentDetails("sbp", PHONE_RAW);
     }
-    onClaimPayment();
   };
 
   useLayoutEffect(() => {
@@ -192,7 +145,7 @@ export function PaywallSheet({
     }
     previousHeightRef.current = naturalHeight;
     return () => el.removeEventListener("transitionend", settle);
-  }, [phase, selectedPrice, qrOpen, copiedMethod, codeInvalid, messaged]);
+  }, [phase, selectedPrice, qrOpen, copiedMethod]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -207,31 +160,13 @@ export function PaywallSheet({
   return (
     <div className="paywall-overlay" role="dialog" aria-modal="true" aria-labelledby="paywall-title">
       <div ref={heroRef} className={`paywall-hero${entering ? " sheet-entering" : ""}`}>
-        {phase === "grace-expired" && (
-          <>
-            <span className="paywall-eyebrow">Упс</span>
-            <h2 id="paywall-title">Кажется, не{" "}оплатил?</h2>
-            <p className="paywall-subtitle">
-              Ты сказал, что{" "}оплатил — час прошёл, а{" "}подтверждения от{" "}Вени
-              не{" "}было, так что{" "}доступ снова закрыт. Если это ошибка, просто напиши
-              в{" "}Telegram.
-            </p>
-            <div className="paywall-actions">
-              <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onClaimPayment}>
-                Проверить оплату
-              </button>
-              <button type="button" className="paywall-cta-text" onClick={onDismiss}>Не сейчас</button>
-            </div>
-          </>
-        )}
-
         {phase === "choose" && (
           <>
-            <span className="paywall-emoji-badge" aria-hidden="true">{selectedPrice ? MOOD_EMOJI[selectedPrice] : "❓"}</span>
-            <h2 id="paywall-title">Надоедливый пейвол</h2>
+            <span className="paywall-emoji-badge" aria-hidden="true">{selectedPrice ? MOOD_EMOJI[selectedPrice] : "💛"}</span>
+            <h2 id="paywall-title">Поддержите автора</h2>
             <p className="paywall-subtitle">
-              В бесплатной версии каждые пять минут открывается этот надоедливый пейвол. Чтобы это прекратилось —
-              оплати по-братски.
+              Автор делал этот инструмент целый месяц, каждый день с{" "}утра до{" "}вечера.
+              Если Chord Tulza вам помогает — поддержите его добровольным донатом.
             </p>
 
             <div className="price-picker" role="group" aria-label="Выбери сумму">
@@ -256,32 +191,6 @@ export function PaywallSheet({
               {selectedPrice ? `Далее · ${selectedPrice} ₽` : "Выбери сумму"}
             </button>
 
-            <div className="paywall-divider">или</div>
-
-            <span className="paywall-unlock-label">Уже есть код доступа?</span>
-            <div className="paywall-unlock">
-              <input
-                type="text"
-                autoComplete="off"
-                spellCheck={false}
-                className={`paywall-unlock-input${codeInvalid ? " invalid" : ""}`}
-                placeholder="Код доступа"
-                value={codeInput}
-                onChange={(event) => {
-                  setCodeInput(event.target.value);
-                  setCodeInvalid(false);
-                }}
-                onKeyDown={(event) => {
-                  if (event.key === "Enter") submitCode();
-                }}
-                aria-label="Код доступа"
-              />
-              <button type="button" className="paywall-unlock-submit" onClick={submitCode}>
-                Ввести
-              </button>
-            </div>
-            {codeInvalid && <span className="paywall-unlock-error">Неверный код</span>}
-
             <button type="button" className="paywall-cta-text paywall-dismiss-link" onClick={onDismiss}>
               Не сейчас
             </button>
@@ -295,9 +204,9 @@ export function PaywallSheet({
               Назад
             </button>
 
-            <span className="paywall-eyebrow">К оплате</span>
+            <span className="paywall-eyebrow">Донат</span>
             <h2 id="paywall-title">{selectedPrice} ₽</h2>
-            <p className="paywall-subtitle">Выбери способ — как только выберешь, перейдём к проверке оплаты.</p>
+            <p className="paywall-subtitle">Выберите удобный способ поддержать автора. Спасибо — это помогает развивать проект.</p>
 
             <div className="payment-methods">
               <CopyableTile
@@ -346,9 +255,6 @@ export function PaywallSheet({
             {qrOpen && (
               <div className="payment-qr-panel">
                 <img src="/paywall-qr.jpg" alt="QR-код для оплаты по СБП" className="payment-qr-image" />
-                <button type="button" className="paywall-cta paywall-cta-secondary" onClick={onClaimPayment}>
-                  Оплатил — проверить оплату
-                </button>
               </div>
             )}
 
@@ -364,68 +270,6 @@ export function PaywallSheet({
           </>
         )}
 
-        {phase === "confirm" && (
-          <>
-            <button type="button" className="paywall-back" onClick={onBackToPayment}>
-              <ArrowLeft size={14} />
-              Назад
-            </button>
-
-            <span className="paywall-eyebrow">Почти всё</span>
-            <h2 id="paywall-title">Доступ будет открыт на{" "}час</h2>
-
-            <div className="telegram-message">
-              <img src="/venya-avatar.jpg" alt="Веня Векк" className="telegram-avatar" />
-              <div className="telegram-message-body">
-                <span className="telegram-sender">Веня Векк</span>
-                <div className="telegram-bubble">
-                  Супер! Напиши Вене, что{" "}ты оплатил и{" "}больше не{" "}хочешь видеть это дурацкое
-                  окно каждые пять минут. И{" "}он тебе вышлет.
-                  <span className="telegram-bubble-time">{MESSAGE_TIME}</span>
-                </div>
-              </div>
-            </div>
-
-            {messaged ? (
-              <button
-                type="button"
-                className="paywall-cta paywall-cta-primary paywall-cta-full telegram-cta"
-                onClick={onConfirmed}
-              >
-                <Check size={16} />
-                Написал
-              </button>
-            ) : (
-              <a
-                href={TELEGRAM_LINK}
-                target="_blank"
-                rel="noreferrer"
-                className="paywall-cta paywall-cta-primary paywall-cta-full telegram-cta"
-                onClick={() => setMessaged(true)}
-              >
-                <Send size={16} />
-                Написать в Telegram
-              </a>
-            )}
-
-            <div className="paywall-actions">
-              <button type="button" className="paywall-cta-text" onClick={onDismiss}>Не сейчас</button>
-            </div>
-          </>
-        )}
-
-        {phase === "success" && (
-          <>
-            <span className="paywall-emoji-badge" aria-hidden="true">✅</span>
-            <h2 id="paywall-title">Готово, доступ открыт</h2>
-            <p className="paywall-subtitle">
-              Код принят — пейвол больше не{" "}появится на этом устройстве.
-            </p>
-            <button type="button" className="paywall-cta paywall-cta-primary paywall-cta-full" onClick={onCloseSuccess}>
-              Продолжить
-            </button>
-          </>
-        )}
       </div>
     </div>
   );
