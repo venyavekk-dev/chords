@@ -1,4 +1,4 @@
-import { Moon, Sun } from "lucide-react";
+import { Heart, Moon, Send, Sun } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { Instrument, ScaleMode, SoundPreset } from "../types/music";
 import { NOTES } from "../lib/musicTheory";
@@ -65,9 +65,27 @@ export function TopBar(props: Props) {
             <img src="/logo.svg" alt="" style={{ height: logoSize, width: "auto" }} />
           </button>
           <h1 ref={nameRef}><span>Chord Tulza</span> <i>by <a href="https://venyavekk.com/music" target="_blank" rel="noreferrer">Venya Vekk</a></i></h1>
-          <button type="button" className="support-link" onClick={props.onDonationClick}>
-            Поддержать автора
-          </button>
+          <div className="header-actions" aria-label="Поддержка проекта">
+            <button
+              type="button"
+              className="header-icon-link"
+              aria-label="Поддержать автора"
+              title="Поддержать автора"
+              onClick={props.onDonationClick}
+            >
+              <Heart size={15} aria-hidden="true" />
+            </button>
+            <a
+              href="https://t.me/veqqa"
+              target="_blank"
+              rel="noreferrer"
+              className="header-icon-link"
+              aria-label="Написать автору в Telegram"
+              title="Написать автору в Telegram"
+            >
+              <Send size={15} aria-hidden="true" />
+            </a>
+          </div>
         </div>
         <div className="brand-toggle-stack">
           <button
