@@ -32,7 +32,9 @@ describe("TopBar onboarding", () => {
     expect(html).toContain('aria-controls="workspace-settings"');
     expect(html).toContain('aria-pressed="false"');
     expect(html).not.toContain("harmony map");
-    expect(html).toContain("Поддержать автора");
+    expect(html).toContain('aria-label="Поддержать автора"');
+    expect(html).toContain('href="https://t.me/veqqa"');
+    expect(html).toContain('aria-label="Написать автору в Telegram"');
     expect(html).not.toContain("Пробный период");
   });
 });
