@@ -27,11 +27,23 @@ export function isVoicingBlockedByCapo(voicing: GuitarVoicing, capoFret: number)
   return voicing.frets.some((fret) => typeof fret === "number" && fret > 0 && fret < capoFret);
 }
 
+/**
+ * The actual sounding pitch of a string at a given fret when a capo is on.
+ * A real finger press (fret > 0) always sounds exactly as if there were no
+ * capo, since the vibrating length runs from that finger to the bridge.
+ * An open string (fret 0) has no finger — its pitch is set entirely by the
+ * capo, so it sounds openNote transposed up by capoFret, not the raw open
+ * note.
+ */
+function realNote(openNote: string, fret: number, capoFret: number): string {
+  return fret === 0 && capoFret > 0 ? transpose(openNote, capoFret) : transpose(openNote, fret);
+}
+
 export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD_TUNING): GuitarVoicing[] {
   const chord = parseChord(symbol);
-  const preferred = buildPreferredVoicings(symbol, tuning);
+  const preferred = buildPreferredVoicings(symbol, tuning, capoFret);
   const options = tuning.map((openNote) => {
-    const frets = Array.from({ length: 13 }, (_, fret) => fret).filter((fret) => chord.tones.includes(transpose(openNote, fret)));
+    const frets = Array.from({ length: 13 }, (_, fret) => fret).filter((fret) => chord.tones.includes(realNote(openNote, fret, capoFret)));
     return ["x" as const, ...frets];
   });
 
@@ -40,11 +52,12 @@ export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD
     if (stringIndex === tuning.length) {
       const fretted = current.filter((fret): fret is number => typeof fret === "number");
       if (fretted.length < 3) return;
-      const sounding = current.map((fret, index) => (fret === "x" ? null : transpose(tuning[index], fret))).filter((note): note is string => Boolean(note));
+      const sounding = current.map((fret, index) => (fret === "x" ? null : realNote(tuning[index], fret, capoFret))).filter((note): note is string => Boolean(note));
       if (!chord.tones.every((tone) => sounding.includes(tone))) return;
       const pressed = fretted.filter((fret) => fret > 0);
-      const min = pressed.length ? Math.min(...pressed) : 0;
-      const max = pressed.length ? Math.max(...pressed) : 0;
+      if (pressed.length === 0) return;
+      const min = Math.min(...pressed);
+      const max = Math.max(...pressed);
       if (max - min > 4) return;
       const mutedInside = current.slice(current.findIndex((fret) => fret !== "x")).filter((fret) => fret === "x").length;
       if (mutedInside > 1) return;
@@ -72,8 +85,7 @@ export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD
   });
 
   const usable = capoFret > 0 ? deduped.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret)) : deduped;
-  const pool = usable.length > 0 ? usable : deduped;
-  return pool.slice(0, 10);
+  return usable.slice(0, 10).sort((a, b) => a.startFret - b.startFret);
 }
 
 function scoreVoicing(voicing: GuitarVoicing, root: string, tuning: string[]): number {
@@ -92,7 +104,7 @@ function voicingName(frets: Array<number | "x">, root: string): string {
   return `${root} movable shape, fret ${start}`;
 }
 
-function buildPreferredVoicings(symbol: string, tuning: string[]): GuitarVoicing[] {
+function buildPreferredVoicings(symbol: string, tuning: string[], capoFret = 0): GuitarVoicing[] {
   if (tuning.join("") !== STANDARD_TUNING.join("")) return [];
   const chord = parseChord(symbol);
   const shapes: Array<{ name: string; frets: Array<number | "x">; difficulty: GuitarVoicing["difficulty"] }> = [];
@@ -137,7 +149,7 @@ function buildPreferredVoicings(symbol: string, tuning: string[]): GuitarVoicing
   return shapes
     .filter((shape) => shape.frets.every((fret) => fret === "x" || fret <= 12))
     .map((shape) => {
-      const notes = shape.frets.map((fret, index) => (fret === "x" ? null : transpose(STANDARD_TUNING[index], fret))).filter((note): note is string => Boolean(note));
+      const notes = shape.frets.map((fret, index) => (fret === "x" ? null : realNote(STANDARD_TUNING[index], fret, capoFret))).filter((note): note is string => Boolean(note));
       const pressed = shape.frets.filter((fret): fret is number => typeof fret === "number" && fret > 0);
       return {
         name: shape.name,
@@ -147,7 +159,8 @@ function buildPreferredVoicings(symbol: string, tuning: string[]): GuitarVoicing
         startFret: pressed.length ? Math.min(...pressed) : 0,
         difficulty: shape.difficulty,
       };
-    });
+    })
+    .filter((voicing) => chord.tones.every((tone) => voicing.notes.includes(tone)) && voicing.notes.every((note) => chord.tones.includes(note)));
 }
 
 function noteFretOnString(note: string, stringNote: string) {
@@ -171,3 +184,4 @@ const openShapes: Record<string, Array<number | "x">> = {
   E7: [0, 2, 0, 1, 0, 0],
   B7: ["x", 2, 1, 2, 0, 2],
 };
+
