@@ -15,9 +15,16 @@ describe("capo open voicings", () => {
     expect(generateVoicings("F#m", 4)[0].frets).toEqual(["x", "x", 4, 6, 7, 5]);
     expect(generateVoicings("G#m", 4)[0].frets).toEqual([4, 6, 6, 4, 4, 4]);
     expect(generateVoicings("A", 4)[0].frets).toEqual([5, 7, 7, 6, 5, 5]);
-    expect(generateVoicings("B", 4)[0].frets).toEqual([7, 6, 4, 4, 4, 7]);
+    expect(generateVoicings("B", 4)[0].frets).toEqual([7, 6, 4, 4, 7, 7]);
     expect(generateVoicings("C#m", 4)[0].frets).toEqual(["x", 4, 6, 6, 5, 4]);
     expect(generateVoicings("D#dim", 4).length).toBeGreaterThan(0);
+  });
+
+  it("prioritizes the characteristic Wonderwall voicings with capo two", () => {
+    expect(generateVoicings("F#m7", 2)[0].frets).toEqual([2, 4, 4, 2, 5, 5]);
+    expect(generateVoicings("A", 2)[0].frets).toEqual([5, 4, 2, 2, 5, 5]);
+    expect(generateVoicings("Esus4", 2)[0].frets).toEqual(["x", "x", 2, 4, 5, 5]);
+    expect(generateVoicings("B7sus4", 2)[0].frets).toEqual(["x", 2, 4, 2, 5, 5]);
   });
 
   it("falls back to playable positions farther up the neck", () => {
