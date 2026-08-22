@@ -1,9 +1,18 @@
 import { describe, expect, it } from "vitest";
-import { buildChordVariants } from "./chordFamilies";
+import { buildChordVariants, CHORD_FAMILIES } from "./chordFamilies";
 import { buildDiatonicChords } from "./musicTheory";
 
 describe("chord families", () => {
   const chords = buildDiatonicChords("F#", "Minor");
+
+  it("uses familiar names for chord families", () => {
+    expect(CHORD_FAMILIES.map(({ label }) => label)).toEqual([
+      "Популярные",
+      "Септаккорды",
+      "Sus",
+      "Добавленные",
+    ]);
+  });
 
   it("groups popular in-key variants without duplicating the main chord", () => {
     expect(buildChordVariants(chords[0], "F#", "Minor", "popular").map((chord) => chord.symbol)).toEqual([

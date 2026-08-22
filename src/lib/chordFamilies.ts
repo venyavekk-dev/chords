@@ -5,9 +5,9 @@ export type ChordFamily = "popular" | "sevenths" | "sus" | "add";
 
 export const CHORD_FAMILIES: Array<{ id: ChordFamily; label: string }> = [
   { id: "popular", label: "Популярные" },
-  { id: "sevenths", label: "7" },
+  { id: "sevenths", label: "Септаккорды" },
   { id: "sus", label: "Sus" },
-  { id: "add", label: "Add" },
+  { id: "add", label: "Добавленные" },
 ];
 
 export function buildChordVariants(

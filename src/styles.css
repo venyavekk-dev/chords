@@ -844,15 +844,11 @@ select {
 .chord-family-filter {
   display: flex;
   justify-content: center;
-  gap: 4px;
+  gap: var(--space-2);
   width: fit-content;
   max-width: 100%;
   margin: var(--space-8) auto 0;
-  padding: 4px;
-  border: 1px solid var(--border-default);
-  border-radius: var(--radius-pill);
   overflow-x: auto;
-  background: var(--surface-primary);
   scrollbar-width: none;
 }
 
@@ -862,12 +858,12 @@ select {
 
 .chord-family-filter button {
   flex: 0 0 auto;
-  min-height: 32px;
+  min-height: 34px;
   padding: 6px 12px;
   border: 0;
   border-radius: var(--radius-pill);
-  background: transparent;
-  color: var(--text-secondary);
+  background: var(--surface-primary);
+  color: var(--text-primary);
   font-size: 0.75rem;
   font-weight: 600;
   white-space: nowrap;
@@ -876,12 +872,11 @@ select {
 
 .chord-family-filter button:hover {
   background: var(--surface-hover);
-  color: var(--text-primary);
 }
 
 .chord-family-filter button.active {
-  background: var(--text-strong);
-  color: var(--page-bg);
+  background: var(--sequencer-accent);
+  color: var(--sequencer-accent-text);
 }
 
 .strip-chord {
