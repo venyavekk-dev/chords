@@ -8,8 +8,8 @@ import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
-import { buildDiatonicChords, buildScale, parseChord, transpose } from "./lib/musicTheory";
-import { generateVoicings } from "./lib/guitar";
+import { buildDiatonicChords, buildScale, parseChord } from "./lib/musicTheory";
+import { generateVoicings, hasOpenVoicingAtCapo } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { playChord, SOUND_PRESETS } from "./lib/audio";
 import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
@@ -84,8 +84,12 @@ export default function App() {
   const [dragStepIndex, setDragStepIndex] = useState<number | null>(null);
   const [presetIndex, setPresetIndex] = useState(0);
   const [presetRevealed, setPresetRevealed] = useState(false);
-  const keyRoot = capoFret > 0 ? transpose(baseKeyRoot, capoFret) : baseKeyRoot;
+  const keyRoot = baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
+  const availableChords = useMemo(
+    () => chords.filter((chord) => hasOpenVoicingAtCapo(chord.symbol, capoFret)),
+    [chords, capoFret],
+  );
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
   const [activeChord, setActiveChord] = useState<DegreeChord>(chords[0]);
   const [selectedVoicing, setSelectedVoicing] = useState<GuitarVoicing | undefined>();
@@ -101,8 +105,8 @@ export default function App() {
     : defaultTransitionAdvice(activeChord);
 
   useEffect(() => {
-    setActiveChord(chords[0]);
-  }, [chords, keyRoot]);
+    setActiveChord(availableChords[0] ?? chords[0]);
+  }, [availableChords, chords, keyRoot]);
 
   useEffect(() => {
     const memorized = voicingMemory[activeChord.symbol];
@@ -153,7 +157,7 @@ export default function App() {
       const { volume: currentVolume, sound: currentSound, capoFret: currentCapo, voicingMemory: currentMemory } = playbackSettings.current;
       const stepVoicings = generateVoicings(chord.symbol, currentCapo);
       const voicing = pickVoicing(stepVoicings, currentMemory[chord.symbol]);
-      playChord(chord.symbol, currentVolume, voicing, currentSound);
+      if (voicing) playChord(chord.symbol, currentVolume, voicing, currentSound);
       setCurrentStep(position);
       index += 1;
     };
@@ -246,7 +250,7 @@ export default function App() {
     const nextVoicings = generateVoicings(chord.symbol, capoFret);
     const memorized = voicingMemory[chord.symbol];
     const nextVoicing = pickVoicing(nextVoicings, memorized);
-    playChord(chord.symbol, volume, nextVoicing, sound);
+    if (nextVoicing) playChord(chord.symbol, volume, nextVoicing, sound);
   };
 
   const selectVoicing = (voicing: GuitarVoicing) => {
@@ -258,12 +262,11 @@ export default function App() {
 
   const selectSound = (nextSound: SoundPreset) => {
     setSound(nextSound);
-    playChord(activeChord.symbol, volume, selectedVoicing, nextSound);
+    if (selectedVoicing) playChord(activeChord.symbol, volume, selectedVoicing, nextSound);
   };
 
   const changeKeyRoot = (value: string) => {
     setBaseKeyRoot(value);
-    setCapoFret(0);
   };
 
   const toggleCapo = (fret: number) => {
@@ -282,7 +285,7 @@ export default function App() {
         onKeyRoot={changeKeyRoot}
         onScaleMode={setScaleMode}
         onInstrument={setInstrument}
-        onPlayChord={() => playChord(activeChord.symbol, volume, selectedVoicing, sound)}
+        onPlayChord={() => selectedVoicing && playChord(activeChord.symbol, volume, selectedVoicing, sound)}
         onSound={selectSound}
         onToggleOnboarding={() => setOnboardingOpen((open) => !open)}
         onDonationClick={openPaywall}
@@ -474,62 +477,82 @@ export default function App() {
             setPreviewVoicing(undefined);
           }}
         >
-          {chords.map((chord, index) => (
-            <div
-              className={`strip-chord ${activeChord.degree === chord.degree ? "active" : ""}`}
-              key={chord.degree}
-              onMouseEnter={() => {
-                setPreviewVoicing(undefined);
-                setPreviewChord(chord);
-              }}
-            >
-              <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
-              <button
-                className="strip-main"
-                onClick={() => {
-                  selectChord(chord);
-                  if (sequencerMode) addSequenceChord(chord);
+          {chords.map((chord, index) => {
+            const chordAvailable = hasOpenVoicingAtCapo(chord.symbol, capoFret);
+            const cardAvailable = chordAvailable
+              || chordVariants[index].some((variant) => hasOpenVoicingAtCapo(variant.symbol, capoFret));
+            return (
+              <div
+                className={`strip-chord ${activeChord.degree === chord.degree ? "active" : ""} ${cardAvailable ? "" : "unavailable"}`}
+                key={chord.degree}
+                onMouseEnter={() => {
+                  if (!chordAvailable) return;
+                  setPreviewVoicing(undefined);
+                  setPreviewChord(chord);
                 }}
               >
-                <span>{chord.degree}</span>
-                <strong>{chord.symbol}</strong>
-              </button>
-              <div className="variant-row">
-                {chordVariants[index].map((variant) => (
-                  <button
-                    className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""}`}
-                    key={variant.symbol}
-                    onClick={() => {
-                      selectChord(variant);
-                      if (sequencerMode) addSequenceChord(variant);
-                    }}
-                    onMouseEnter={() => {
-                      setPreviewVoicing(undefined);
-                      setPreviewChord(variant);
-                    }}
-                  >
-                    {variantLabel(variant)}
-                  </button>
-                ))}
+                <i className={`relation-dot ${transitionRelation(activeChord, chord, scaleMode)}`} />
+                <button
+                  className="strip-main"
+                  disabled={!chordAvailable}
+                  title={chordAvailable ? undefined : `Нет открытой аппликатуры для ${chord.symbol} с капо на ${capoFret} ладу`}
+                  onClick={() => {
+                    selectChord(chord);
+                    if (sequencerMode) addSequenceChord(chord);
+                  }}
+                >
+                  <span>{chord.degree}</span>
+                  <strong>{chord.symbol}</strong>
+                </button>
+                <div className="variant-row">
+                  {chordVariants[index].map((variant) => {
+                    const variantAvailable = hasOpenVoicingAtCapo(variant.symbol, capoFret);
+                    return (
+                      <button
+                        className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""}`}
+                        key={variant.symbol}
+                        disabled={!variantAvailable}
+                        title={variantAvailable ? undefined : `Нет открытой аппликатуры для ${variant.symbol} с капо на ${capoFret} ладу`}
+                        onClick={() => {
+                          selectChord(variant);
+                          if (sequencerMode) addSequenceChord(variant);
+                        }}
+                        onMouseEnter={() => {
+                          if (!variantAvailable) return;
+                          setPreviewVoicing(undefined);
+                          setPreviewChord(variant);
+                        }}
+                      >
+                        {variantLabel(variant)}
+                      </button>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </section>
-        <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
-          {voicings.map((voicing) => (
-            <button
-              className={`position-button ${selectedVoicing?.frets.join("") === voicing.frets.join("") ? "active" : ""}`}
-              key={voicing.frets.join("-")}
-              onClick={() => selectVoicing(voicing)}
-              onMouseEnter={() => {
-                setPreviewChord(undefined);
-                setPreviewVoicing(voicing);
-              }}
-            >
-              <VoicingMini voicing={voicing} />
-            </button>
-          ))}
-        </section>
+        {voicings.length === 0 ? (
+          <p className="no-voicing-message">
+            Нет открытой аппликатуры для {activeChord.symbol} с капо на {capoFret} ладу.
+          </p>
+        ) : (
+          <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
+            {voicings.map((voicing) => (
+              <button
+                className={`position-button ${selectedVoicing?.frets.join("") === voicing.frets.join("") ? "active" : ""}`}
+                key={voicing.frets.join("-")}
+                onClick={() => selectVoicing(voicing)}
+                onMouseEnter={() => {
+                  setPreviewChord(undefined);
+                  setPreviewVoicing(voicing);
+                }}
+              >
+                <VoicingMini voicing={voicing} />
+              </button>
+            ))}
+          </section>
+        )}
         {onboardingOpen && (
           <RelationshipHint acknowledged={onboardingAcknowledged} onAcknowledge={() => setOnboardingAcknowledged(true)}>
             {relationText}
