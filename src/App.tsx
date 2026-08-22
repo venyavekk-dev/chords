@@ -9,8 +9,7 @@ import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords } from "./lib/musicTheory";
-import { buildChordVariants, CHORD_FAMILIES } from "./lib/chordFamilies";
-import type { ChordFamily } from "./lib/chordFamilies";
+import { buildChordVariants } from "./lib/chordFamilies";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { playChord, SOUND_PRESETS } from "./lib/audio";
@@ -86,7 +85,6 @@ export default function App() {
   const [dragStepIndex, setDragStepIndex] = useState<number | null>(null);
   const [presetIndex, setPresetIndex] = useState(0);
   const [presetRevealed, setPresetRevealed] = useState(false);
-  const [chordFamily, setChordFamily] = useState<ChordFamily>("popular");
   const keyRoot = baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const availableChords = useMemo(
@@ -94,8 +92,8 @@ export default function App() {
     [chords, capoFret],
   );
   const chordVariants = useMemo(
-    () => chords.map((chord) => buildChordVariants(chord, keyRoot, scaleMode, chordFamily)),
-    [chords, keyRoot, scaleMode, chordFamily],
+    () => chords.map((chord) => buildChordVariants(chord, keyRoot, scaleMode)),
+    [chords, keyRoot, scaleMode],
   );
   const [activeChord, setActiveChord] = useState<DegreeChord>(chords[0]);
   const [selectedVoicing, setSelectedVoicing] = useState<GuitarVoicing | undefined>();
@@ -277,14 +275,6 @@ export default function App() {
 
   const toggleCapo = (fret: number) => {
     setCapoFret((current) => (current === fret ? 0 : fret));
-  };
-
-  const selectChordFamily = (family: ChordFamily) => {
-    setChordFamily(family);
-    setPreviewChord(undefined);
-    setPreviewVoicing(undefined);
-    const baseChord = chords.find((chord) => chord.degree === activeChord.degree);
-    if (baseChord) setActiveChord(baseChord);
   };
 
   return (
@@ -484,19 +474,6 @@ export default function App() {
             </button>
           </div>
         )}
-        <div className="chord-family-filter" role="group" aria-label="Семейство аккордов">
-          {CHORD_FAMILIES.map((family) => (
-            <button
-              type="button"
-              className={chordFamily === family.id ? "active" : ""}
-              aria-pressed={chordFamily === family.id}
-              key={family.id}
-              onClick={() => selectChordFamily(family.id)}
-            >
-              {family.label}
-            </button>
-          ))}
-        </div>
         <section
           className="chord-strip"
           onMouseLeave={() => {
