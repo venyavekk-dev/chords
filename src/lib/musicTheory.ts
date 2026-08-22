@@ -62,6 +62,11 @@ export function transpose(note: string, semitones: number): string {
   return NOTES[(index + semitones + 120) % 12];
 }
 
+export function transposeChordSymbol(symbol: string, semitones: number): string {
+  const chord = parseChord(symbol);
+  return `${transpose(chord.root, semitones)}${chord.suffix}`;
+}
+
 export function buildScale(root: string, mode: ScaleMode): string[] {
   const intervals = mode === "Major" ? MAJOR_INTERVALS : MINOR_INTERVALS;
   return intervals.map((interval) => transpose(root, interval));

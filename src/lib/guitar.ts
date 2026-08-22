@@ -1,5 +1,5 @@
 import type { FretRange, GuitarVoicing } from "../types/music";
-import { parseChord, transpose } from "./musicTheory";
+import { parseChord, transpose, transposeChordSymbol } from "./musicTheory";
 
 export const STANDARD_TUNING = ["E", "A", "D", "G", "B", "E"];
 export const DROP_D_TUNING = ["D", "A", "D", "G", "B", "E"];
@@ -28,6 +28,11 @@ export function isVoicingBlockedByCapo(voicing: GuitarVoicing, capoFret: number)
 }
 
 export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD_TUNING): GuitarVoicing[] {
+  if (capoFret > 0) {
+    const openVoicing = buildCapoOpenVoicing(symbol, capoFret, tuning);
+    return openVoicing ? [openVoicing] : [];
+  }
+
   const chord = parseChord(symbol);
   const preferred = buildPreferredVoicings(symbol, tuning);
   const options = tuning.map((openNote) => {
@@ -71,9 +76,37 @@ export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD
     return true;
   });
 
-  const usable = capoFret > 0 ? deduped.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret)) : deduped;
-  const pool = usable.length > 0 ? usable : deduped;
-  return pool.slice(0, 10);
+  return deduped.slice(0, 10);
+}
+
+export function hasOpenVoicingAtCapo(symbol: string, capoFret: number, tuning = STANDARD_TUNING): boolean {
+  return capoFret <= 0 || Boolean(buildCapoOpenVoicing(symbol, capoFret, tuning));
+}
+
+function buildCapoOpenVoicing(symbol: string, capoFret: number, tuning: string[]): GuitarVoicing | undefined {
+  if (tuning.join("") !== STANDARD_TUNING.join("")) return undefined;
+  const shapeSymbol = transposeChordSymbol(symbol, -capoFret);
+  const shape = openShapes[shapeSymbol];
+  if (!shape) return undefined;
+
+  const chord = parseChord(symbol);
+  const frets = shape.map((fret) => (fret === "x" ? fret : fret + capoFret));
+  const notes = frets
+    .map((fret, index) => (fret === "x" ? null : transpose(tuning[index], fret)))
+    .filter((note): note is string => Boolean(note));
+
+  if (!chord.tones.every((tone) => notes.includes(tone)) || !notes.every((note) => chord.tones.includes(note))) {
+    return undefined;
+  }
+
+  return {
+    name: `${symbol} open voicing, capo ${capoFret}`,
+    frets,
+    notes,
+    root: chord.root,
+    startFret: capoFret,
+    difficulty: shapeSymbol === "F" ? "medium" : "easy",
+  };
 }
 
 function scoreVoicing(voicing: GuitarVoicing, root: string, tuning: string[]): number {
