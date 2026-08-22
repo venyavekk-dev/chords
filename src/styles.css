@@ -863,6 +863,15 @@ select {
   color: var(--card-active-text);
 }
 
+.strip-chord.unavailable {
+  opacity: 0.34;
+}
+
+.strip-chord.unavailable .strip-main,
+.strip-chord.unavailable .variant-chip:disabled {
+  cursor: not-allowed;
+}
+
 .relation-dot {
   position: absolute;
   top: 12px;
@@ -905,6 +914,11 @@ select {
 
 .strip-main:focus-visible {
   outline-offset: -4px;
+}
+
+.strip-main:disabled {
+  cursor: not-allowed;
+  opacity: 0.35;
 }
 
 .strip-main span {
@@ -972,6 +986,17 @@ select {
 .strip-chord.active .variant-chip.active {
   background: var(--card-chip-selected-bg);
   color: var(--card-chip-selected-text);
+}
+
+.variant-chip:disabled {
+  opacity: 0.35;
+}
+
+.no-voicing-message {
+  margin-top: var(--space-2);
+  padding: 12px 4px;
+  color: var(--text-secondary);
+  font-size: 0.9rem;
 }
 
 .sequencer-toolbar {
