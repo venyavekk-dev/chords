@@ -8,7 +8,8 @@ import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
-import { buildDiatonicChords, buildScale, parseChord } from "./lib/musicTheory";
+import { buildDiatonicChords } from "./lib/musicTheory";
+import { buildChordVariants } from "./lib/chordFamilies";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { playChord, SOUND_PRESETS } from "./lib/audio";
@@ -90,7 +91,10 @@ export default function App() {
     () => chords.filter((chord) => generateVoicings(chord.symbol, capoFret).length > 0),
     [chords, capoFret],
   );
-  const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
+  const chordVariants = useMemo(
+    () => chords.map((chord) => buildChordVariants(chord, keyRoot, scaleMode)),
+    [chords, keyRoot, scaleMode],
+  );
   const [activeChord, setActiveChord] = useState<DegreeChord>(chords[0]);
   const [selectedVoicing, setSelectedVoicing] = useState<GuitarVoicing | undefined>();
   const [previewChord, setPreviewChord] = useState<DegreeChord | undefined>();
@@ -575,29 +579,6 @@ export default function App() {
 
 function pickVoicing(voicings: GuitarVoicing[], memorizedKey?: string): GuitarVoicing | undefined {
   return voicings.find((voicing) => voicing.frets.join("") === memorizedKey) ?? voicings[0];
-}
-
-function variantsForChord(chord: DegreeChord, keyRoot: string, mode: ScaleMode): DegreeChord[] {
-  const scaleNotes = new Set(buildScale(keyRoot, mode));
-  const variants = [
-    chord.symbol,
-    `${chord.root}sus2`,
-    `${chord.root}sus4`,
-    `${chord.root}${seventhSuffix(chord, mode)}`,
-  ];
-
-  return variants
-    .filter((symbol, index, all) => all.indexOf(symbol) === index)
-    .filter((symbol) => parseChord(symbol).tones.every((tone) => scaleNotes.has(tone)))
-    .map((symbol) => ({ ...chord, symbol }));
-}
-
-function seventhSuffix(chord: DegreeChord, mode: ScaleMode) {
-  const cleanDegree = chord.degree.replace("°", "");
-  if (chord.quality === "diminished") return "m7b5";
-  if (chord.quality === "minor") return "m7";
-  if ((mode === "Major" && cleanDegree === "V") || (mode === "Minor" && cleanDegree === "VII")) return "7";
-  return "maj7";
 }
 
 function variantLabel(variant: DegreeChord) {
