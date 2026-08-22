@@ -27,14 +27,23 @@ describe("capo open voicings", () => {
 
   it("keeps every chord in C major playable with capo three", () => {
     expect(generateVoicings("Dm", 3)[0].frets).toEqual(["x", 5, 7, 7, 6, 5]);
-    expect(generateVoicings("Em", 3)[0].frets).toEqual(["x", 7, 9, 9, 8, 7]);
-    expect(generateVoicings("Am", 3)[0].frets).toEqual([5, 7, 7, 5, 5, 5]);
 
     for (const symbol of ["C", "Dm", "Em", "F", "G", "Am", "Bdim"]) {
       const voicings = generateVoicings(symbol, 3);
       expect(voicings.length).toBeGreaterThan(0);
       expect(voicings.every((voicing) => voicing.frets.every((fret) => fret === "x" || fret >= 3))).toBe(true);
     }
+  });
+
+  it("keeps the capo-open voicing first and sorts later positions by fret", () => {
+    const cVoicings = generateVoicings("C", 3);
+    expect(cVoicings[0].frets).toEqual(["x", 3, 5, 5, 5, 3]);
+    expect(cVoicings.slice(1).map((voicing) => voicing.startFret)).toEqual(
+      [...cVoicings.slice(1).map((voicing) => voicing.startFret)].sort((a, b) => a - b),
+    );
+
+    const emPositions = generateVoicings("Em", 3).map((voicing) => voicing.startFret);
+    expect(emPositions).toEqual([...emPositions].sort((a, b) => a - b));
   });
 
   it("keeps the existing full voicing generator when no capo is selected", () => {

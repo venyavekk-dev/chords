@@ -52,8 +52,8 @@ export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD
       const sounding = current.map((fret, index) => (fret === "x" ? null : transpose(tuning[index], fret))).filter((note): note is string => Boolean(note));
       if (!chord.tones.every((tone) => sounding.includes(tone))) return;
       const pressed = fretted.filter((fret) => fret > firstFret);
-      const min = pressed.length ? Math.min(...pressed) : 0;
-      const max = pressed.length ? Math.max(...pressed) : 0;
+      const min = pressed.length ? Math.min(...pressed) : firstFret;
+      const max = pressed.length ? Math.max(...pressed) : firstFret;
       if (max - min > 4) return;
       const mutedInside = current.slice(current.findIndex((fret) => fret !== "x")).filter((fret) => fret === "x").length;
       if (mutedInside > 1) return;
@@ -85,7 +85,18 @@ export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD
     return true;
   });
 
-  const result = deduped.slice(0, 10);
+  const ordered = capoFret > 0
+    ? [
+      ...(capoOpenVoicing ? [capoOpenVoicing] : []),
+      ...deduped
+        .filter((voicing) => voicing !== capoOpenVoicing)
+        .sort((a, b) => (
+          a.startFret - b.startFret
+          || scoreVoicing(a, chord.root, tuning, firstFret) - scoreVoicing(b, chord.root, tuning, firstFret)
+        )),
+    ]
+    : deduped;
+  const result = ordered.slice(0, 10);
   voicingCache.set(cacheKey, result);
   return result;
 }
