@@ -9,7 +9,7 @@ import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
 import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords, buildScale, parseChord } from "./lib/musicTheory";
-import { generateVoicings, hasOpenVoicingAtCapo } from "./lib/guitar";
+import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
 import { playChord, SOUND_PRESETS } from "./lib/audio";
 import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
@@ -87,7 +87,7 @@ export default function App() {
   const keyRoot = baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const availableChords = useMemo(
-    () => chords.filter((chord) => hasOpenVoicingAtCapo(chord.symbol, capoFret)),
+    () => chords.filter((chord) => generateVoicings(chord.symbol, capoFret).length > 0),
     [chords, capoFret],
   );
   const chordVariants = useMemo(() => chords.map((chord) => variantsForChord(chord, keyRoot, scaleMode)), [chords, keyRoot, scaleMode]);
@@ -478,9 +478,9 @@ export default function App() {
           }}
         >
           {chords.map((chord, index) => {
-            const chordAvailable = hasOpenVoicingAtCapo(chord.symbol, capoFret);
+            const chordAvailable = generateVoicings(chord.symbol, capoFret).length > 0;
             const cardAvailable = chordAvailable
-              || chordVariants[index].some((variant) => hasOpenVoicingAtCapo(variant.symbol, capoFret));
+              || chordVariants[index].some((variant) => generateVoicings(variant.symbol, capoFret).length > 0);
             return (
               <div
                 className={`strip-chord ${activeChord.degree === chord.degree ? "active" : ""} ${cardAvailable ? "" : "unavailable"}`}
@@ -495,7 +495,7 @@ export default function App() {
                 <button
                   className="strip-main"
                   disabled={!chordAvailable}
-                  title={chordAvailable ? undefined : `Нет открытой аппликатуры для ${chord.symbol} с капо на ${capoFret} ладу`}
+                  title={chordAvailable ? undefined : `Нет доступной аппликатуры для ${chord.symbol} с капо на ${capoFret} ладу`}
                   onClick={() => {
                     selectChord(chord);
                     if (sequencerMode) addSequenceChord(chord);
@@ -506,13 +506,13 @@ export default function App() {
                 </button>
                 <div className="variant-row">
                   {chordVariants[index].map((variant) => {
-                    const variantAvailable = hasOpenVoicingAtCapo(variant.symbol, capoFret);
+                    const variantAvailable = generateVoicings(variant.symbol, capoFret).length > 0;
                     return (
                       <button
                         className={`variant-chip ${activeChord.symbol === variant.symbol ? "active" : ""}`}
                         key={variant.symbol}
                         disabled={!variantAvailable}
-                        title={variantAvailable ? undefined : `Нет открытой аппликатуры для ${variant.symbol} с капо на ${capoFret} ладу`}
+                        title={variantAvailable ? undefined : `Нет доступной аппликатуры для ${variant.symbol} с капо на ${capoFret} ладу`}
                         onClick={() => {
                           selectChord(variant);
                           if (sequencerMode) addSequenceChord(variant);
@@ -534,7 +534,7 @@ export default function App() {
         </section>
         {voicings.length === 0 ? (
           <p className="no-voicing-message">
-            Нет открытой аппликатуры для {activeChord.symbol} с капо на {capoFret} ладу.
+            Нет доступной аппликатуры для {activeChord.symbol} с капо на {capoFret} ладу.
           </p>
         ) : (
           <section className="position-strip" onMouseLeave={() => setPreviewVoicing(undefined)}>
