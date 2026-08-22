@@ -1,8 +1,10 @@
 import type { FretRange, GuitarVoicing } from "../types/music";
-import { parseChord, transpose } from "./musicTheory";
+import { parseChord, transpose, transposeChordSymbol } from "./musicTheory";
 
 export const STANDARD_TUNING = ["E", "A", "D", "G", "B", "E"];
 export const DROP_D_TUNING = ["D", "A", "D", "G", "B", "E"];
+const MAX_DISPLAY_FRET = 19;
+const voicingCache = new Map<string, GuitarVoicing[]>();
 
 export function buildFretboard(tuning = STANDARD_TUNING, maxFret = 20) {
   return tuning.map((openNote, stringIndex) => ({
@@ -24,14 +26,21 @@ export function getFretWindow(range: FretRange): [number, number] {
 
 export function isVoicingBlockedByCapo(voicing: GuitarVoicing, capoFret: number): boolean {
   if (capoFret <= 0) return false;
-  return voicing.frets.some((fret) => typeof fret === "number" && fret > 0 && fret < capoFret);
+  return voicing.frets.some((fret) => typeof fret === "number" && fret < capoFret);
 }
 
 export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD_TUNING): GuitarVoicing[] {
+  const cacheKey = `${symbol}|${capoFret}|${tuning.join("-")}`;
+  const cached = voicingCache.get(cacheKey);
+  if (cached) return cached;
+
   const chord = parseChord(symbol);
   const preferred = buildPreferredVoicings(symbol, tuning);
+  const firstFret = capoFret > 0 ? capoFret : 0;
+  const lastFret = capoFret > 0 ? MAX_DISPLAY_FRET : 12;
   const options = tuning.map((openNote) => {
-    const frets = Array.from({ length: 13 }, (_, fret) => fret).filter((fret) => chord.tones.includes(transpose(openNote, fret)));
+    const frets = Array.from({ length: lastFret - firstFret + 1 }, (_, index) => firstFret + index)
+      .filter((fret) => chord.tones.includes(transpose(openNote, fret)));
     return ["x" as const, ...frets];
   });
 
@@ -42,14 +51,14 @@ export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD
       if (fretted.length < 3) return;
       const sounding = current.map((fret, index) => (fret === "x" ? null : transpose(tuning[index], fret))).filter((note): note is string => Boolean(note));
       if (!chord.tones.every((tone) => sounding.includes(tone))) return;
-      const pressed = fretted.filter((fret) => fret > 0);
-      const min = pressed.length ? Math.min(...pressed) : 0;
-      const max = pressed.length ? Math.max(...pressed) : 0;
+      const pressed = fretted.filter((fret) => fret > firstFret);
+      const min = pressed.length ? Math.min(...pressed) : firstFret;
+      const max = pressed.length ? Math.max(...pressed) : firstFret;
       if (max - min > 4) return;
       const mutedInside = current.slice(current.findIndex((fret) => fret !== "x")).filter((fret) => fret === "x").length;
       if (mutedInside > 1) return;
       candidates.push({
-        name: voicingName(current, chord.root),
+        name: voicingName(current, chord.root, firstFret),
         frets: current,
         notes: sounding,
         root: chord.root,
@@ -63,30 +72,77 @@ export function generateVoicings(symbol: string, capoFret = 0, tuning = STANDARD
   search(0, []);
 
   const seen = new Set<string>();
-  const orderedCandidates = candidates.sort((a, b) => scoreVoicing(a, chord.root, tuning) - scoreVoicing(b, chord.root, tuning));
-  const deduped = [...preferred, ...orderedCandidates].filter((voicing) => {
+  const orderedCandidates = candidates.sort(
+    (a, b) => scoreVoicing(a, chord.root, tuning, firstFret) - scoreVoicing(b, chord.root, tuning, firstFret),
+  );
+  const capoOpenVoicing = capoFret > 0 ? buildCapoOpenVoicing(symbol, capoFret, tuning) : undefined;
+  const usablePreferred = preferred.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret));
+  const deduped = [capoOpenVoicing, ...usablePreferred, ...orderedCandidates].filter((voicing): voicing is GuitarVoicing => {
+    if (!voicing) return false;
     const key = voicing.frets.join("-");
     if (seen.has(key)) return false;
     seen.add(key);
     return true;
   });
 
-  const usable = capoFret > 0 ? deduped.filter((voicing) => !isVoicingBlockedByCapo(voicing, capoFret)) : deduped;
-  const pool = usable.length > 0 ? usable : deduped;
-  return pool.slice(0, 10);
+  const ordered = capoFret > 0
+    ? [
+      ...(capoOpenVoicing ? [capoOpenVoicing] : []),
+      ...deduped
+        .filter((voicing) => voicing !== capoOpenVoicing)
+        .sort((a, b) => (
+          a.startFret - b.startFret
+          || scoreVoicing(a, chord.root, tuning, firstFret) - scoreVoicing(b, chord.root, tuning, firstFret)
+        )),
+    ]
+    : deduped;
+  const result = ordered.slice(0, 10);
+  voicingCache.set(cacheKey, result);
+  return result;
 }
 
-function scoreVoicing(voicing: GuitarVoicing, root: string, tuning: string[]): number {
+export function hasOpenVoicingAtCapo(symbol: string, capoFret: number, tuning = STANDARD_TUNING): boolean {
+  return capoFret <= 0 || Boolean(buildCapoOpenVoicing(symbol, capoFret, tuning));
+}
+
+function buildCapoOpenVoicing(symbol: string, capoFret: number, tuning: string[]): GuitarVoicing | undefined {
+  if (tuning.join("") !== STANDARD_TUNING.join("")) return undefined;
+  const shapeSymbol = transposeChordSymbol(symbol, -capoFret);
+  const shape = openShapes[shapeSymbol];
+  if (!shape) return undefined;
+
+  const chord = parseChord(symbol);
+  const frets = shape.map((fret) => (fret === "x" ? fret : fret + capoFret));
+  if (frets.some((fret) => fret !== "x" && fret > MAX_DISPLAY_FRET)) return undefined;
+  const notes = frets
+    .map((fret, index) => (fret === "x" ? null : transpose(tuning[index], fret)))
+    .filter((note): note is string => Boolean(note));
+
+  if (!chord.tones.every((tone) => notes.includes(tone)) || !notes.every((note) => chord.tones.includes(note))) {
+    return undefined;
+  }
+
+  return {
+    name: `${symbol} open voicing, capo ${capoFret}`,
+    frets,
+    notes,
+    root: chord.root,
+    startFret: capoFret,
+    difficulty: shapeSymbol === "F" ? "medium" : "easy",
+  };
+}
+
+function scoreVoicing(voicing: GuitarVoicing, root: string, tuning: string[], openFret = 0): number {
   const knownShapeBonus = voicing.name.includes("shape") || voicing.name.includes("barre") || voicing.name.includes("D-shape") ? -14 : 0;
   const fretted = voicing.frets.filter((fret): fret is number => typeof fret === "number");
   const rootBassBonus = voicing.frets.some((fret, index) => fret !== "x" && transpose(tuning[index], fret) === root) ? -4 : 0;
-  const openBonus = fretted.filter((fret) => fret === 0).length * -1.5;
+  const openBonus = fretted.filter((fret) => fret === openFret).length * -1.5;
   return Math.max(...fretted) + fretted.length + (voicing.difficulty === "hard" ? 8 : 0) + rootBassBonus + openBonus + knownShapeBonus;
 }
 
-function voicingName(frets: Array<number | "x">, root: string): string {
-  const fretted = frets.filter((fret): fret is number => typeof fret === "number" && fret > 0);
-  if (frets.some((fret) => fret === 0)) return `Open ${root} voicing`;
+function voicingName(frets: Array<number | "x">, root: string, openFret = 0): string {
+  const fretted = frets.filter((fret): fret is number => typeof fret === "number" && fret > openFret);
+  if (frets.some((fret) => fret === openFret)) return `Open ${root} voicing`;
   const start = fretted.length ? Math.min(...fretted) : 0;
   if (fretted.length <= 4) return `${root} compact triad, fret ${start}`;
   return `${root} movable shape, fret ${start}`;
