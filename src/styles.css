@@ -1838,6 +1838,167 @@ select {
   }
 }
 
+.user-survey-shell {
+  position: fixed;
+  top: 50%;
+  right: clamp(1rem, 3vw, 2.5rem);
+  z-index: 35;
+  width: min(22rem, calc(100vw - 2rem));
+  transform: translateY(-50%);
+}
+
+.user-survey {
+  position: relative;
+  padding: 1.5rem;
+  border: 1px solid var(--border-default);
+  border-radius: 1.25rem;
+  background: color-mix(in srgb, var(--surface-primary) 96%, transparent);
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.34);
+  backdrop-filter: blur(18px);
+  animation: survey-slide-in 320ms var(--ease-default);
+}
+
+.user-survey h2 {
+  margin: 0 2rem var(--space-4) 0;
+  color: var(--text-strong);
+  font-size: 1.375rem;
+  line-height: 1.15;
+}
+
+.user-survey-eyebrow {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--text-secondary);
+  font-size: 0.75rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.user-survey-close,
+.user-survey-back {
+  display: grid;
+  width: 36px;
+  height: 36px;
+  place-items: center;
+  padding: 0;
+  border: 0;
+  border-radius: 50%;
+  background: transparent;
+  color: var(--text-secondary);
+}
+
+.user-survey-close {
+  position: absolute;
+  top: 0.875rem;
+  right: 0.875rem;
+}
+
+.user-survey-back {
+  margin: -0.5rem 0 var(--space-2) -0.5rem;
+}
+
+.user-survey-options {
+  display: grid;
+  gap: var(--space-2);
+}
+
+.user-survey-options button {
+  min-height: 44px;
+  padding: 0.7rem 0.875rem;
+  border: 1px solid var(--border-default);
+  border-radius: 0.75rem;
+  background: var(--page-bg);
+  color: var(--text-primary);
+  line-height: 1.25;
+  text-align: left;
+  transition: border-color var(--transition-fast), background var(--transition-fast), color var(--transition-fast), transform 120ms var(--ease-default);
+}
+
+.user-survey-options button:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+  color: var(--text-strong);
+}
+
+.user-survey-options button:active {
+  transform: scale(0.98);
+}
+
+.user-survey-copy,
+.user-survey-thanks p,
+.user-survey-status,
+.user-survey-error {
+  margin: 0 0 var(--space-4);
+}
+
+.user-survey-input {
+  width: 100%;
+  min-height: 44px;
+  margin-bottom: var(--space-3);
+  padding: 0 0.875rem;
+  border: 1px solid var(--border-default);
+  border-radius: 0.75rem;
+  background: var(--page-bg);
+  color: var(--text-strong);
+  cursor: text;
+}
+
+.user-survey-input:focus {
+  border-color: var(--border-strong);
+  outline: none;
+}
+
+.user-survey-primary {
+  width: 100%;
+  min-height: 44px;
+  border: 0;
+  border-radius: var(--radius-pill);
+  background: var(--sequencer-accent);
+  color: var(--sequencer-accent-text);
+  font-weight: 600;
+}
+
+.user-survey-primary:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.user-survey-error {
+  color: var(--function-weak);
+  font-size: 0.8125rem;
+}
+
+.user-survey-status {
+  margin-top: var(--space-3);
+  color: var(--text-secondary);
+  font-size: 0.8125rem;
+  text-align: center;
+}
+
+.user-survey-thanks {
+  text-align: center;
+}
+
+.user-survey-thanks h2 {
+  margin-right: 0;
+}
+
+.user-survey-check {
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  margin: 0 auto var(--space-3);
+  border-radius: 50%;
+  background: var(--home-bg);
+  color: var(--function-good);
+}
+
+@keyframes survey-slide-in {
+  from { opacity: 0; transform: translateX(1.5rem); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
 @media (max-width: 63.999rem) {
   :root { --page-padding: 2rem; }
 }
@@ -2043,6 +2204,27 @@ select {
     width: 100%;
   }
 
+  .user-survey-shell {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    transform: none;
+  }
+
+  .user-survey {
+    padding: 1.5rem var(--space-5) calc(1.5rem + env(safe-area-inset-bottom));
+    border-width: 1px 0 0;
+    border-radius: 1.25rem 1.25rem 0 0;
+    animation-name: survey-slide-up;
+  }
+
+}
+
+@keyframes survey-slide-up {
+  from { opacity: 0; transform: translateY(100%); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @media (max-height: 54rem) {
