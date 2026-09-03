@@ -17,8 +17,8 @@ const FORM_FIELDS = {
 const QUESTIONS = [
   {
     id: "goal",
-    eyebrow: "Пара вопросов",
-    title: "Для чего ты открыл Chord Tulza?",
+    eyebrow: "Для пользователей Tulza",
+    title: "Для чего ты обычно открываешь Chord Tulza?",
     options: [
       { id: "song", label: "Сочиняю песню" },
       { id: "next-chord", label: "Ищу следующий аккорд" },
@@ -53,7 +53,7 @@ const QUESTIONS = [
   {
     id: "purchase",
     eyebrow: "Последний вопрос",
-    title: "Chord Tulza Pro навсегда за 990 ₽ — нужен ранний доступ?",
+    title: "Если появится Chord Tulza Pro за 990 ₽ навсегда — купил бы?",
     options: [
       { id: "yes", label: "Да, готов купить" },
       { id: "maybe", label: "Возможно, покажите подробнее" },
@@ -223,8 +223,8 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
                 <button type="button" className="user-survey-back" onClick={() => setStep(QUESTIONS.length - 1)} aria-label="Назад">
                   <ArrowLeft size={15} />
                 </button>
-                <span className="user-survey-eyebrow">Ранний доступ</span>
-                <h2>Куда тебе написать?</h2>
+                <span className="user-survey-eyebrow">Chord Tulza Pro</span>
+                <h2>Хочешь узнать о Pro первым?</h2>
                 <p className="user-survey-copy">Оставь Telegram или e‑mail. Контакт увидит только автор Chord Tulza.</p>
                 <input
                   className="user-survey-input"

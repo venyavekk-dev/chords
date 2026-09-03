@@ -8,7 +8,7 @@ describe("UserSurvey", () => {
 
     expect(html).toContain('aria-label="Открыть короткий опрос"');
     expect(html).toContain("user-survey-badge");
-    expect(html).not.toContain("Для чего ты открыл Chord Tulza?");
+    expect(html).not.toContain("Для чего ты обычно открываешь Chord Tulza?");
   });
 
   it("maps answers to the published Google Form fields without leaking contact to analytics", () => {
