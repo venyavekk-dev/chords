@@ -3,8 +3,12 @@ import { describe, expect, it } from "vitest";
 import { buildSurveyPayload, UserSurvey } from "./UserSurvey";
 
 describe("UserSurvey", () => {
-  it("stays hidden until the user is eligible", () => {
-    expect(renderToStaticMarkup(<UserSurvey eligible={false} />)).toBe("");
+  it("renders the launcher before the user is eligible for automatic opening", () => {
+    const html = renderToStaticMarkup(<UserSurvey eligible={false} />);
+
+    expect(html).toContain('aria-label="Открыть короткий опрос"');
+    expect(html).toContain("user-survey-badge");
+    expect(html).not.toContain("Для чего ты открыл Chord Tulza?");
   });
 
   it("maps answers to the published Google Form fields without leaking contact to analytics", () => {

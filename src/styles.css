@@ -1838,13 +1838,18 @@ select {
   }
 }
 
-.user-survey-shell {
+.user-survey-widget {
   position: fixed;
-  top: 50%;
   right: clamp(1rem, 3vw, 2.5rem);
+  bottom: calc(1.25rem + env(safe-area-inset-bottom));
   z-index: 35;
+}
+
+.user-survey-shell {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 0.75rem);
   width: min(22rem, calc(100vw - 2rem));
-  transform: translateY(-50%);
 }
 
 .user-survey {
@@ -1891,6 +1896,44 @@ select {
   position: absolute;
   top: 0.875rem;
   right: 0.875rem;
+}
+
+.user-survey-launcher {
+  position: relative;
+  display: grid;
+  width: 48px;
+  height: 48px;
+  place-items: center;
+  padding: 0;
+  border: 1px solid var(--border-default);
+  border-radius: 50%;
+  background: color-mix(in srgb, var(--surface-primary) 96%, transparent);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  color: var(--text-strong);
+  backdrop-filter: blur(18px);
+  transition: border-color var(--transition-fast), background var(--transition-fast), transform 120ms var(--ease-default);
+  animation: survey-launcher-in 280ms var(--ease-default);
+}
+
+.user-survey-launcher:hover {
+  border-color: var(--border-strong);
+  background: var(--surface-hover);
+}
+
+.user-survey-launcher:active {
+  transform: scale(0.94);
+}
+
+.user-survey-badge {
+  position: absolute;
+  top: 1px;
+  right: 1px;
+  width: 12px;
+  height: 12px;
+  border: 2px solid var(--surface-primary);
+  border-radius: 50%;
+  background: #0a84ff;
+  box-shadow: 0 0 0 1px rgba(10, 132, 255, 0.16);
 }
 
 .user-survey-back {
@@ -1997,6 +2040,11 @@ select {
 @keyframes survey-slide-in {
   from { opacity: 0; transform: translateX(1.5rem); }
   to { opacity: 1; transform: translateX(0); }
+}
+
+@keyframes survey-launcher-in {
+  from { opacity: 0; transform: scale(0.72); }
+  to { opacity: 1; transform: scale(1); }
 }
 
 @media (max-width: 63.999rem) {
@@ -2204,13 +2252,18 @@ select {
     width: 100%;
   }
 
+  .user-survey-widget {
+    right: 0;
+    bottom: calc(0.875rem + env(safe-area-inset-bottom));
+    padding-right: 0.875rem;
+  }
+
   .user-survey-shell {
-    top: auto;
+    position: fixed;
     right: 0;
     bottom: 0;
     left: 0;
     width: 100%;
-    transform: none;
   }
 
   .user-survey {

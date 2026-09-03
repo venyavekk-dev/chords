@@ -1,4 +1,4 @@
-import { ArrowLeft, Check, X } from "lucide-react";
+import { ArrowLeft, Check, MessageCircleQuestion, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { track } from "@vercel/analytics";
 
@@ -111,35 +111,50 @@ async function submitAnswers(answers: Answers, contact = "") {
 
 export function UserSurvey({ blocked = false, eligible }: Props) {
   const [visible, setVisible] = useState(false);
+  const [available, setAvailable] = useState(() => !loadSurveyState().completedAt);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [contact, setContact] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState(false);
-  const openedRef = useRef(false);
+  const autoOpenedRef = useRef(false);
 
   useEffect(() => {
-    if (!eligible || openedRef.current) return;
     const stored = loadSurveyState();
+    if (stored.completedAt) {
+      setAvailable(false);
+      return;
+    }
+    if (!eligible || autoOpenedRef.current) return;
+    autoOpenedRef.current = true;
     const dismissedRecently = stored.dismissedAt && Date.now() - stored.dismissedAt < DISMISS_FOR_MS;
-    if (stored.completedAt || dismissedRecently) return;
+    if (dismissedRecently) return;
 
-    openedRef.current = true;
     setVisible(true);
-    track("survey_opened");
+    track("survey_opened", { source: "automatic" });
   }, [eligible]);
 
-  if (!visible || blocked) return null;
+  if (!available || blocked) return null;
 
   const question = QUESTIONS[step];
   const wantsContact = answers.purchase === "Да, готов купить";
   const isContactStep = step === QUESTIONS.length;
 
   const dismiss = () => {
-    saveSurveyState({ dismissedAt: Date.now() });
+    if (submitted) {
+      setVisible(false);
+      setAvailable(false);
+      return;
+    }
+    saveSurveyState({ ...loadSurveyState(), dismissedAt: Date.now() });
     track("survey_dismissed", { step: Math.min(step + 1, QUESTIONS.length) });
     setVisible(false);
+  };
+
+  const openManually = () => {
+    setVisible(true);
+    track("survey_opened", { source: "launcher" });
   };
 
   const finish = async (nextAnswers: Answers, nextContact = "") => {
@@ -147,7 +162,7 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
     setError(false);
     try {
       await submitAnswers(nextAnswers, nextContact);
-      saveSurveyState({ completedAt: Date.now() });
+      saveSurveyState({ ...loadSurveyState(), completedAt: Date.now() });
       track("survey_completed", {
         purchase: nextAnswers.purchase === "Да, готов купить" ? "yes" : nextAnswers.purchase === "Возможно, покажите подробнее" ? "maybe" : "no",
       });
@@ -174,67 +189,86 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
   };
 
   return (
-    <aside className="user-survey-shell" aria-live="polite">
-      <section className="user-survey" aria-label="Опрос Chord Tulza">
-        <button type="button" className="user-survey-close" onClick={dismiss} aria-label="Закрыть опрос">
-          <X size={17} />
-        </button>
+    <div className="user-survey-widget">
+      {visible && (
+        <aside className="user-survey-shell" aria-live="polite">
+          <section className="user-survey" aria-label="Опрос Chord Tulza">
+            <button type="button" className="user-survey-close" onClick={dismiss} aria-label="Закрыть опрос">
+              <X size={17} />
+            </button>
 
-        {submitted ? (
-          <div className="user-survey-thanks">
-            <span className="user-survey-check"><Check size={22} /></span>
-            <h2>Спасибо!</h2>
-            <p>Это правда поможет решить, что делать дальше.</p>
-            <button type="button" className="user-survey-primary" onClick={() => setVisible(false)}>Готово</button>
-          </div>
-        ) : isContactStep && wantsContact ? (
-          <form
-            onSubmit={(event) => {
-              event.preventDefault();
-              void finish(answers, contact);
-            }}
-          >
-            <button type="button" className="user-survey-back" onClick={() => setStep(QUESTIONS.length - 1)} aria-label="Назад">
-              <ArrowLeft size={15} />
-            </button>
-            <span className="user-survey-eyebrow">Ранний доступ</span>
-            <h2>Куда тебе написать?</h2>
-            <p className="user-survey-copy">Оставь Telegram или e‑mail. Контакт увидит только автор Chord Tulza.</p>
-            <input
-              className="user-survey-input"
-              type="text"
-              value={contact}
-              onChange={(event) => setContact(event.target.value)}
-              placeholder="@telegram или e‑mail"
-              autoComplete="email"
-              required
-            />
-            {error && <p className="user-survey-error">Не получилось отправить. Попробуй ещё раз.</p>}
-            <button type="submit" className="user-survey-primary" disabled={submitting || !contact.trim()}>
-              {submitting ? "Отправляем…" : "Отправить"}
-            </button>
-          </form>
-        ) : question ? (
-          <>
-            {step > 0 && (
-              <button type="button" className="user-survey-back" onClick={() => setStep((current) => current - 1)} aria-label="Назад">
-                <ArrowLeft size={15} />
-              </button>
-            )}
-            <span className="user-survey-eyebrow">{question.eyebrow} · {step + 1}/{QUESTIONS.length}</span>
-            <h2>{question.title}</h2>
-            <div className="user-survey-options">
-              {question.options.map((option) => (
-                <button type="button" key={option.id} disabled={submitting} onClick={() => answerQuestion(option)}>
-                  {option.label}
+            {submitted ? (
+              <div className="user-survey-thanks">
+                <span className="user-survey-check"><Check size={22} /></span>
+                <h2>Спасибо!</h2>
+                <p>Это правда поможет решить, что делать дальше.</p>
+                <button
+                  type="button"
+                  className="user-survey-primary"
+                  onClick={() => {
+                    setVisible(false);
+                    setAvailable(false);
+                  }}
+                >
+                  Готово
                 </button>
-              ))}
-            </div>
-            {submitting && <p className="user-survey-status">Отправляем…</p>}
-            {error && <p className="user-survey-error">Не получилось отправить. Выбери ответ ещё раз.</p>}
-          </>
-        ) : null}
-      </section>
-    </aside>
+              </div>
+            ) : isContactStep && wantsContact ? (
+              <form
+                onSubmit={(event) => {
+                  event.preventDefault();
+                  void finish(answers, contact);
+                }}
+              >
+                <button type="button" className="user-survey-back" onClick={() => setStep(QUESTIONS.length - 1)} aria-label="Назад">
+                  <ArrowLeft size={15} />
+                </button>
+                <span className="user-survey-eyebrow">Ранний доступ</span>
+                <h2>Куда тебе написать?</h2>
+                <p className="user-survey-copy">Оставь Telegram или e‑mail. Контакт увидит только автор Chord Tulza.</p>
+                <input
+                  className="user-survey-input"
+                  type="text"
+                  value={contact}
+                  onChange={(event) => setContact(event.target.value)}
+                  placeholder="@telegram или e‑mail"
+                  autoComplete="email"
+                  required
+                />
+                {error && <p className="user-survey-error">Не получилось отправить. Попробуй ещё раз.</p>}
+                <button type="submit" className="user-survey-primary" disabled={submitting || !contact.trim()}>
+                  {submitting ? "Отправляем…" : "Отправить"}
+                </button>
+              </form>
+            ) : question ? (
+              <>
+                {step > 0 && (
+                  <button type="button" className="user-survey-back" onClick={() => setStep((current) => current - 1)} aria-label="Назад">
+                    <ArrowLeft size={15} />
+                  </button>
+                )}
+                <span className="user-survey-eyebrow">{question.eyebrow} · {step + 1}/{QUESTIONS.length}</span>
+                <h2>{question.title}</h2>
+                <div className="user-survey-options">
+                  {question.options.map((option) => (
+                    <button type="button" key={option.id} disabled={submitting} onClick={() => answerQuestion(option)}>
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+                {submitting && <p className="user-survey-status">Отправляем…</p>}
+                {error && <p className="user-survey-error">Не получилось отправить. Выбери ответ ещё раз.</p>}
+              </>
+            ) : null}
+          </section>
+        </aside>
+      )}
+      {!visible && (
+        <button type="button" className="user-survey-launcher" onClick={openManually} aria-label="Открыть короткий опрос">
+          <MessageCircleQuestion size={21} />
+          <span className="user-survey-badge" aria-hidden="true" />
+        </button>
+      )}
+    </div>
   );
 }
