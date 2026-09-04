@@ -1,6 +1,6 @@
 import { renderToStaticMarkup } from "react-dom/server";
 import { describe, expect, it } from "vitest";
-import { buildSurveyPayload, UserSurvey } from "./UserSurvey";
+import { buildSurveyPayload, isSurveyPreview, UserSurvey } from "./UserSurvey";
 
 describe("UserSurvey", () => {
   it("renders the launcher before the user is eligible for automatic opening", () => {
@@ -24,5 +24,12 @@ describe("UserSurvey", () => {
     expect(payload.get("entry.2012861588")).toBe("Полноценное приложение для iPad");
     expect(payload.get("entry.178919732")).toBe("Да, готов купить");
     expect(payload.get("entry.1316376898")).toBe("@musician");
+  });
+
+  it("only enables preview mode for the explicit survey query", () => {
+    expect(isSurveyPreview("?survey=preview")).toBe(true);
+    expect(isSurveyPreview("?survey=preview&utm_source=codex")).toBe(true);
+    expect(isSurveyPreview("?survey=completed")).toBe(false);
+    expect(isSurveyPreview("")).toBe(false);
   });
 });

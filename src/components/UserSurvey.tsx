@@ -109,9 +109,14 @@ async function submitAnswers(answers: Answers, contact = "") {
   });
 }
 
+export function isSurveyPreview(search: string) {
+  return new URLSearchParams(search).get("survey") === "preview";
+}
+
 export function UserSurvey({ blocked = false, eligible }: Props) {
-  const [visible, setVisible] = useState(false);
-  const [available, setAvailable] = useState(() => !loadSurveyState().completedAt);
+  const previewMode = isSurveyPreview(typeof window === "undefined" ? "" : window.location.search);
+  const [visible, setVisible] = useState(previewMode);
+  const [available, setAvailable] = useState(() => previewMode || !loadSurveyState().completedAt);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
   const [contact, setContact] = useState("");
@@ -121,6 +126,11 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
   const autoOpenedRef = useRef(false);
 
   useEffect(() => {
+    if (previewMode) {
+      setAvailable(true);
+      setVisible(true);
+      return;
+    }
     const stored = loadSurveyState();
     if (stored.completedAt) {
       setAvailable(false);
@@ -133,7 +143,7 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
 
     setVisible(true);
     track("survey_opened", { source: "automatic" });
-  }, [eligible]);
+  }, [eligible, previewMode]);
 
   if (!available || blocked) return null;
 
@@ -142,6 +152,10 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
   const isContactStep = step === QUESTIONS.length;
 
   const dismiss = () => {
+    if (previewMode) {
+      setVisible(false);
+      return;
+    }
     if (submitted) {
       setVisible(false);
       setAvailable(false);
@@ -154,18 +168,20 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
 
   const openManually = () => {
     setVisible(true);
-    track("survey_opened", { source: "launcher" });
+    if (!previewMode) track("survey_opened", { source: "launcher" });
   };
 
   const finish = async (nextAnswers: Answers, nextContact = "") => {
     setSubmitting(true);
     setError(false);
     try {
-      await submitAnswers(nextAnswers, nextContact);
-      saveSurveyState({ ...loadSurveyState(), completedAt: Date.now() });
-      track("survey_completed", {
-        purchase: nextAnswers.purchase === "Да, готов купить" ? "yes" : nextAnswers.purchase === "Возможно, покажите подробнее" ? "maybe" : "no",
-      });
+      if (!previewMode) {
+        await submitAnswers(nextAnswers, nextContact);
+        saveSurveyState({ ...loadSurveyState(), completedAt: Date.now() });
+        track("survey_completed", {
+          purchase: nextAnswers.purchase === "Да, готов купить" ? "yes" : nextAnswers.purchase === "Возможно, покажите подробнее" ? "maybe" : "no",
+        });
+      }
       setSubmitted(true);
     } catch {
       setError(true);
@@ -178,7 +194,7 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
     if (!question) return;
     const nextAnswers = { ...answers, [question.id]: option.label };
     setAnswers(nextAnswers);
-    track("survey_answered", { question: question.id, answer: option.id });
+    if (!previewMode) track("survey_answered", { question: question.id, answer: option.id });
 
     if (question.id === "purchase") {
       if (option.id === "yes") setStep(QUESTIONS.length);
@@ -207,7 +223,14 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
                   className="user-survey-primary"
                   onClick={() => {
                     setVisible(false);
-                    setAvailable(false);
+                    if (previewMode) {
+                      setSubmitted(false);
+                      setAnswers({});
+                      setContact("");
+                      setStep(0);
+                    } else {
+                      setAvailable(false);
+                    }
                   }}
                 >
                   Готово
