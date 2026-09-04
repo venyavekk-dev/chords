@@ -2,62 +2,94 @@ import { ArrowLeft, Check, MessageCircleQuestion, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { track } from "@vercel/analytics";
 
-const STORAGE_KEY = "chord-tulza-survey-v1";
+const STORAGE_KEY = "chord-tulza-survey-v2";
 const DISMISS_FOR_MS = 30 * 24 * 60 * 60 * 1000;
 const FORM_ACTION = "https://docs.google.com/forms/d/e/1FAIpQLSe9FThlfDRJLOJo9z0lUuEOr52qppMbsv1Eec1QXpKAcxULqg/formResponse";
 
 const FORM_FIELDS = {
-  goal: "entry.232382321",
-  outcome: "entry.122178230",
-  feature: "entry.2012861588",
-  purchase: "entry.178919732",
-  contact: "entry.1316376898",
+  frequency: "entry.232382321",
+  goal: "entry.122178230",
+  friction: "entry.2012861588",
+  feature: "entry.178919732",
+  payment: "entry.1168274726",
+  price: "entry.913441010",
+  details: "entry.1316376898",
+  contact: "entry.1575555321",
 } as const;
 
 const QUESTIONS = [
   {
-    id: "goal",
-    eyebrow: "Для пользователей Tulza",
-    title: "Для чего ты обычно открываешь Chord Tulza?",
+    id: "frequency",
+    eyebrow: "Твой опыт",
+    title: "Как часто ты сейчас пользуешься Chord Tulza?",
     options: [
-      { id: "song", label: "Сочиняю песню" },
-      { id: "next-chord", label: "Ищу следующий аккорд" },
-      { id: "learning", label: "Учусь играть" },
-      { id: "voicings", label: "Подбираю аппликатуры" },
-      { id: "exploring", label: "Просто изучаю инструмент" },
+      { id: "daily", label: "Почти каждый день" },
+      { id: "weekly", label: "Несколько раз в неделю" },
+      { id: "monthly", label: "Несколько раз в месяц" },
+      { id: "tried", label: "Попробовал пару раз" },
+      { id: "stopped", label: "Перестал пользоваться" },
     ],
   },
   {
-    id: "outcome",
-    eyebrow: "Уже почти",
-    title: "Получилось сделать то, зачем пришёл?",
+    id: "goal",
+    eyebrow: "Главный сценарий",
+    title: "Для чего ты чаще всего её открываешь?",
     options: [
-      { id: "yes", label: "Да" },
-      { id: "partly", label: "Частично" },
-      { id: "no", label: "Нет" },
+      { id: "progression", label: "Сочинить прогрессию" },
+      { id: "next-chord", label: "Найти следующий аккорд" },
+      { id: "voicing", label: "Подобрать аппликатуру" },
+      { id: "learning", label: "Учиться играть" },
+      { id: "exploring", label: "Просто экспериментировать" },
+    ],
+  },
+  {
+    id: "friction",
+    eyebrow: "Что мешает",
+    title: "Что больше всего мешает пользоваться чаще?",
+    options: [
+      { id: "saving", label: "Нельзя сохранять проекты" },
+      { id: "sound", label: "Не хватает звучания, ритмов и баса" },
+      { id: "midi", label: "Нужен MIDI‑экспорт" },
+      { id: "device", label: "Неудобно на телефоне или планшете" },
+      { id: "value", label: "Пока не вижу достаточной пользы" },
+      { id: "other", label: "Другое" },
     ],
   },
   {
     id: "feature",
-    eyebrow: "Что важнее",
-    title: "За какую функцию ты мог бы заплатить?",
+    eyebrow: "Платная ценность",
+    title: "Какая одна функция сделала бы платную версию полезной лично для тебя?",
     options: [
       { id: "save", label: "Сохранение песен и прогрессий" },
       { id: "midi", label: "MIDI‑экспорт в GarageBand или Logic" },
-      { id: "pdf", label: "PDF с аккордами и аппликатурами" },
       { id: "backing", label: "Ритмы, барабаны и бас" },
-      { id: "ipad", label: "Полноценное приложение для iPad" },
-      { id: "none", label: "Ни за одну из этих функций" },
+      { id: "pdf", label: "PDF с аккордами" },
+      { id: "ipad", label: "Полноценная версия для iPad" },
+      { id: "other", label: "Другое" },
     ],
   },
   {
-    id: "purchase",
-    eyebrow: "Последний вопрос",
-    title: "Если появится Chord Tulza Pro за 990 ₽ навсегда — купил бы?",
+    id: "payment",
+    eyebrow: "Модель оплаты",
+    title: "Как тебе было бы комфортнее заплатить?",
     options: [
-      { id: "yes", label: "Да, готов купить" },
-      { id: "maybe", label: "Возможно, покажите подробнее" },
-      { id: "no", label: "Нет" },
+      { id: "lifetime", label: "Один раз навсегда" },
+      { id: "subscription", label: "Небольшая подписка" },
+      { id: "features", label: "Только за отдельные функции" },
+      { id: "free", label: "Не готов платить" },
+    ],
+  },
+  {
+    id: "price",
+    eyebrow: "Последний вопрос",
+    title: "Сколько ты реально готов заплатить за полезную тебе версию?",
+    options: [
+      { id: "490-once", label: "490 ₽ один раз" },
+      { id: "990-once", label: "990 ₽ один раз" },
+      { id: "1990-once", label: "1 990 ₽ один раз" },
+      { id: "199-month", label: "199 ₽ в месяц" },
+      { id: "399-month", label: "399 ₽ в месяц" },
+      { id: "zero", label: "Пока нисколько" },
     ],
   },
 ] as const;
@@ -91,21 +123,22 @@ function saveSurveyState(state: StoredSurveyState) {
   }
 }
 
-export function buildSurveyPayload(answers: Answers, contact = "") {
+export function buildSurveyPayload(answers: Answers, details = "", contact = "") {
   const body = new URLSearchParams();
   for (const question of QUESTIONS) {
     const answer = answers[question.id];
     if (answer) body.set(FORM_FIELDS[question.id], answer);
   }
+  if (details.trim()) body.set(FORM_FIELDS.details, details.trim());
   if (contact.trim()) body.set(FORM_FIELDS.contact, contact.trim());
   return body;
 }
 
-async function submitAnswers(answers: Answers, contact = "") {
+async function submitAnswers(answers: Answers, details = "", contact = "") {
   await fetch(FORM_ACTION, {
     method: "POST",
     mode: "no-cors",
-    body: buildSurveyPayload(answers, contact),
+    body: buildSurveyPayload(answers, details, contact),
   });
 }
 
@@ -119,6 +152,7 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
   const [available, setAvailable] = useState(() => previewMode || !loadSurveyState().completedAt);
   const [step, setStep] = useState(0);
   const [answers, setAnswers] = useState<Answers>({});
+  const [details, setDetails] = useState("");
   const [contact, setContact] = useState("");
   const [submitting, setSubmitting] = useState(false);
   const [submitted, setSubmitted] = useState(false);
@@ -148,7 +182,6 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
   if (!available || blocked) return null;
 
   const question = QUESTIONS[step];
-  const wantsContact = answers.purchase === "Да, готов купить";
   const isContactStep = step === QUESTIONS.length;
 
   const dismiss = () => {
@@ -171,15 +204,16 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
     if (!previewMode) track("survey_opened", { source: "launcher" });
   };
 
-  const finish = async (nextAnswers: Answers, nextContact = "") => {
+  const finish = async (nextAnswers: Answers, nextDetails = "", nextContact = "") => {
     setSubmitting(true);
     setError(false);
     try {
       if (!previewMode) {
-        await submitAnswers(nextAnswers, nextContact);
+        await submitAnswers(nextAnswers, nextDetails, nextContact);
         saveSurveyState({ ...loadSurveyState(), completedAt: Date.now() });
         track("survey_completed", {
-          purchase: nextAnswers.purchase === "Да, готов купить" ? "yes" : nextAnswers.purchase === "Возможно, покажите подробнее" ? "maybe" : "no",
+          payment: nextAnswers.payment ?? "unknown",
+          price: nextAnswers.price ?? "unknown",
         });
       }
       setSubmitted(true);
@@ -196,11 +230,6 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
     setAnswers(nextAnswers);
     if (!previewMode) track("survey_answered", { question: question.id, answer: option.id });
 
-    if (question.id === "purchase") {
-      if (option.id === "yes") setStep(QUESTIONS.length);
-      else void finish(nextAnswers);
-      return;
-    }
     setStep((current) => current + 1);
   };
 
@@ -226,6 +255,7 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
                     if (previewMode) {
                       setSubmitted(false);
                       setAnswers({});
+                      setDetails("");
                       setContact("");
                       setStep(0);
                     } else {
@@ -236,31 +266,37 @@ export function UserSurvey({ blocked = false, eligible }: Props) {
                   Готово
                 </button>
               </div>
-            ) : isContactStep && wantsContact ? (
+            ) : isContactStep ? (
               <form
                 onSubmit={(event) => {
                   event.preventDefault();
-                  void finish(answers, contact);
+                  void finish(answers, details, contact);
                 }}
               >
                 <button type="button" className="user-survey-back" onClick={() => setStep(QUESTIONS.length - 1)} aria-label="Назад">
                   <ArrowLeft size={15} />
                 </button>
-                <span className="user-survey-eyebrow">Chord Tulza Pro</span>
-                <h2>Хочешь узнать о Pro первым?</h2>
-                <p className="user-survey-copy">Оставь Telegram или e‑mail. Контакт увидит только автор Chord Tulza.</p>
+                <span className="user-survey-eyebrow">Можно подробнее</span>
+                <h2>Хочешь что-то добавить?</h2>
+                <p className="user-survey-copy">Оба поля необязательные. Их увидит только автор Chord Tulza.</p>
+                <textarea
+                  className="user-survey-input user-survey-textarea"
+                  value={details}
+                  onChange={(event) => setDetails(event.target.value)}
+                  placeholder="Чего не хватает или что раздражает?"
+                  rows={3}
+                />
                 <input
                   className="user-survey-input"
                   type="text"
                   value={contact}
                   onChange={(event) => setContact(event.target.value)}
-                  placeholder="@telegram или e‑mail"
+                  placeholder="@telegram или e‑mail — если можно написать"
                   autoComplete="email"
-                  required
                 />
                 {error && <p className="user-survey-error">Не получилось отправить. Попробуй ещё раз.</p>}
-                <button type="submit" className="user-survey-primary" disabled={submitting || !contact.trim()}>
-                  {submitting ? "Отправляем…" : "Отправить"}
+                <button type="submit" className="user-survey-primary" disabled={submitting}>
+                  {submitting ? "Отправляем…" : "Отправить ответы"}
                 </button>
               </form>
             ) : question ? (
