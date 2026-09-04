@@ -7,6 +7,7 @@ import type { PriceOption, Step as PaywallStep } from "./components/PaywallSheet
 import { PianoKeyboard } from "./components/PianoKeyboard";
 import { RelationshipHint } from "./components/RelationshipHint";
 import { TopBar } from "./components/TopBar";
+import { UserSurvey } from "./components/UserSurvey";
 import { VoicingMini } from "./components/VoicingMini";
 import { buildDiatonicChords } from "./lib/musicTheory";
 import { buildChordVariants } from "./lib/chordFamilies";
@@ -85,6 +86,7 @@ export default function App() {
   const [dragStepIndex, setDragStepIndex] = useState<number | null>(null);
   const [presetIndex, setPresetIndex] = useState(0);
   const [presetRevealed, setPresetRevealed] = useState(false);
+  const [interactionCount, setInteractionCount] = useState(0);
   const keyRoot = baseKeyRoot;
   const chords = useMemo(() => buildDiatonicChords(keyRoot, scaleMode), [keyRoot, scaleMode]);
   const availableChords = useMemo(
@@ -248,6 +250,7 @@ export default function App() {
   };
 
   const selectChord = (chord: DegreeChord) => {
+    setInteractionCount((count) => count + 1);
     setPreviewChord(undefined);
     setPreviewVoicing(undefined);
     setActiveChord(chord);
@@ -308,6 +311,10 @@ export default function App() {
           checkoutUrl={import.meta.env.VITE_LEMONSQUEEZY_CHECKOUT_URL}
         />
       )}
+      <UserSurvey
+        eligible={interactionCount >= 4 || sequence.length >= 3}
+        blocked={paywallSheetVisible}
+      />
       <main className="minimal-workspace">
         {(instrument === "Guitar" || instrument === "Both") && (
           <MinimalFretboard
