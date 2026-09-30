@@ -13,7 +13,7 @@ import { buildDiatonicChords } from "./lib/musicTheory";
 import { buildChordVariants } from "./lib/chordFamilies";
 import { generateVoicings } from "./lib/guitar";
 import { loadState, saveState } from "./lib/storage";
-import { playChord, SOUND_PRESETS } from "./lib/audio";
+import { cancelPendingPlayback, playChord, prepareAudio, SOUND_PRESETS } from "./lib/audio";
 import type { DegreeChord, GuitarVoicing, Instrument, ScaleMode, SoundPreset } from "./types/music";
 
 const initial = loadState();
@@ -169,7 +169,10 @@ export default function App() {
     };
     playStep();
     const id = window.setInterval(playStep, stepMs);
-    return () => window.clearInterval(id);
+    return () => {
+      window.clearInterval(id);
+      cancelPendingPlayback();
+    };
   }, [isPlaying, bpm, sequence.length]);
 
   const toggleSequencerMode = () => {
@@ -206,7 +209,11 @@ export default function App() {
     setSequence((current) => current.slice(0, clamped));
   };
 
-  const togglePlay = () => setIsPlaying((playing) => !playing);
+  const togglePlay = () => {
+    // Unlock audio while the tap is still active, not inside the playback effect.
+    if (!isPlaying) void prepareAudio();
+    setIsPlaying((playing) => !playing);
+  };
 
   const modePresets = CHORD_PRESETS.filter((preset) => preset.mode === scaleMode);
   const availablePresets = [

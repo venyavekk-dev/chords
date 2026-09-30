@@ -6,6 +6,7 @@ export const SOUND_PRESETS: SoundPreset[] = ["Velvet", "Clean", "Air"];
 let audioContext: AudioContext | undefined;
 let reverbBuffer: AudioBuffer | undefined;
 let activeMaster: GainNode | undefined;
+let playbackRequest = 0;
 
 type AudioWindow = Window & typeof globalThis & {
   webkitAudioContext?: typeof AudioContext;
@@ -15,8 +16,38 @@ function getAudioContext() {
   const audioWindow = window as AudioWindow;
   const Context = audioWindow.AudioContext ?? audioWindow.webkitAudioContext;
   if (!Context) return undefined;
-  audioContext ??= new Context();
+  if (!audioContext || audioContext.state === "closed") {
+    // Safari otherwise treats Web Audio as ambient sound and mutes it with
+    // the iPhone silent switch. Other browsers may not expose Audio Session.
+    const audioNavigator = navigator as Navigator & { audioSession?: { type: string } };
+    try {
+      if (audioNavigator.audioSession) audioNavigator.audioSession.type = "playback";
+    } catch {
+      // An optional platform setting must not prevent ordinary Web Audio.
+    }
+    audioContext = new Context();
+    reverbBuffer = undefined;
+    activeMaster = undefined;
+  }
   return audioContext;
+}
+
+// Call directly from a click/tap handler, before React effects or timers run.
+export async function prepareAudio() {
+  try {
+    const context = getAudioContext();
+    if (!context) return undefined;
+    // Safari also uses "interrupted" after switching apps or locking the phone.
+    if (context.state !== "running") await context.resume();
+    return context.state === "running" ? context : undefined;
+  } catch {
+    // A later user gesture can retry if the browser refuses this attempt.
+    return undefined;
+  }
+}
+
+export function cancelPendingPlayback() {
+  playbackRequest += 1;
 }
 
 const OPEN_STRING_MIDI = [40, 45, 50, 55, 59, 64];
@@ -56,10 +87,10 @@ const SOUND_PROFILES: Record<SoundPreset, SoundProfile> = {
   Air: { oscillator: "sine", body: "sine", attack: 0.045, duration: 1.55, level: 0.38, detune: 5, lowpassStart: 5200, lowpassEnd: 2100, ampFrequency: 1100, ampGain: 2.2, cabinet: 5100, drive: 0.03, shimmer: 0.085, pick: 0.012, pickFrequency: 3300, delay: 0.17, reverb: 0.34, stagger: 0.04 },
 };
 
-export function playChord(symbol: string, volume = 0.72, voicing?: GuitarVoicing, sound: SoundPreset = "Velvet") {
-  const context = getAudioContext();
-  if (!context) return;
-  if (context.state === "suspended") void context.resume();
+export async function playChord(symbol: string, volume = 0.72, voicing?: GuitarVoicing, sound: SoundPreset = "Velvet") {
+  const request = ++playbackRequest;
+  const context = await prepareAudio();
+  if (!context || request !== playbackRequest) return;
   const profile = SOUND_PROFILES[sound];
 
   const fadeNow = context.currentTime;
